@@ -94,8 +94,8 @@ async def stats(event: NewMessage.Event) -> None:  # pylint: disable = R0912, R0
             KeyValueItem(Bold('Admin Rights'), admin_in_broadcast_channels - creator_in_channels)),
         KeyValueItem(Bold('Unread'), unread),
         KeyValueItem(Bold('Unread Mentions'), unread_mentions)),
-        # KeyValueItem(Bold('Largest Group'), largest_group_member_count),
-        # KeyValueItem(Bold('Largest Group with Admin'), largest_group_with_admin)),
+        KeyValueItem(Bold('Largest Group'), largest_group_member_count),
+        KeyValueItem(Bold('Largest Group with Admin'), largest_group_with_admin)),
         Italic(f'Took {stop_time:.02f}s'))
 
     await client.respond(event, response, reply=False)
