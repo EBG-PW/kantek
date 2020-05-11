@@ -11,7 +11,7 @@ from telethon.tl.types import (Channel, MessageEntityHashtag)
 try:
     from config import GESTAPO
 except ImportError:
-    vollzugsanstalten = []
+    GESTAPO = []
 
 from utils.client import KantekClient
 
