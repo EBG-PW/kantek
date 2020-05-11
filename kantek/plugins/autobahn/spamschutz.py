@@ -1,6 +1,7 @@
 """Plugin to manage the autobahn"""
 import logging
 from typing import Dict, Union
+import spamwatch
 
 import logzero
 from telethon import events
@@ -11,6 +12,10 @@ from telethon.tl.types import Channel, ChannelParticipantsAdmins
 from database.arango import ArangoDB
 from utils.client import KantekClient
 from utils.mdtex import Bold, Code, KeyValueItem, MDTeXDocument, Mention, Section
+
+from config import spamwatch_host
+from config import spamwatch_token
+
 
 __version__ = '0.1.1'
 
@@ -37,6 +42,7 @@ async def grenzschutz(event: Union[ChatAction.Event, NewMessage.Event]) -> None:
     polizei_tag = db_named_tags.get('polizei')
     grenzschutz_tag = db_named_tags.get('grenzschutz')
     silent = grenzschutz_tag == 'silent'
+    client = spamwatch.Client(spamwatch_token)
     if grenzschutz_tag == 'exclude' or polizei_tag == 'exclude':
         return
 
@@ -48,18 +54,13 @@ async def grenzschutz(event: Union[ChatAction.Event, NewMessage.Event]) -> None:
         return
     if uid is None:
         return
-    try:
-        user = await client.get_entity(uid)
-    except ValueError as err:
-        logger.error(err)
 
-    result = db.query('For doc in BanList '
-                      'FILTER doc._key == @id '
-                      'RETURN doc', bind_vars={'id': str(uid)})
-    if not result:
+    ban = swclient.get_ban(uid)
+    if not ban.reason:
         return
-    else:
-        ban_reason = result[0]['reason']
+    reason = ban.reason
+
+    await client.gban(uid, reason)
     admins = [p.id for p in (await client.get_participants(event.chat_id, filter=ChannelParticipantsAdmins()))]
     if uid not in admins:
         try:
@@ -70,7 +71,7 @@ async def grenzschutz(event: Union[ChatAction.Event, NewMessage.Event]) -> None:
 
         if not silent:
             message = MDTeXDocument(Section(
-                Bold('OwlWatch Grenzschutz Ban'),
+                Bold('OwlWatch Spamschutz Ban'),
                 KeyValueItem(Bold("User"),
                              f'{Mention(user.first_name, uid)} [{Code(uid)}]'),
                 KeyValueItem(Bold("Reason"),
