@@ -40,7 +40,7 @@ async def stats(event: NewMessage.Event) -> None:  # pylint: disable = R0912, R0
         entity = dialog.entity
 
         if isinstance(entity, Channel):
-            # participants_count = (await client.get_participants(dialog, limit=0)).total
+            participants_count = (await client.get_participants(dialog, limit=0)).total
             if entity.broadcast:
                 broadcast_channels += 1
                 if entity.creator or entity.admin_rights:
@@ -50,11 +50,11 @@ async def stats(event: NewMessage.Event) -> None:  # pylint: disable = R0912, R0
 
             elif entity.megagroup:
                 groups += 1
-                # if participants_count > largest_group_member_count:
-                #     largest_group_member_count = participants_count
+                if participants_count > largest_group_member_count:
+                    largest_group_member_count = participants_count
                 if entity.creator or entity.admin_rights:
-                    # if participants_count > largest_group_with_admin:
-                    #     largest_group_with_admin = participants_count
+                     if participants_count > largest_group_with_admin:
+                        largest_group_with_admin = participants_count
                     admin_in_groups += 1
                 if entity.creator:
                     creator_in_groups += 1
