@@ -30,8 +30,8 @@ async def kriminalamt(event: ChatAction.Event) -> None:
     db: ArangoDB = client.db
     chat_document = db.groups.get_chat(event.chat_id)
     db_named_tags: Dict = chat_document['named_tags'].getStore()
-    kriminalamt_tag = db_named_tags.get('kriminalamt')
-    bancmd = db_named_tags.get('gbancmd', 'manual')
+    kriminalamt_tag = db_named_tags.get('kriminalamt', 1)
+    bancmd = db_named_tags.get('gbancmd')
     delay = 1
     if not kriminalamt_tag or user.bot:
         return
