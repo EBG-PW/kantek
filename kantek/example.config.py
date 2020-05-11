@@ -25,6 +25,7 @@ db_host = 'http://127.0.0.1:8529'
 
 # Channels to fetch bans from
 vollzugsanstalten: List[int] = []
+GESTAPO: List[int] = []
 
 spamwatch_host: str = 'https://api.spamwat.ch'
 spamwatch_token: str = ''
