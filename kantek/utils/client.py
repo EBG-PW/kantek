@@ -112,7 +112,7 @@ class KantekClient(TelegramClient):  # pylint: disable = R0901, W0223
             f'<a href="tg://user?id={uid}">{uid}</a>', parse_mode='html')
         await self.send_message(
             config.gban_group,
-            f'/gban {uid} {reason}')
+            f'/ban {uid} {reason}')
         await self.send_message(
             config.gban_group,
             f'/fban {uid} {reason}')
