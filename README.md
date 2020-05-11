@@ -20,3 +20,8 @@ ArangoDB is used to store bot data.
 - Create a user and a Database in ArangoDB. Give the user full permissions to the Database.
  - Put the Authentication data into the config file.
 - Run bot.py
+
+
+
+
+[Powered by CAS](https://cas.chat)
