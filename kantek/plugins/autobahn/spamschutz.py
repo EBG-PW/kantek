@@ -42,7 +42,7 @@ async def grenzschutz(event: Union[ChatAction.Event, NewMessage.Event]) -> None:
     polizei_tag = db_named_tags.get('polizei')
     grenzschutz_tag = db_named_tags.get('grenzschutz')
     silent = grenzschutz_tag == 'silent'
-    client = spamwatch.Client(spamwatch_token)
+    swclient = spamwatch.Client(spamwatch_token)
     if grenzschutz_tag == 'exclude' or polizei_tag == 'exclude':
         return
 
