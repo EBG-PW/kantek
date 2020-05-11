@@ -37,7 +37,7 @@ async def austria(event: NewMessage.Event) -> None:
 
 
                             userid = match.group()
-                            await client.gban(userid, f'Cobra No. {msg.id}')
+                            await client.gban(userid, f'Cobra cas.chat/query?u={userid}')
                             print("banner")
 
 
