@@ -17,6 +17,7 @@ from telethon.errors import UserAdminInvalidError
 from telethon.events import NewMessage, ChatAction
 from telethon.tl.custom import Message
 from telethon.tl.functions.channels import EditBannedRequest
+from telethon.tl.functions.contacts import BlockRequest
 from telethon.tl.patched import Message
 from telethon.tl.types import ChatBannedRights
 from yarl import URL
@@ -116,6 +117,10 @@ class KantekClient(TelegramClient):  # pylint: disable = R0901, W0223
         await self.send_message(
             config.gban_group,
             f'/fban {uid} {reason}')
+        try:
+            await self.BlockRequest(uid)  # Blocks User from PMing
+        except:
+            pass
 
         data = {'_key': str(uid),
                 'id': str(uid),
