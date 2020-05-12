@@ -118,7 +118,9 @@ class KantekClient(TelegramClient):  # pylint: disable = R0901, W0223
             config.gban_group,
             f'/fban {uid} {reason}')
 
-        await self.BlockRequest(uid)  # Blocks User from PMing
+        await self(BlockRequest(
+                id=uid
+        ))
 
 
         data = {'_key': str(uid),
