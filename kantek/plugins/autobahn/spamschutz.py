@@ -56,7 +56,7 @@ async def grenzschutz(event: Union[ChatAction.Event, NewMessage.Event]) -> None:
         return
 
     ban = swclient.get_ban(uid)
-    if not ban.reason:
+    if not ban:
         return
     reason = ban.reason
 
