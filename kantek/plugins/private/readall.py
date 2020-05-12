@@ -42,7 +42,7 @@ async def rmmention(event: NewMessage.Event) -> None:
     waiting_message = await client.respond(event, 'Clearing mentions in your bangroup.')
     for x in range(3):
         await client.send_read_acknowledge(gban_group, clear_mentions=True)
-        await sleep(500)
+        await sleep(0.5)
 
     await client.respond(event, 'Done', reply=False)
     await waiting_message.delete()
