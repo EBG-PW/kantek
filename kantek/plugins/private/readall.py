@@ -40,7 +40,7 @@ async def readall(event: NewMessage.Event) -> None:
 async def rmmention(event: NewMessage.Event) -> None:
     client: KantekClient = event.client
     waiting_message = await client.respond(event, 'Clearing mentions in your bangroup.')
-    for x in range(3):
+    for x in range(200):
         await client.send_read_acknowledge(gban_group, clear_mentions=True)
         await sleep(0.5)
 
