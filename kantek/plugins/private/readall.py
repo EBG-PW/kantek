@@ -26,7 +26,7 @@ async def readall(event: NewMessage.Event) -> None:
     async for dialog in client.iter_dialogs():
         entity = dialog.entity
 
-        await client.send_read_acknowledge(entity)
+        await client.send_read_acknowledge(entity, clear_mentions=True)
 
     stop_time = time.time() - start_time
 
