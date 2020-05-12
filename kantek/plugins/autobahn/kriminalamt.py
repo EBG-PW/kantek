@@ -24,13 +24,14 @@ logger: logging.Logger = logzero.logger
 
 @events.register(events.ChatAction())
 async def kriminalamt(event: ChatAction.Event) -> None:
+    return
     client: KantekClient = event.client
     chat: Channel = await event.get_chat()
     user: User = await event.get_user()
     db: ArangoDB = client.db
     chat_document = db.groups.get_chat(event.chat_id)
     db_named_tags: Dict = chat_document['named_tags'].getStore()
-    kriminalamt_tag = db_named_tags.get('kriminalamt', 1)
+    kriminalamt_tag = db_named_tags.get('kriminalamt')
     bancmd = db_named_tags.get('gbancmd')
     delay = 1
     if not kriminalamt_tag or user.bot:
