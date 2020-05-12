@@ -22,7 +22,7 @@ tlog = logging.getLogger('kantek-channel-log')
 @events.register(events.NewMessage(outgoing=True, pattern=f'{cmd_prefix}readall'))
 async def readall(event: NewMessage.Event) -> None:
     client: KantekClient = event.client
-    waiting_message = await client.respond(event, 'Reading All chats. This might take a while.', delete=120)
+    waiting_message = await client.respond(event, 'Reading All chats. This might take a while.')
     start_time = time.time()
 
     async for dialog in client.iter_dialogs():
