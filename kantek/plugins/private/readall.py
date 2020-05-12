@@ -32,7 +32,7 @@ async def readall(event: NewMessage.Event) -> None:
 
     stop_time = time.time() - start_time
 
-    await client.respond(event, 'Took' + str(stop_time), reply=False)
+    await client.respond(event, f'Took {stop_time:.02f}s', reply=False)
     await waiting_message.delete()
 
 
