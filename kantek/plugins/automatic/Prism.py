@@ -50,7 +50,7 @@ async def gban(event: NewMessage.Event) -> None:
 
 
 
-@events.register(events.UserUpdate)
+@events.register(events.UserUpdate())
 @events.register(events.chataction.ChatAction())
 @events.register(events.NewMessage())
 async def prism(event: Union[ChatAction.Event, NewMessage.Event]) -> None:
