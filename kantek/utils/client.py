@@ -119,9 +119,8 @@ class KantekClient(TelegramClient):  # pylint: disable = R0901, W0223
             f'/fban {uid} {reason}')
 
         await self(BlockRequest(
-                id=uid
+            id=uid
         ))
-
 
         data = {'_key': str(uid),
                 'id': str(uid),
@@ -241,16 +240,9 @@ class KantekClient(TelegramClient):  # pylint: disable = R0901, W0223
                              'FILTER doc._key == @uid '
                              'RETURN doc', bind_vars={'uid': str(uid)})
 
-
-
-
-
-        data = {'_key': str(uid),
-                'id': str(uid)}
-
-        self.db.query('UPSERT {"_key": @ban.id} '
-                      'INSERT @ban ', bind_vars={'ban': data})
-
+        self.db.query('UPSERT {"_key": @uid} '
+                      ' INSERT{"_key": @uid} '
+                      'UPDATE {} IN StalkList', bind_vars={'uid': str(uid)})
 
         # Some bots are slow so wait a while before clearing mentions
         # doesnt really do much, sending a message clears unread messages anyway
@@ -260,8 +252,3 @@ class KantekClient(TelegramClient):  # pylint: disable = R0901, W0223
         #                                  clear_mentions=True)
 
         return True
-
-
-
-
-
