@@ -9,6 +9,8 @@ from telethon.events import ChatAction, NewMessage, UserUpdate
 from telethon.tl.types import Channel, ChannelParticipantsAdmins
 from telethon.tl.custom import Message
 from config import StalkingGroup
+from config import cmd_prefix
+
 
 from database.arango import ArangoDB
 from utils.client import KantekClient
