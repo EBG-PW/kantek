@@ -222,3 +222,46 @@ class KantekClient(TelegramClient):  # pylint: disable = R0901, W0223
             if _base_domain:
                 url = _base_domain
         return str(url)
+
+    async def stalk(self, uid: Union[int, str]) -> bool:
+        """Command to start stalking a user
+
+        Args:
+            uid: User ID
+
+
+        Returns:
+            True if stalk was successful else false
+
+        """
+        # if the user account is deleted this can be None
+        if uid is None:
+            return False
+        user = self.db.query('For doc in StalkList '
+                             'FILTER doc._key == @uid '
+                             'RETURN doc', bind_vars={'uid': str(uid)})
+
+
+
+
+
+        data = {'_key': str(uid),
+                'id': str(uid)}
+
+        self.db.query('UPSERT {"_key": @ban.id} '
+                      'INSERT @ban ', bind_vars={'ban': data})
+
+
+        # Some bots are slow so wait a while before clearing mentions
+        # doesnt really do much, sending a message clears unread messages anyway
+        # await asyncio.sleep(10)
+        # await self.send_read_acknowledge(config.gban_group,
+        #                                  max_id=1000000,
+        #                                  clear_mentions=True)
+
+        return True
+
+
+
+
+
