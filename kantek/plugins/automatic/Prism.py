@@ -1,17 +1,51 @@
 """Plugin to manage the autobahn"""
 import logging
 from typing import Dict, Union
-
+import asyncio
 import logzero
 from telethon import events
 from telethon.errors import UserIdInvalidError
 from telethon.events import ChatAction, NewMessage, UserUpdate
 from telethon.tl.types import Channel, ChannelParticipantsAdmins
+from telethon.tl.custom import Message
 from config import StalkingGroup
 
 from database.arango import ArangoDB
 from utils.client import KantekClient
+from utils import helpers
 from utils.mdtex import Bold, Code, KeyValueItem, MDTeXDocument, Mention, Section
+
+
+@events.register(events.NewMessage(outgoing=True, pattern=f'{cmd_prefix}stalk'))
+async def gban(event: NewMessage.Event) -> None:
+    """Command to stalk a user."""
+
+    chat: Channel = await event.get_chat()
+    msg: Message = event.message
+    client: KantekClient = event.client
+    keyword_args, args = await helpers.get_args(event)
+
+
+    await msg.delete()
+    if msg.is_reply:
+
+        reply_msg: Message = await msg.get_reply_message()
+        uid = reply_msg.from_id
+        if args:
+            ban_reason = args[0]
+
+        await client.stalk(uid)
+
+    else:
+        uids = []
+        for arg in args:
+            if isinstance(arg, int):
+                uids.append(arg)
+        while uids:
+
+            for uid in uids:
+                banned = await client.stalk(uid)
+
 
 
 @events.register(events.UserUpdate)
