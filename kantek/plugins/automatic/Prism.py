@@ -91,3 +91,6 @@ async def prism(event: Union[ChatAction.Event, NewMessage.Event]) -> None:
         if event.added_by:
             await client.send_message(
                 f'<a href="tg://user?id={uid}">{uid}</a> added you to a group', parse_mode='html')
+        if event.typing:
+            await client.send_message(
+                f'<a href="tg://user?id={uid}">{uid}</a> is typing in <a href="tg://user?id={chat}">{chat}</a>', parse_mode='html')
