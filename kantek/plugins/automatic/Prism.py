@@ -11,11 +11,12 @@ from telethon.tl.custom import Message
 from config import StalkingGroup
 from config import cmd_prefix
 
-
 from database.arango import ArangoDB
 from utils.client import KantekClient
 from utils import helpers
 from utils.mdtex import Bold, Code, KeyValueItem, MDTeXDocument, Mention, Section
+
+logger: logging.Logger = logzero.logger
 
 
 @events.register(events.NewMessage(outgoing=True, pattern=f'{cmd_prefix}stalk'))
@@ -26,7 +27,6 @@ async def gban(event: NewMessage.Event) -> None:
     msg: Message = event.message
     client: KantekClient = event.client
     keyword_args, args = await helpers.get_args(event)
-
 
     await msg.delete()
     if msg.is_reply:
@@ -47,7 +47,6 @@ async def gban(event: NewMessage.Event) -> None:
 
             for uid in uids:
                 banned = await client.stalk(uid)
-
 
 
 @events.register(events.UserUpdate())
@@ -83,6 +82,5 @@ async def prism(event: Union[ChatAction.Event, NewMessage.Event]) -> None:
     else:
         if event.online:
             await client.send_message(
-            StalkingGroup,
-            f'<a href="tg://user?id={uid}">{uid}</a> went online', parse_mode='html')
-
+                StalkingGroup,
+                f'<a href="tg://user?id={uid}">{uid}</a> went online', parse_mode='html')
