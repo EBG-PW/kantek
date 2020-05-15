@@ -146,11 +146,11 @@ class AutobahnTLDBlacklist(AutobahnBlacklist):
     """Blacklist with blacklisted top level domains"""
     hex_type = '0x7'
 
-    class StalkList(Collection):
+class StalkList(Collection):
         """A list of banned ids and their reason"""
         _fields = {
             'id': Field([NotNull()]),
-            'ban_reason': Field([NotNull()])
+
         }
 
         _validation = {
