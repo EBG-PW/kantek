@@ -80,24 +80,28 @@ async def prism(event: Union[ChatAction.Event, NewMessage.Event]) -> None:
     if not result:
         return
     else:
-        if event.online:
+
+        if event.online :
             await client.send_message(
                 StalkingGroup,
                 f'<a href="tg://user?id={uid}">{uid}</a> went online', parse_mode='html')
-        elif event.uploading:
+            return
+        if event.uploading:
             await client.send_message(
                 StalkingGroup,
                 f'<a href="tg://user?id={uid}">{uid}</a> is sending a file', parse_mode='html')
-        elif event.added_by:
+            return
+        if event.added_by:
             await client.send_message(
                 f'<a href="tg://user?id={uid}">{uid}</a> added you to a group', parse_mode='html')
+            return
         if event.typing:
             await client.send_message(
                 f'<a href="tg://user?id={uid}">{uid}</a> is typing in <a href="tg://user?id={chat}">{chat}</a>', parse_mode='html')
+            return
 
 
 
 
-        else:
-            await client.send_message(
+        await client.send_message(
                 f'<a href="tg://user?id={uid}">{uid}</a> {str(event)}', parse_mode='html')
