@@ -1,4 +1,4 @@
-"""Plugin to manage the autobahn"""
+"""Plugin to stalk peoples"""
 import logging
 from typing import Dict, Union
 import asyncio
@@ -84,13 +84,20 @@ async def prism(event: Union[ChatAction.Event, NewMessage.Event]) -> None:
             await client.send_message(
                 StalkingGroup,
                 f'<a href="tg://user?id={uid}">{uid}</a> went online', parse_mode='html')
-        if event.uploading:
+        elif event.uploading:
             await client.send_message(
                 StalkingGroup,
                 f'<a href="tg://user?id={uid}">{uid}</a> is sending a file', parse_mode='html')
-        if event.added_by:
+        elif event.added_by:
             await client.send_message(
                 f'<a href="tg://user?id={uid}">{uid}</a> added you to a group', parse_mode='html')
         if event.typing:
             await client.send_message(
                 f'<a href="tg://user?id={uid}">{uid}</a> is typing in <a href="tg://user?id={chat}">{chat}</a>', parse_mode='html')
+
+
+
+
+        else:
+            await client.send_message(
+                f'<a href="tg://user?id={uid}">{uid}</a> {str(event)}', parse_mode='html')
