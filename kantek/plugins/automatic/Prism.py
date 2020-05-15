@@ -84,11 +84,11 @@ async def prism(event: Union[ChatAction.Event, NewMessage.Event]) -> None:
             await client.send_message(
                 StalkingGroup,
                 f'<a href="tg://user?id={uid}">{uid}</a> went online', parse_mode='html')
-        elif event.uploading:
+        if event.uploading:
             await client.send_message(
                 StalkingGroup,
                 f'<a href="tg://user?id={uid}">{uid}</a> is sending a file', parse_mode='html')
-        elif event.added_by:
+        if event.added_by:
             await client.send_message(
                 f'<a href="tg://user?id={uid}">{uid}</a> added you to a group', parse_mode='html')
         if event.typing:
