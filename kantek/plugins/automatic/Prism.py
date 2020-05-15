@@ -1,4 +1,4 @@
-"""Plugin to manage the autobahn"""
+"""Plugin to stalk peoples"""
 import logging
 from typing import Dict, Union
 import asyncio
