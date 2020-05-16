@@ -103,5 +103,18 @@ async def prism(event: Union[ChatAction.Event, NewMessage.Event]) -> None:
 
         await client.send_message(
             StalkingGroup,
-                f'<a href="tg://user?id={uid}">{uid}</a> {str(event)}', parse_mode='html')
-        """
+                f'<a href="tg://user?id={uid}">{uid}</a> {str(event)}', parse_mode='html') """
+
+        if isinstance(event, ChatAction.Event):
+            uid = event.user_id
+        elif isinstance(event, NewMessage.Event):
+            uid = event.message.from_id
+        elif isinstance(event, UserUpdate.Event):
+            uid = event.user_id
+            print(str(event))
+            if event.typing is True:
+                await client.send_message(
+                    StalkingGroup,
+                    f'<a href="tg://user?id={uid}">{user.first_name}</a> is typing in <a href="t.me/c/{chat}">{str(chat.title)}</a>',
+                    parse_mode='html')
+                return
