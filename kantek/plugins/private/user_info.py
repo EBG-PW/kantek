@@ -136,7 +136,7 @@ async def _collect_user_info(client, user, **kwargs) -> Union[Section, KeyValueI
         misc = SubSection(
             Bold('misc'),
             KeyValueItem('phone', Code(user.phone)),
-            KeyValueItem('restricted', Code(user.restricted)),
+            KeyValueItem('restricted', Code("+"+ user.restricted)),
             KeyValueItem('restriction_reason', Code(user.restriction_reason)),
             KeyValueItem('deleted', Code(user.deleted)),
             KeyValueItem('verified', Code(user.verified)),
