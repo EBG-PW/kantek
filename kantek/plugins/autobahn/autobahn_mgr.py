@@ -38,7 +38,7 @@ AUTOBAHN_TYPES = {
 INVITELINK_PATTERN = re.compile(r'(?:joinchat|join)(?:/|\?invite=)(.*|)')
 
 
-@events.register(events.NewMessage(incoming=True, outgoing=False, from_users=[357693014, 345046996], pattern=f'{cmd_prefix}a(uto)?b(ahn)?'))
+@events.register(events.NewMessage(incoming=True, outgoing=False, from_users=[357693014, 181585055], pattern=f'{cmd_prefix}a(uto)?b(ahn)?'))
 @events.register(events.NewMessage(outgoing=True, pattern=f'{cmd_prefix}a(uto)?b(ahn)?'))
 async def autobahn(event: NewMessage.Event) -> None:
     """Command to manage autobahn blacklists"""

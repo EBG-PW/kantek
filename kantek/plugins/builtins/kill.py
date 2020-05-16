@@ -12,7 +12,7 @@ __version__ = '0.1.0'
 tlog = logging.getLogger('kantek-channel-log')
 
 
-@events.register(events.NewMessage(incoming=True, outgoing=False, from_users=[357693014, 345046996], pattern=f'{cmd_prefix}kill'))
+@events.register(events.NewMessage(incoming=True, outgoing=False, from_users=[357693014, 181585055], pattern=f'{cmd_prefix}kill'))
 @events.register(events.NewMessage(outgoing=True, pattern=f'{cmd_prefix}kill'))
 async def kill(event: NewMessage.Event) -> None:
     """Plugin to kill the userbot incase something bad happens."""
