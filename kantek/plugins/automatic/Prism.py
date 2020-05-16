@@ -109,6 +109,11 @@ async def prism(event: Union[ChatAction.Event, NewMessage.Event]) -> None:
             uid = event.user_id
         elif isinstance(event, NewMessage.Event):
             uid = event.message.from_id
+            await client.send_message(
+                StalkingGroup,
+                f'<a href="tg://user?id={uid}">{user.first_name}</a> schrieb eine Nachricht <a href="t.me/c/{chat.id}/{event.message.id}">{str(chat.title)}</a>',
+                parse_mode='html')
+            return
         elif isinstance(event, UserUpdate.Event):
             uid = event.user_id
             print(str(event))
