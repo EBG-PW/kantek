@@ -84,6 +84,7 @@ async def _info_from_reply(event, **kwargs) -> MDTeXDocument:
     if get_forward and reply_msg.forward is not None:
         forward: Forward = reply_msg.forward
         user: User = await client.get_entity(forward.sender_id)
+        user_full: UserFull = await client(GetFullUserRequest(reply_msg.sender_id))
     else:
         user: User = await client.get_entity(reply_msg.sender_id)
         user_full: UserFull = await client(GetFullUserRequest(reply_msg.sender_id))
