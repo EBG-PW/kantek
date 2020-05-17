@@ -71,7 +71,7 @@ async def join_polizei(event: ChatAction.Event) -> None:
     try:
         user: UserFull = await client(GetFullUserRequest(await event.get_input_user()))
     except TypeError as e:
-        logger.error(e)
+        logger.info(e)
         return
 
     for string in bio_blacklist:
@@ -130,7 +130,7 @@ async def _check_message(event):
     try:
         user = await client.get_cached_entity(user_id)
     except ValueError:
-        tlog.critical(str(user_id) + " is not known yet")
+        tlog.info(str(user_id) + " is not known yet")
         return False, False
     if user.bot:
         return False, False

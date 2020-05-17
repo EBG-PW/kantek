@@ -72,7 +72,7 @@ async def prism(event: Union[ChatAction.Event, NewMessage.Event]) -> None:
     try:
         user = await client.get_entity(uid)
     except ValueError as err:
-        logger.error(err)
+        logger.info(err)
 
     result = db.query('For doc in StalkList '
                       'FILTER doc._key == @id '
