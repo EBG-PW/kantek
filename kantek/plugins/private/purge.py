@@ -1,5 +1,6 @@
 """Plugin to purge messages up to a specific point"""
 import logging
+from typing import List
 
 from telethon import events
 from telethon.events import NewMessage
@@ -25,4 +26,7 @@ async def purge(event: NewMessage.Event) -> None:
         return
     else:
         reply_msg: Message = await msg.get_reply_message()
-        await client.delete_messages(chat, list(range(reply_msg.id, msg.id)))
+        msg_list: List = client.get_messages(chat, min_id=reply_msg.id)
+
+        await client.delete_messages(chat, msg_list)
+
