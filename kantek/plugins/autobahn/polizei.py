@@ -127,7 +127,11 @@ async def _check_message(event):
         return False, False
 
     # no need to ban bots as they can only be added by users anyway
-    user = await client.get_cached_entity(user_id)
+    try:
+        user = await client.get_cached_entity(user_id)
+    except ValueError:
+        tlog.critical(str(user_id) + " is not known yet")
+        return False, False
     if user.bot:
         return False, False
 
