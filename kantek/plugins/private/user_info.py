@@ -5,7 +5,8 @@ from typing import Union
 from telethon import events
 from telethon.events import NewMessage
 from telethon.tl.custom import Forward, Message
-from telethon.tl.types import Channel, MessageEntityMention, MessageEntityMentionName, User
+from telethon.tl.functions.users import GetFullUserRequest
+from telethon.tl.types import Channel, MessageEntityMention, MessageEntityMentionName, User, UserFull
 
 from config import cmd_prefix
 from utils import helpers, parsers, constants
@@ -66,7 +67,8 @@ async def _info_from_arguments(event) -> MDTeXDocument:
     for entity in entities:
         try:
             user: User = await client.get_entity(entity)
-            users.append(await _collect_user_info(client, user, **keyword_args))
+            user_full: UserFull = await client(GetFullUserRequest(entity))
+            users.append(await _collect_user_info(client, user, user_full, **keyword_args))
         except constants.GET_ENTITY_ERRORS as err:
             errors.append(str(entity))
     if users:
@@ -84,11 +86,12 @@ async def _info_from_reply(event, **kwargs) -> MDTeXDocument:
         user: User = await client.get_entity(forward.sender_id)
     else:
         user: User = await client.get_entity(reply_msg.sender_id)
+        user_full: UserFull = await client(GetFullUserRequest(reply_msg.sender_id))
 
-    return MDTeXDocument(await _collect_user_info(client, user, **kwargs))
+    return MDTeXDocument(await _collect_user_info(client, user, user_full, **kwargs))
 
 
-async def _collect_user_info(client, user, **kwargs) -> Union[Section, KeyValueItem]:
+async def _collect_user_info(client, user, user_full, **kwargs) -> Union[Section, KeyValueItem]:
     id_only = kwargs.get('id', False)
     show_general = kwargs.get('general', True)
     show_bot = kwargs.get('bot', False)
@@ -121,7 +124,7 @@ async def _collect_user_info(client, user, **kwargs) -> Union[Section, KeyValueI
             KeyValueItem('first_name', Code(user.first_name)),
             KeyValueItem('last_name', Code(user.last_name)),
             KeyValueItem('username', Code(user.username)),
-            KeyValueItem('common_groups', Code(user.common_chats_count)),
+            KeyValueItem('common_groups', Code(user_full.common_chats_count)),
             KeyValueItem('mutual_contact', Code(user.mutual_contact)),
             KeyValueItem('ban_reason', Code(ban_reason)) if ban_reason else KeyValueItem('gbanned', Code('False')))
 
@@ -136,8 +139,8 @@ async def _collect_user_info(client, user, **kwargs) -> Union[Section, KeyValueI
             KeyValueItem('bot_nochats', Code(user.bot_nochats)))
         misc = SubSection(
             Bold('misc'),
-            KeyValueItem('phone', Code(user.phone)),
-            KeyValueItem('restricted', Code("+"+ user.restricted)),
+            KeyValueItem('phone', Code("+"+ str(user.phone))),
+            KeyValueItem('restricted', Code(user.restricted)),
             KeyValueItem('restriction_reason', Code(user.restriction_reason)),
             KeyValueItem('deleted', Code(user.deleted)),
             KeyValueItem('verified', Code(user.verified)),
