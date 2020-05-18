@@ -7,6 +7,7 @@ from telethon.events import NewMessage
 from telethon.tl.types import Channel, User
 
 from config import cmd_prefix
+from utils import helpers
 from utils.client import KantekClient
 from utils.mdtex import Bold, Code, Item, KeyValueItem, MDTeXDocument, Section
 
@@ -25,13 +26,17 @@ async def info(event: NewMessage.Event) -> None:
     Returns: None
 
     """
-    chat: Channel = await event.get_chat()
     client: KantekClient = event.client
+    keyword_args, args = await helpers.get_args(event)
+    if args:
+        chat: Channel = await client.get_entity(args[0])
+    else:
+        chat: Channel = await event.get_chat()
     if event.is_private:
         return
     chat_info = Section(f'info for {chat.title}:',
                         KeyValueItem(Bold('title'), Code(chat.title)),
-                        KeyValueItem(Bold('chat_id'), Code(event.chat_id)),
+                        KeyValueItem(Bold('chat_id'), Code(chat.id)),
                         KeyValueItem(Bold('access_hash'), Code(chat.access_hash)),
                         KeyValueItem(Bold('creator'), Code(chat.creator)),
                         KeyValueItem(Bold('broadcast'), Code(chat.broadcast)),
