@@ -12,6 +12,8 @@ log_channel_id: Union[str, int] = ''
 
 gban_group = ''
 
+StalkingGroup = ''
+
 # This is regex so make sure to escape the usual characters
 cmd_prefix: str = r'\.'
 
