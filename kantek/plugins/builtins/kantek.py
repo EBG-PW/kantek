@@ -33,7 +33,7 @@ async def kantek(event: NewMessage.Event) -> None:
     await client.send_file(chat, stickerset.documents[0])
     await client.send_message(chat, str(MDTeXDocument(
         Section(f"{Bold('kantek')} userbot",
-                KeyValueItem(Bold('source'), 'src.kv2.dev'),
+                KeyValueItem(Bold('source'), 'github.com/GodOfOwls/kantek'),
                 KeyValueItem(Bold('version'), client.kantek_version),
                 KeyValueItem(Bold('telethon version'), telethon.__version__),
                 KeyValueItem(Bold('python version'), platform.python_version()),
