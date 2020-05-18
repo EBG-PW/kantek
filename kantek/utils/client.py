@@ -118,9 +118,13 @@ class KantekClient(TelegramClient):  # pylint: disable = R0901, W0223
             config.gban_group,
             f'/fban {uid} {reason}')
 
-        await self(BlockRequest(
-            id=uid
-        ))
+
+        try:
+            await self(BlockRequest(
+                id=uid
+            ))
+        except ValueError as Err:
+            logger.error(Err)
 
         data = {'_key': str(uid),
                 'id': str(uid),
