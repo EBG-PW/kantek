@@ -38,10 +38,15 @@ async def user_info(event: NewMessage.Event) -> None:
     _args = msg.raw_text.split()[1:]
     keyword_args, args = parsers.parse_arguments(' '.join(_args))
     response = ''
+
     if not args and msg.is_reply:
         response = await _info_from_reply(event, **keyword_args)
+    elif not args and not msg.is_reply and event.is_private:
+        response = await _info_from_chat(event)
+
     elif args or 'search' in keyword_args:
         response = await _info_from_arguments(event)
+
     if response:
         await client.respond(event, response)
 
@@ -88,6 +93,16 @@ async def _info_from_reply(event, **kwargs) -> MDTeXDocument:
     else:
         user: User = await client.get_entity(reply_msg.sender_id)
         user_full: UserFull = await client(GetFullUserRequest(reply_msg.sender_id))
+
+    return MDTeXDocument(await _collect_user_info(client, user, user_full, **kwargs))
+
+
+async def _info_from_chat(event) -> MDTeXDocument:
+    msg: Message = event.message
+    client: KantekClient = event.client
+
+    user: User = await client.get_entity(msg.to_id)
+    user_full: UserFull = await client(GetFullUserRequest(msg.to_id))
 
     return MDTeXDocument(await _collect_user_info(client, user, user_full, **kwargs))
 
@@ -140,7 +155,7 @@ async def _collect_user_info(client, user, user_full, **kwargs) -> Union[Section
             KeyValueItem('bot_nochats', Code(user.bot_nochats)))
         misc = SubSection(
             Bold('misc'),
-            KeyValueItem('phone', Code("+"+ str(user.phone))),
+            KeyValueItem('phone', Code("+" + str(user.phone))),
             KeyValueItem('restricted', Code(user.restricted)),
             KeyValueItem('restriction_reason', Code(user.restriction_reason)),
             KeyValueItem('deleted', Code(user.deleted)),
