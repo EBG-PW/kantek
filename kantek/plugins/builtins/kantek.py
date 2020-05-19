@@ -30,7 +30,10 @@ async def kantek(event: NewMessage.Event) -> None:
     client: KantekClient = event.client
     chat: Channel = await event.get_chat()
     stickerset: StickerSet = await client(GetStickerSetRequest(InputStickerSetShortName("kantek")))
-    await client.send_file(chat, stickerset.documents[0])
+    try:
+        await client.send_file(chat, stickerset.documents[0])
+    except telethon.errors.rpcerrorlist.ChatSendStickersForbiddenError:
+        pass
     await client.send_message(chat, str(MDTeXDocument(
         Section(f"{Bold('kantek')} userbot",
                 KeyValueItem(Bold('source'), 'github.com/GodOfOwls/kantek'),
