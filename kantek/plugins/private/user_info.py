@@ -104,7 +104,7 @@ async def _info_from_chat(event) -> MDTeXDocument:
     user: User = await client.get_entity(msg.to_id)
     user_full: UserFull = await client(GetFullUserRequest(msg.to_id))
 
-    return MDTeXDocument(await _collect_user_info(client, user, user_full, **kwargs))
+    return MDTeXDocument(await _collect_user_info(client, user, user_full))
 
 
 async def _collect_user_info(client, user, user_full, **kwargs) -> Union[Section, KeyValueItem]:
