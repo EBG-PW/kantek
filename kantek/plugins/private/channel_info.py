@@ -36,8 +36,12 @@ async def info(event: NewMessage.Event) -> None:
             return
     else:
         chat: Channel = await event.get_chat()
+    try:
+        acceshash = chat.access_hash
 
-    chat_info = Section(f'info for {chat.title}:',
+
+
+        chat_info = Section(f'info for {chat.title}:',
                         KeyValueItem(Bold('title'), Code(chat.title)),
                         KeyValueItem(Bold('chat_id'), Code(chat.id)),
                         KeyValueItem(Bold('access_hash'), Code(chat.access_hash)),
@@ -49,12 +53,24 @@ async def info(event: NewMessage.Event) -> None:
                         KeyValueItem(Bold('verified'), Code(chat.verified)),
                         KeyValueItem(Bold('version'), Code(chat.version)),
                         )
-
+    except AttributeError:
+        chat_info = Section(f'info for {chat.title}:',
+                            KeyValueItem(Bold('title'), Code(chat.title)),
+                            KeyValueItem(Bold('chat_id'), Code(chat.id)),
+                            #KeyValueItem(Bold('access_hash'), Code(chat.access_hash)),
+                            KeyValueItem(Bold('creator'), Code(chat.creator)),
+                            #KeyValueItem(Bold('broadcast'), Code(chat.broadcast)),
+                            #KeyValueItem(Bold('megagroup'), Code(chat.megagroup)),
+                            #KeyValueItem(Bold('min'), Code(chat.min)),
+                            #KeyValueItem(Bold('username'), Code(chat.username)),
+                            #KeyValueItem(Bold('verified'), Code(chat.verified)),
+                            KeyValueItem(Bold('version'), Code(chat.version)),
+                            )
     bot_accounts = 0
     total_users = 0
     deleted_accounts = 0
     user: User
-    async for user in client.iter_participants(chat):
+    async for user in client.iter_participants(chat, limit=25000):
         total_users += 1
         if user.bot:
             bot_accounts += 1
