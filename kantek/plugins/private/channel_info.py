@@ -66,7 +66,7 @@ async def info(event: NewMessage.Event) -> None:
                          KeyValueItem(Bold('bots'), Code(bot_accounts)),
                          KeyValueItem(Bold('deleted_accounts'), Code(deleted_accounts)))
 
-    chat_document = client.db.groups.get_chat(event.chat_id)
+    chat_document = client.db.groups.get_chat(chat.id)
     db_named_tags: Dict = chat_document['named_tags'].getStore()
     db_tags: List = chat_document['tags']
     data = []
