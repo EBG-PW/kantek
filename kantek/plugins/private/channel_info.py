@@ -29,11 +29,14 @@ async def info(event: NewMessage.Event) -> None:
     client: KantekClient = event.client
     keyword_args, args = await helpers.get_args(event)
     if args:
-        chat: Channel = await client.get_entity(args[0])
+        try:
+            chat: Channel = await client.get_entity(args[0])
+        except ValueError:
+            await client.respond(event, "Chat not found OwO")   #for @geozukunft test
+            return
     else:
         chat: Channel = await event.get_chat()
-    if event.is_private:
-        return
+
     chat_info = Section(f'info for {chat.title}:',
                         KeyValueItem(Bold('title'), Code(chat.title)),
                         KeyValueItem(Bold('chat_id'), Code(chat.id)),
