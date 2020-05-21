@@ -30,8 +30,9 @@ async def cleanup(event: NewMessage.Event) -> None:
     client: KantekClient = event.client
     keyword_args, _ = await helpers.get_args(event)
     count_only = keyword_args.get('count', False)
-    silent = keyword_args.get('silent', False)
+    silent = keyword_args.get('silent', True)
     if not chat.creator and not chat.admin_rights:
+
         count_only = True
     waiting_message = None
     if silent:
