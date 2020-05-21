@@ -49,6 +49,10 @@ async def cleanup(event: NewMessage.Event) -> None:
 @events.register(events.NewMessage(incoming=True, pattern=f'{cmd_prefix}cleanup'))
 async def cleanup_group_admins(event: NewMessage.Event) -> None:
     """Check if the issuer of the command is group admin. Then execute the cleanup command."""
+    chat: Channel = await event.get_chat()
+    if not chat.creator and not chat.admin_rights:
+        return
+
     if event.is_channel:
         msg: Message = event.message
         client: KantekClient = event.client
