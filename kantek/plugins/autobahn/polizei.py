@@ -91,7 +91,7 @@ async def join_polizei(event: ChatAction.Event) -> None:
 
 
 async def _banuser(event, chat, userid, bancmd, ban_type, ban_reason):
-    formatted_reason = f'Spambot[kv2 {ban_type} 0x{ban_reason.rjust(4, "0")}]'
+    formatted_reason = f'Spambot[Owl {ban_type} 0x{ban_reason.rjust(4, "0")}]'
     client: KantekClient = event.client
     db: ArangoDB = client.db
     chat: Channel = await event.get_chat()
