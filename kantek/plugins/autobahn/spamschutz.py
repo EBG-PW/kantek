@@ -54,7 +54,7 @@ async def grenzschutz(event: Union[ChatAction.Event, NewMessage.Event]) -> None:
         return
     if uid is None:
         return
-
+    user = await client.get_entity(uid)
     ban = swclient.get_ban(uid)
     if not ban:
         return
@@ -75,6 +75,6 @@ async def grenzschutz(event: Union[ChatAction.Event, NewMessage.Event]) -> None:
                 KeyValueItem(Bold("User"),
                              f'{Mention(user.first_name, uid)} [{Code(uid)}]'),
                 KeyValueItem(Bold("Reason"),
-                             ban_reason)
+                             reason)
             ))
             await client.respond(event, str(message), reply=False, delete=120)
