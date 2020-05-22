@@ -66,7 +66,7 @@ async def grenzschutz(event: Union[ChatAction.Event, NewMessage.Event]) -> None:
         try:
             await client.ban(chat, uid)
         except UserIdInvalidError as err:
-            logger.error(f"Error occured while banning {err}")
+            logger.error(f"Error occurred while banning {err}")
             return
 
         if not silent:
