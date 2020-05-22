@@ -31,3 +31,5 @@ async def adminlist(event: NewMessage.Event) -> None:
     for id in admin_groups:
         chat: Chat = await client.get_entity(id)
         message += chat.title + "\n"
+
+    client.send_message(event, message)
