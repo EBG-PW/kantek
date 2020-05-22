@@ -9,6 +9,9 @@ from telethon.tl.types import Channel, ChannelParticipantsAdmins, Chat
 from telethon.tl.custom import Message
 from utils.client import KantekClient
 from config import cmd_prefix
+from utils.mdtex import Link
+from telethon.sync import TelegramClient
+from telethon import functions, types
 
 
 @events.register(events.NewMessage(outgoing=True, pattern=f'{cmd_prefix}adminlist'))
@@ -27,9 +30,17 @@ async def adminlist(event: NewMessage.Event) -> None:
                 admin_in_groups += 1
                 admin_groups.append(entity.id)
 
+        if isinstance(entity, Channel):
+            if entity.megagroup:
+                if entity.creator or entity.admin_rights:
+                    admin_in_groups += 1
+                    admin_groups.append(entity.id)
 
     for id in admin_groups:
         chat: Chat = await client.get_entity(id)
-        message += chat.title + "\n"
+        try:
+            message += chat.title + str(await functions.messages.ExportChatInviteRequest(id)) + "\n"
+        except Exception as e:
+            message += "A ERROR OCCURD @GODOFOWLS FIX IT"
 
     await client.respond(event, message)
