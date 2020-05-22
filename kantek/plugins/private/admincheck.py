@@ -12,7 +12,7 @@ from config import cmd_prefix
 from utils.mdtex import Link
 from telethon.sync import TelegramClient
 from telethon import functions, types
-from Typing import Int
+from typing import Int
 
 @events.register(events.NewMessage(outgoing=True, pattern=f'{cmd_prefix}adminlist'))
 async def adminlist(event: NewMessage.Event) -> None:
