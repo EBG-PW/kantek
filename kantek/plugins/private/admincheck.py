@@ -32,4 +32,4 @@ async def adminlist(event: NewMessage.Event) -> None:
         chat: Chat = await client.get_entity(id)
         message += chat.title + "\n"
 
-    await client.send_message(event, message)
+    await client.respond(event, message)
