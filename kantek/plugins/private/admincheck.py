@@ -12,7 +12,6 @@ from config import cmd_prefix
 from utils.mdtex import Link
 from telethon.sync import TelegramClient
 from telethon import functions, types
-from typing import Int
 
 @events.register(events.NewMessage(outgoing=True, pattern=f'{cmd_prefix}adminlist'))
 async def adminlist(event: NewMessage.Event) -> None:
@@ -21,7 +20,7 @@ async def adminlist(event: NewMessage.Event) -> None:
     admin_in_groups = 0
     admin_groups = []
     message = ''
-    count: Int = 0
+    count = 0
 
     async for dialog in client.iter_dialogs():
         entity = dialog.entity
