@@ -1,6 +1,7 @@
 from telethon.errors import UsernameInvalidError, UsernameNotOccupiedError, InviteHashInvalidError
 
 TELEGRAM_DOMAINS = ['t.me',
+                    't-do.ru',
                     'telegram.org',
                     'telegram.dog',
                     'telegra.ph',
