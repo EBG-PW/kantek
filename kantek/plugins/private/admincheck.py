@@ -1,14 +1,10 @@
-import logging
-from typing import Dict, Union
-import asyncio
-import logzero
 from telethon import events
-from telethon.errors import UserIdInvalidError
-from telethon.events import ChatAction, NewMessage, UserUpdate
-from telethon.tl.types import Channel, ChannelParticipantsAdmins, Chat
-from telethon.tl.custom import Message
-from utils.client import KantekClient
+from telethon import events
+from telethon.events import NewMessage
+from telethon.tl.types import Channel, Chat
+
 from config import cmd_prefix
+from utils.client import KantekClient
 
 
 @events.register(events.NewMessage(outgoing=True, pattern=f'{cmd_prefix}adminlist'))
@@ -27,9 +23,17 @@ async def adminlist(event: NewMessage.Event) -> None:
                 admin_in_groups += 1
                 admin_groups.append(entity.id)
 
+        if isinstance(entity, Channel):
+            if entity.megagroup:
+                if entity.creator or entity.admin_rights:
+                    admin_in_groups += 1
+                    admin_groups.append(entity.id)
 
     for id in admin_groups:
-        chat: Chat = await client.get_entity(id)
-        message += chat.title + "\n"
 
-    await client.respond(event, message)
+        chat: Chat = await client.get_entity(id)
+        #f'<a href="tg://user?id={uid}">{uid}</a>'
+        message += f'<a href="t.me/c/{chat.id}/1000000">{chat.title}</a>' "\n"
+
+    await client.send_message(event.input_chat, message, parse_mode='html')
+
