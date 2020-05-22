@@ -51,7 +51,9 @@ async def gban(event: NewMessage.Event) -> None:
         await client.gban(uid, ban_reason)
         await client(ReportRequest(chat, [reply_msg.id], InputReportReasonSpam()))
         if chat.creator or chat.admin_rights:
-            if bancmd == 'manual' or bancmd is None:
+            if bancmd == 'ignore':
+                return
+            elif bancmd == 'manual' or bancmd is None:
                 await client(EditBannedRequest(
                     chat, uid, ChatBannedRights(
                         until_date=datetime.datetime(2038, 1, 1),
