@@ -14,13 +14,12 @@ from config import cmd_prefix
 from database.arango import ArangoDB
 from utils.client import KantekClient
 from utils import helpers
-from utils.mdtex import Bold, Code, KeyValueItem, MDTeXDocument, Mention, Section
 
 logger: logging.Logger = logzero.logger
 
 
 @events.register(events.NewMessage(outgoing=True, pattern=f'{cmd_prefix}stalk'))
-async def gban(event: NewMessage.Event) -> None:
+async def hawk(event: NewMessage.Event) -> None:
     """Command to stalk a user."""
 
     chat: Channel = await event.get_chat()
