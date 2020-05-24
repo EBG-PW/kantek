@@ -1,5 +1,4 @@
 """File containing the Custom TelegramClient"""
-import ast
 import asyncio
 import datetime
 import logging
@@ -23,7 +22,6 @@ from telethon.tl.types import ChatBannedRights
 from yarl import URL
 
 import config
-from config import cmd_prefix
 from database.arango import ArangoDB
 from utils.constants import SCHEDULE_DELETION_COMMAND
 from utils.mdtex import FormattedBase, MDTeXDocument, Section
@@ -148,7 +146,7 @@ class KantekClient(TelegramClient):  # pylint: disable = R0901, W0223
         return True, reason
 
     async def ungban(self, uid: Union[int, str]):
-        """Command to gban a user
+        """Command to ungban a user
 
         Args:
             uid: User ID

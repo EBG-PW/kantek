@@ -140,7 +140,7 @@ async def ungban(event: NewMessage.Event) -> None:
 
     unbanned_users = []
     for uid in users_to_unban:
-        if client.db.banlist.get_user(uid):
+        #if client.db.banlist.get_user(uid):
             await client.ungban(uid)
             unbanned_users.append(str(uid))
     if unbanned_users:
