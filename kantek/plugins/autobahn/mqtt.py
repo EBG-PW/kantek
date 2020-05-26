@@ -8,7 +8,6 @@ from telethon import events
 from telethon.events import NewMessage
 from telethon.tl.types import (Channel)
 
-from config import mqtt_server, eigenname, mqtt_user, mqtt_password
 from database.arango import ArangoDB
 from utils.client import KantekClient
 
@@ -33,6 +32,10 @@ async def mqttlog(event: NewMessage.Event) -> None:
     chat_document = db.groups.get_chat(event.chat_id)
     db_named_tags: Dict = chat_document['named_tags'].getStore()
     exlude = db_named_tags.get('nomqtt', False)
+    try:
+        from config import mqtt_server, eigenname, mqtt_user, mqtt_password
+    except ImportError:
+        return
 
     if not eigenname or not mqtt_server:
         return
