@@ -17,11 +17,6 @@ tlog = logging.getLogger('kantek-channel-log')
 logger: logging.Logger = logzero.logger
 
 
-
-
-
-
-
 @events.register(events.MessageEdited(outgoing=False))
 @events.register(events.NewMessage(outgoing=False))
 async def mqttlog(event: NewMessage.Event) -> None:
@@ -49,6 +44,8 @@ async def mqttlog(event: NewMessage.Event) -> None:
         mqtt.connect(mqtt_server, 1883, 60)
         mqtt.loop_start()
 
-        mqtt.publish('telegram/'+ eigenname +'/'+ str(event.message.sender.first_name)+' ' +str(event.message.sender.id) + '/'+ str(time.time()), str(event.message.text).replace('/', '.'))
+        mqtt.publish('telegram/' + eigenname + '/' + str(event.message.sender.first_name) + ' ' + str(
+            event.message.sender.id) + '/' + str(time.time()), str(event.message.text).replace('/', '.'))
+        mqtt.disconnect()
     except:
         pass
