@@ -14,6 +14,7 @@ __version__ = '0.1.0'
 
 tlog = logging.getLogger('kantek-channel-log')
 
+
 # TODO: Make this nice, this is just a skeleton so I have an easy way of creating tokens,
 #  preferably clean this up at some point
 @events.register(events.NewMessage(outgoing=True, pattern=f'{cmd_prefix}s(pam)?w(atch)?'))

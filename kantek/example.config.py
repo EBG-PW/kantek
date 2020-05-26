@@ -31,3 +31,7 @@ GESTAPO: List[int] = []
 
 spamwatch_host: str = 'https://api.spamwat.ch'
 spamwatch_token: str = ''
+mqtt_server: str = ''
+mqtt_user: str = ''
+mqtt_password: str = ''
+eigenname: str = ''
