@@ -43,19 +43,18 @@ async def rmmention(event: NewMessage.Event) -> None:
     await client.respond(event, 'Done', reply=False)
     await waiting_message.delete()
 
+
 @events.register(events.NewMessage(outgoing=True, pattern=f'{cmd_prefix}updategroups'))
 async def readall(event: NewMessage.Event) -> None:
     client: KantekClient = event.client
-    waiting_message = await client.respond(event, 'Updating DB please dont ddos too often else Steffan will get mail :(')
+    waiting_message = await client.respond(event,
+                                           'Updating DB please dont ddos too often else Steffan will get mail :(')
     start_time = time.time()
 
     async for dialog in client.iter_dialogs():
-
         client.db.groups.get_chat(dialog.id)
 
     stop_time = time.time() - start_time
 
     await client.respond(event, f'Took {stop_time:.02f}s', reply=False)
     await waiting_message.delete()
-
-
