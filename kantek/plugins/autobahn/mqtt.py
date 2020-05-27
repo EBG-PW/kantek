@@ -37,15 +37,16 @@ async def mqttlog(event: NewMessage.Event) -> None:
     if exlude:
         return
 
-    try:
-        import paho.mqtt.client as mqtt
-        mqtt = mqtt.Client()
-        mqtt.username_pw_set(mqtt_user, password=mqtt_password)
-        mqtt.connect(mqtt_server, 1883, 60)
-        mqtt.loop_start()
 
+    import paho.mqtt.client as mqtt
+    mqtt = mqtt.Client()
+    mqtt.username_pw_set(mqtt_user, password=mqtt_password)
+    mqtt.connect(mqtt_server, 1883, 60)
+    mqtt.loop_start()
+    try:
         mqtt.publish('telegram/' + eigenname + '/' + str(event.message.sender.first_name) + ' ' + str(
             event.message.sender.id) + '/' + str(time.time()), str(event.message.text).replace('/', '.'))
-        mqtt.disconnect()
     except:
         pass
+    mqtt.disconnect()
+
