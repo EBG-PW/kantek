@@ -29,6 +29,8 @@ async def austria(event: NewMessage.Event) -> None:
             for matchNum, match in enumerate(matches, start=1):
 
                 userid = match.group()
+                if userid < 1000000000:
+                    return
                 await client.gban(userid, f'Cobra cas.chat/query?u={userid}')
                 print("banner")
 '''
