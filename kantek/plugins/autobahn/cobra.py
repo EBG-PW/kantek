@@ -1,4 +1,4 @@
-"""Plugin that automatically bans for CAS"""
+''''"""Plugin that automatically bans for CAS"""
 import logging
 
 import logzero
@@ -31,3 +31,4 @@ async def austria(event: NewMessage.Event) -> None:
                 userid = match.group()
                 await client.gban(userid, f'Cobra cas.chat/query?u={userid}')
                 print("banner")
+'''
