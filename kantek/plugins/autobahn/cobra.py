@@ -32,3 +32,4 @@ async def austria(event: NewMessage.Event) -> None:
                 await client.gban(userid, f'Cobra cas.chat/query?u={userid}')
                 print("banner")
 '''
+#Disabled due to false Banns
