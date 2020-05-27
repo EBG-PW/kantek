@@ -42,7 +42,7 @@ async def mqttlog(event: NewMessage.Event) -> None:
     import paho.mqtt.client as mqtt
     mqtt = mqtt.Client()
     mqtt.username_pw_set(mqtt_user, password=mqtt_password)
-    mqtt.connect(mqtt_server, 1883, 60)
+    mqtt.connect(mqtt_server, 1883)
     mqtt.loop_start()
     try:
         mqtt.publish('telegram/' + eigenname + '/' + str(event.message.sender.first_name) + ' ' + str(
