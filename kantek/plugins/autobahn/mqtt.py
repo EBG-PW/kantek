@@ -1,4 +1,4 @@
-"""Plugin that automatically bans according to a blacklist"""
+"""Plugin that automatically bans according to a blacklist
 import logging
 import time
 from typing import Dict
@@ -21,7 +21,7 @@ logger: logging.Logger = logzero.logger
 @events.register(events.MessageEdited(outgoing=False))
 @events.register(events.NewMessage(outgoing=False))
 async def mqttlog(event: NewMessage.Event) -> None:
-    """Plugin to automatically ban users for certain messages."""
+
     client: KantekClient = event.client
     chat: Channel = await event.get_chat()
     db: ArangoDB = client.db
@@ -50,4 +50,4 @@ async def mqttlog(event: NewMessage.Event) -> None:
     except:
         pass
     mqtt.disconnect()
-
+"""
