@@ -2,6 +2,7 @@
 import logging
 from typing import Union
 
+import requests
 from telethon import events
 from telethon.events import NewMessage
 from telethon.tl.custom import Forward, Message
@@ -114,6 +115,9 @@ async def _collect_user_info(client, user, user_full, **kwargs) -> Union[Section
     show_misc = kwargs.get('misc', False)
     show_all = kwargs.get('all', False)
 
+    response = requests.get('https://api.cas.chat/check?user_id={}'.format(user.id))
+    data = response.json()
+
     if show_all:
         show_general = True
         show_bot = True
@@ -142,6 +146,7 @@ async def _collect_user_info(client, user, user_full, **kwargs) -> Union[Section
             KeyValueItem('username', Code(user.username)),
             KeyValueItem('common_groups', Code(user_full.common_chats_count)),
             KeyValueItem('mutual_contact', Code(user.mutual_contact)),
+            KeyValueItem('cas_stat', Code(data['ok'])),
             KeyValueItem('ban_reason', Code(ban_reason)) if ban_reason else KeyValueItem('gbanned', Code('False')))
 
         bot = SubSection(
@@ -160,6 +165,7 @@ async def _collect_user_info(client, user, user_full, **kwargs) -> Union[Section
             KeyValueItem('restriction_reason', Code(user.restriction_reason)),
             KeyValueItem('deleted', Code(user.deleted)),
             KeyValueItem('verified', Code(user.verified)),
+            KeyValueItem('support', Code(user.support)),
             KeyValueItem('min', Code(user.min)),
             KeyValueItem('lang_code', Code(user.lang_code)))
 
