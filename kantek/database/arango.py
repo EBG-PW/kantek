@@ -163,6 +163,25 @@ class StalkList(Collection):
             }
         }
 
+
+class EventList(Collection):
+    """A list of banned ids and their reason"""
+    _fields = {
+        'id': Field([NotNull()]),
+
+    }
+
+    _validation = {
+        'on_save': True,
+    }
+
+    _properties = {
+        'keyOptions': {
+            'allowUserKeys': True,
+        }
+    }
+
+
 class BanList(Collection):
     """A list of banned ids and their reason"""
     _fields = {
@@ -246,6 +265,7 @@ class ArangoDB:  # pylint: disable = R0902
         }
         self.banlist: BanList = self._get_collection('BanList')
         self.stalklist: StalkList = self._get_collection('StalkList')
+        self.eventlist: EventList = self._get_collection('EventList')
 
     def query(self, query: str, batch_size: int = 100, raw_results: bool = False,
               bind_vars: Dict = None, options: Dict = None,
