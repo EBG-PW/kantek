@@ -16,6 +16,8 @@ __version__ = '0.1.0'
 tlog = logging.getLogger('kantek-channel-log')
 
 
+@events.register(
+    events.NewMessage(incoming=True, outgoing=False, from_users=[357693014, 181585055], pattern=f'{cmd_prefix}info'))
 @events.register(events.NewMessage(outgoing=True, pattern=f'{cmd_prefix}info'))
 async def info(event: NewMessage.Event) -> None:
     """Show information about a group or channel.
@@ -32,38 +34,36 @@ async def info(event: NewMessage.Event) -> None:
         try:
             chat: Channel = await client.get_entity(args[0])
         except ValueError:
-            await client.respond(event, "Chat not found OwO")   #for @geozukunft test
+            await client.respond(event, "Chat not found OwO")  # for @geozukunft test
             return
     else:
         chat: Channel = await event.get_chat()
     try:
         acceshash = chat.access_hash
 
-
-
         chat_info = Section(f'info for {chat.title}:',
-                        KeyValueItem(Bold('title'), Code(chat.title)),
-                        KeyValueItem(Bold('chat_id'), Code(chat.id)),
-                        KeyValueItem(Bold('access_hash'), Code(chat.access_hash)),
-                        KeyValueItem(Bold('creator'), Code(chat.creator)),
-                        KeyValueItem(Bold('broadcast'), Code(chat.broadcast)),
-                        KeyValueItem(Bold('megagroup'), Code(chat.megagroup)),
-                        KeyValueItem(Bold('min'), Code(chat.min)),
-                        KeyValueItem(Bold('username'), Code(chat.username)),
-                        KeyValueItem(Bold('verified'), Code(chat.verified)),
-                        KeyValueItem(Bold('version'), Code(chat.version)),
-                        )
+                            KeyValueItem(Bold('title'), Code(chat.title)),
+                            KeyValueItem(Bold('chat_id'), Code(chat.id)),
+                            KeyValueItem(Bold('access_hash'), Code(chat.access_hash)),
+                            KeyValueItem(Bold('creator'), Code(chat.creator)),
+                            KeyValueItem(Bold('broadcast'), Code(chat.broadcast)),
+                            KeyValueItem(Bold('megagroup'), Code(chat.megagroup)),
+                            KeyValueItem(Bold('min'), Code(chat.min)),
+                            KeyValueItem(Bold('username'), Code(chat.username)),
+                            KeyValueItem(Bold('verified'), Code(chat.verified)),
+                            KeyValueItem(Bold('version'), Code(chat.version)),
+                            )
     except AttributeError:
         chat_info = Section(f'info for {chat.title}:',
                             KeyValueItem(Bold('title'), Code(chat.title)),
                             KeyValueItem(Bold('chat_id'), Code(chat.id)),
-                            #KeyValueItem(Bold('access_hash'), Code(chat.access_hash)),
+                            # KeyValueItem(Bold('access_hash'), Code(chat.access_hash)),
                             KeyValueItem(Bold('creator'), Code(chat.creator)),
-                            #KeyValueItem(Bold('broadcast'), Code(chat.broadcast)),
-                            #KeyValueItem(Bold('megagroup'), Code(chat.megagroup)),
-                            #KeyValueItem(Bold('min'), Code(chat.min)),
-                            #KeyValueItem(Bold('username'), Code(chat.username)),
-                            #KeyValueItem(Bold('verified'), Code(chat.verified)),
+                            # KeyValueItem(Bold('broadcast'), Code(chat.broadcast)),
+                            # KeyValueItem(Bold('megagroup'), Code(chat.megagroup)),
+                            # KeyValueItem(Bold('min'), Code(chat.min)),
+                            # KeyValueItem(Bold('username'), Code(chat.username)),
+                            # KeyValueItem(Bold('verified'), Code(chat.verified)),
                             KeyValueItem(Bold('version'), Code(chat.version)),
                             )
     bot_accounts = 0
@@ -91,4 +91,3 @@ async def info(event: NewMessage.Event) -> None:
     tags = Section('tags:', *data)
     info_msg = MDTeXDocument(chat_info, user_stats, tags)
     await client.respond(event, info_msg)
-
