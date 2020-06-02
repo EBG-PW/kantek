@@ -58,3 +58,28 @@ async def updateer(event: NewMessage.Event) -> None:
 
     await client.respond(event, f'Took {stop_time:.02f}s', reply=False)
     await waiting_message.delete()
+
+
+@events.register(events.NewMessage(outgoing=True, pattern=f'{cmd_prefix}stress'))
+async def updateer(event: NewMessage.Event) -> None:
+    client: KantekClient = event.client
+    waiting_message = await client.respond(event,
+                                           'AwangOWO DB')
+    start_time = time.time()
+
+    async for dialog in client.iter_dialogs():
+        async for message in client.iter_messages(dialog):
+            try:
+                result = client.db.query('For doc in BanList '
+                                         'FILTER doc._key == @id '
+                                         'RETURN doc', bind_vars={'id': str(message.sender_id)})
+                if not result:
+                    print('nope')
+                print(str(result))
+            except:
+                pass
+
+    stop_time = time.time() - start_time
+
+    await client.respond(event, f'Took {stop_time:.02f}s', reply=False)
+    await waiting_message.delete()
