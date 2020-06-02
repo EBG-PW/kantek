@@ -19,7 +19,7 @@ tlog = logging.getLogger('kantek-channel-log')
 logger: logging.Logger = logzero.logger
 
 
-@events.register(events.NewMessage(outgoing=True, pattern=f'{cmd_prefix}s(olar)s(tats)'))
+@events.register(events.NewMessage(outgoing=True, pattern=f'{cmd_prefix}s(olar)?s(tats)?'))
 async def solar(event: NewMessage.Event) -> None:
     """Plugin to send current solar statistics of owls home."""
     client: KantekClient = event.client
