@@ -103,7 +103,7 @@ async def stressdb(event: NewMessage.Event) -> None:
                                  'FILTER doc._key == @id '
                                  'RETURN doc', bind_vars={'id': str(i)})
         i += 1
-        print(f'i ---------- {result}')
+        print(f'{i} ---------- {result}')
         if result:
             positive += 1
 
