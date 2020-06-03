@@ -85,3 +85,30 @@ async def countall(event: NewMessage.Event) -> None:
 
     await client.respond(event, f'Took {stop_time:.02f}s and counted {str(i)}', reply=False)
     await waiting_message.delete()
+
+
+@events.register(events.NewMessage(outgoing=True, pattern=f'{cmd_prefix}db-test'))
+async def stressdb(event: NewMessage.Event) -> None:
+    client: KantekClient = event.client
+    waiting_message = await client.respond(event,
+                                           'AwangOWO DBonly')
+    start_time = time.time()
+    i = 0
+    positive = 0
+
+    gesamtzahl = client.db.banlist.count()
+    while positive < gesamtzahl:
+
+        result = client.db.query('For doc in BanList '
+                                 'FILTER doc._key == @id '
+                                 'RETURN doc', bind_vars={'id': str(i)})
+        i += 1
+        print(f'i ---------- {result}')
+        if result:
+            positive += 1
+
+    stop_time = time.time() - start_time
+
+    await client.respond(event, f'Took {stop_time:.02f}s and checked {str(i)} entries to find {gesamtzahl} Banns',
+                         reply=False)
+    await waiting_message.delete()
