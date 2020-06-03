@@ -48,7 +48,7 @@ async def rmmention(event: NewMessage.Event) -> None:
 async def updateer(event: NewMessage.Event) -> None:
     client: KantekClient = event.client
     waiting_message = await client.respond(event,
-                                           'Updating DB please dont ddos too often else Steffan will get mail :(')
+                                           'Stressing DB')
     start_time = time.time()
 
     async for dialog in client.iter_dialogs():
@@ -61,7 +61,7 @@ async def updateer(event: NewMessage.Event) -> None:
 
 
 @events.register(events.NewMessage(outgoing=True, pattern=f'{cmd_prefix}stress'))
-async def updateer(event: NewMessage.Event) -> None:
+async def countall(event: NewMessage.Event) -> None:
     client: KantekClient = event.client
     waiting_message = await client.respond(event,
                                            'AwangOWO DB')
