@@ -45,7 +45,7 @@ async def rmmention(event: NewMessage.Event) -> None:
 
 
 @events.register(events.NewMessage(outgoing=True, pattern=f'{cmd_prefix}updategroups'))
-async def updateer(event: NewMessage.Event) -> None:
+async def gurrmacher423(event: NewMessage.Event) -> None:
     client: KantekClient = event.client
     waiting_message = await client.respond(event,
                                            'Stressing DB')

@@ -1,19 +1,22 @@
-import requests
 import base64
 import json
-import telethon
-
-from telethon import events
-from config import cmd_prefix
-
-from PIL import Image
 from io import BytesIO
 
+import aiohttp
+import requests
+import telethon
+from PIL import Image
+from telethon import events
+from telethon.events import NewMessage
+
+from config import API_TOKEN
+from config import cmd_prefix
+from utils.client import KantekClient
 
 
-@events.register(events.NewMessage(outgoing=True, pattern=f'{cmd_prefix}quote')
+@events.register(events.NewMessage(outgoing=True, pattern=f'{cmd_prefix}quote'))
 async def quote(event: NewMessage.Event) -> None:
-    return
+    #return
     """Quote a message.
     Usage: .quote [template] [file/force_file]
     If template is missing, possible templates are fetched.
@@ -21,8 +24,7 @@ async def quote(event: NewMessage.Event) -> None:
     client: KantekClient = event.client
     message = event.message
 
-    USERNAME_COLOURS = ["#fb6169", "#faa357", "#b48bf2", "#85de85",
-                                                              "#62d4e3", "#65bdf3", "#ff5694"]
+    colours = ["#fb6169", "#faa357", "#b48bf2", "#85de85", "#62d4e3", "#65bdf3", "#ff5694"]
 
 
     #args = utils.get_args(message)
@@ -31,7 +33,7 @@ async def quote(event: NewMessage.Event) -> None:
     if not reply:
         return await client.respond(message, "no_reply")
 
-    username_color = username = admintitle = user_id = None
+
     profile_photo_url = reply.from_id
 
     admintitle = ""
@@ -91,9 +93,9 @@ async def quote(event: NewMessage.Event) -> None:
         profile_photo_url = ""
 
     if user_id is not None:
-        username_color = self.config["USERNAME_COLORS"][user_id % 7]
+        username_color = colours[user_id % 7]
     else:
-        username_color = self.config["DEFAULT_USERNAME_COLOR"]
+        username_color = colours[2]
 
     reply_username = ""
     reply_text = ""
@@ -106,14 +108,14 @@ async def quote(event: NewMessage.Event) -> None:
             elif reply_to.fwd_from.from_id:
                 try:
                     user_id = reply_to.fwd_from.from_id
-                    user = await self.client(telethon.tl.functions.users.GetFullUserRequest(user_id))
+                    user = await client(telethon.tl.functions.users.GetFullUserRequest(user_id))
                     reply_peer = user.user
                 except ValueError:
                     pass
             else:
                 reply_username = reply_to.fwd_from.from_name
         elif not reply_to.from_id:
-            reply_user = await self.client(telethon.tl.functions.users.GetFullUserRequest(reply_to.from_id))
+            reply_user = await client(telethon.tl.functions.users.GetFullUserRequest(reply_to.from_id))
             reply_peer = reply_user.user
 
         if not reply_username:
@@ -132,17 +134,17 @@ async def quote(event: NewMessage.Event) -> None:
         "username": username,
         "adminTitle": admintitle,
         "Text": reply.message,
-        "Markdown": get_markdown(reply),
+        "Markdown": [],
         "ReplyUsername": reply_username,
         "ReplyText": reply_text,
         "Date": date,
-        "Template": args[0] if len(args) > 0 else "default",
-        "APIKey": self.config["API_TOKEN"]
+        "Template": "default",
+        "APIKey": API_TOKEN
     })
 
-    resp = await utils.run_sync(requests.post, self.config["API_URL"] + "/api/v2/quote", data=request)
-    resp.raise_for_status()
-    resp = await utils.run_sync(resp.json)
+
+    respo =  await aiohttp.ClientSession().post(url="http://antiddos.systems/api/v2/quote", json=request)
+    resp = await respo.json()
 
     if resp["status"] == 500:
         return await client.respond(message, "server_error")
@@ -157,41 +159,20 @@ async def quote(event: NewMessage.Event) -> None:
         else:
             raise ValueError("Invalid response from server", resp)
     elif resp["status"] == 404:
-        if resp["message"] == "ERROR_TEMPLATE_NOT_FOUND":
-            newreq = await utils.run_sync(requests.post, self.config["API_URL"] + "/api/v1/getalltemplates", data={
-                "token": self.config["API_TOKEN"]
-            })
-            newreq = await utils.run_sync(newreq.json)
-
-            if newreq["status"] == "NOT_ENOUGH_PERMISSIONS":
-                return await client.respond(message, "not_enough_permissions")
-            elif newreq["status"] == "SUCCESS":
-                templates = "delimiter".join(newreq["message"])
-                return await client.respond(message, "templates".format(templates))
-            elif newreq["status"] == "INVALID_TOKEN":
-                return await client.respond(message, "invalid_token")
-            else:
-                raise ValueError("Invalid response from server", newreq)
-        else:
-            raise ValueError("Invalid response from server", resp)
+        print(resp)
     elif resp["status"] != 200:
         raise ValueError("Invalid response from server", resp)
 
-    req = await utils.run_sync(requests.get, self.config["API_URL"] + "/cdn/" + resp["message"])
+    req = requests.get("antiddos.systems/cdn/" + resp["message"])
     req.raise_for_status()
     file = BytesIO(req.content)
     file.seek(0)
 
-    if len(args) == 2:
-        if args[1] == "file":
-            await client.respond(message, file)
-        elif args[1] == "force_file":
-            file.name = "filename"
-            await client.respond(message, file, force_document=True)
-    else:
-        img = await utils.run_sync(Image.open, file)
-        with BytesIO() as sticker:
-            await utils.run_sync(img.save, sticker, "webp")
+
+
+    img = Image.open(file)
+    with BytesIO() as sticker:
+            img.save( sticker, "webp")
             sticker.name = "sticker.webp"
             sticker.seek(0)
             try:

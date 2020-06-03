@@ -269,7 +269,7 @@ class ArangoDB:  # pylint: disable = R0902
 
     def query(self, query: str, batch_size: int = 100, raw_results: bool = False,
               bind_vars: Dict = None, options: Dict = None,
-              count: bool = False, full_count: bool = False,
+              count: bool = False, full_count: bool = True,
               json_encoder: bool = None, **kwargs: Any) -> AQLQuery:  # pylint: disable = R0913
         """Wrapper around the pyArango AQLQuery to avoid having to do `db.db.AQLQuery`."""
         bind_vars = bind_vars or {}
