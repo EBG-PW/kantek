@@ -66,6 +66,7 @@ async def updateer(event: NewMessage.Event) -> None:
     waiting_message = await client.respond(event,
                                            'AwangOWO DB')
     start_time = time.time()
+    i = 0
 
     async for dialog in client.iter_dialogs():
         async for message in client.iter_messages(dialog):
@@ -76,10 +77,11 @@ async def updateer(event: NewMessage.Event) -> None:
                 if not result:
                     print('nope')
                 print(str(result))
+                i += 1
             except:
-                pass
+                i += 1
 
     stop_time = time.time() - start_time
 
-    await client.respond(event, f'Took {stop_time:.02f}s', reply=False)
+    await client.respond(event, f'Took {stop_time:.02f}s and counted {str(i)}', reply=False)
     await waiting_message.delete()
