@@ -1,41 +1,23 @@
 import base64
 import json
 from io import BytesIO
-
-import aiohttp
 import requests
 import telethon
 from PIL import Image
 from telethon import events
 from telethon.events import NewMessage
-
 from config import API_TOKEN
 from config import cmd_prefix
 from utils.client import KantekClient
-
-
 @events.register(events.NewMessage(outgoing=True, pattern=f'{cmd_prefix}quote'))
 async def quote(event: NewMessage.Event) -> None:
-    #return
-    """Quote a message.
-    Usage: .quote [template] [file/force_file]
-    If template is missing, possible templates are fetched.
-    If no args provided, default template will be used, quote sent as sticker"""
     client: KantekClient = event.client
     message = event.message
-
     colours = ["#fb6169", "#faa357", "#b48bf2", "#85de85", "#62d4e3", "#65bdf3", "#ff5694"]
-
-
-    #args = utils.get_args(message)
     reply = await message.get_reply_message()
-
     if not reply:
         return await client.respond(message, "no_reply")
-
-
     profile_photo_url = reply.from_id
-
     admintitle = ""
     pfp = None
     if isinstance(reply.to_id, telethon.tl.types.PeerChannel) and reply.fwd_from:
@@ -51,12 +33,10 @@ async def quote(event: NewMessage.Event) -> None:
         user = await reply.get_sender()
     else:
         user = await reply.get_sender()
-
     username = telethon.utils.get_display_name(user)
     if reply.fwd_from is not None and reply.fwd_from.post_author is not None:
         username += " ({})".format(reply.fwd_from.post_author)
     user_id = reply.from_id
-
     if reply.fwd_from:
         if reply.fwd_from.saved_from_peer:
             profile_photo_url = reply.forward.chat
@@ -86,17 +66,14 @@ async def quote(event: NewMessage.Event) -> None:
                 pass
     if profile_photo_url is not None:
         pfp = await client.download_profile_photo(profile_photo_url, bytes)
-
     if pfp is not None:
         profile_photo_url = "data:image/png;base64, " + base64.b64encode(pfp).decode()
     else:
         profile_photo_url = ""
-
     if user_id is not None:
         username_color = colours[user_id % 7]
     else:
         username_color = colours[2]
-
     reply_username = ""
     reply_text = ""
     reply_to = await reply.get_reply_message()
@@ -121,13 +98,11 @@ async def quote(event: NewMessage.Event) -> None:
         if not reply_username:
             reply_username = telethon.utils.get_display_name(reply_peer)
         reply_text = reply_to.message
-
     date = ""
     if reply.fwd_from:
         date = reply.fwd_from.date.strftime("%H:%M")
     else:
         date = reply.date.strftime("%H:%M")
-
     request = json.dumps({
         "ProfilePhotoURL": profile_photo_url,
         "usernameColor": username_color,
@@ -141,37 +116,13 @@ async def quote(event: NewMessage.Event) -> None:
         "Template": "default",
         "APIKey": API_TOKEN
     })
-
     respo = requests.post(url="http://api.antiddos.systems/api/v2/quote", data=request)
-    #async with aiohttp.ClientSession().post(url="http://api.antiddos.systems/api/v2/quote", json=request) as respo:
-     #       resp = await respo.json(content_type='text/plain')
-    #resp = await respo.json(content_type='text/plain')
     resp = respo.json()
-    if resp["status"] == 500:
-        return await client.respond(message, "server_error")
-    elif resp["status"] == 401:
-        if resp["message"] == "ERROR_TOKEN_INVALID":
-            return await client.respond(message, "invalid_token")
-        else:
-            raise ValueError("Invalid response from server", resp)
-    elif resp["status"] == 403:
-        if resp["message"] == "ERROR_UNAUTHORIZED":
-            return await client.respond(message, "unauthorized")
-        else:
-            raise ValueError("Invalid response from server", resp)
-    elif resp["status"] == 404:
-        print(resp)
-    elif resp["status"] != 200:
-        raise ValueError("Invalid response from server", resp)
-
     req = requests.get("http://api.antiddos.systems/cdn/" + resp["message"])
     print("http://api.antiddos.systems/cdn/" + resp["message"])
     req.raise_for_status()
     file = BytesIO(req.content)
     file.seek(0)
-
-
-
     img = Image.open(file)
     with BytesIO() as sticker:
             img.save( sticker, "webp")
@@ -180,7 +131,6 @@ async def quote(event: NewMessage.Event) -> None:
 
             with open("sticker.webp", "wb") as f:
                 f.write(sticker.getbuffer())
-
             try:
                 await client.send_file(entity=event.chat, file=sticker)
             except telethon.errors.rpcerrorlist.ChatSendStickersForbiddenError:
