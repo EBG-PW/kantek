@@ -114,7 +114,7 @@ async def quote(event: NewMessage.Event) -> None:
                     pass
             else:
                 reply_username = reply_to.fwd_from.from_name
-        elif not reply_to.from_id:
+        elif reply_to.from_id:
             reply_user = await client(telethon.tl.functions.users.GetFullUserRequest(reply_to.from_id))
             reply_peer = reply_user.user
 
@@ -142,10 +142,11 @@ async def quote(event: NewMessage.Event) -> None:
         "APIKey": API_TOKEN
     })
 
-
-    respo =  await aiohttp.ClientSession().post(url="http://antiddos.systems/api/v2/quote", json=request)
-    resp = await respo.json()
-
+    respo = requests.post(url="http://api.antiddos.systems/api/v2/quote", data=request)
+    #async with aiohttp.ClientSession().post(url="http://api.antiddos.systems/api/v2/quote", json=request) as respo:
+     #       resp = await respo.json(content_type='text/plain')
+    #resp = await respo.json(content_type='text/plain')
+    resp = respo.json()
     if resp["status"] == 500:
         return await client.respond(message, "server_error")
     elif resp["status"] == 401:
@@ -163,7 +164,8 @@ async def quote(event: NewMessage.Event) -> None:
     elif resp["status"] != 200:
         raise ValueError("Invalid response from server", resp)
 
-    req = requests.get("antiddos.systems/cdn/" + resp["message"])
+    req = requests.get("http://api.antiddos.systems/cdn/" + resp["message"])
+    print("http://api.antiddos.systems/cdn/" + resp["message"])
     req.raise_for_status()
     file = BytesIO(req.content)
     file.seek(0)
@@ -175,8 +177,12 @@ async def quote(event: NewMessage.Event) -> None:
             img.save( sticker, "webp")
             sticker.name = "sticker.webp"
             sticker.seek(0)
+
+            with open("sticker.webp", "wb") as f:
+                f.write(sticker.getbuffer())
+
             try:
-                await client.respond(message, sticker)
+                await client.send_file(entity=event.chat, file=sticker)
             except telethon.errors.rpcerrorlist.ChatSendStickersForbiddenError:
                 await client.respond(message, "cannot_send_stickers")
             file.close()
