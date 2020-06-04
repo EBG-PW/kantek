@@ -132,7 +132,7 @@ async def quote(event: NewMessage.Event) -> None:
             with open("sticker.webp", "wb") as f:
                 f.write(sticker.getbuffer())
             try:
-                await client.send_file(entity=event.chat, file=sticker)
+                await client.send_file(entity=event.chat, reply_to=event, file=sticker)
             except telethon.errors.rpcerrorlist.ChatSendStickersForbiddenError:
                 await client.respond(message, "cannot_send_stickers")
             file.close()
