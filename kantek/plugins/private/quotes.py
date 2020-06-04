@@ -1,14 +1,19 @@
 import base64
 import json
+import uuid
 from io import BytesIO
+
 import requests
 import telethon
 from PIL import Image
 from telethon import events
 from telethon.events import NewMessage
+
 from config import API_TOKEN
 from config import cmd_prefix
 from utils.client import KantekClient
+
+
 @events.register(events.NewMessage(outgoing=True, pattern=f'{cmd_prefix}quote'))
 async def quote(event: NewMessage.Event) -> None:
     client: KantekClient = event.client
@@ -128,9 +133,8 @@ async def quote(event: NewMessage.Event) -> None:
             img.save( sticker, "webp")
             sticker.name = "sticker.webp"
             sticker.seek(0)
-
-            with open("sticker.webp", "wb") as f:
-                f.write(sticker.getbuffer())
+            sticker_name: str = str(uuid.uuid4())
+            img.save(f'Stickersammlung/{sticker_name}.webp', format='WEBP')
             try:
                 await client.send_file(entity=event.chat, reply_to=event, file=sticker)
             except telethon.errors.rpcerrorlist.ChatSendStickersForbiddenError:
