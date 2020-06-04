@@ -222,5 +222,4 @@ async def resize_photo(photo):
         image = image.resize(sizenew)
     else:
         image.thumbnail(maxsize)
-
     return image
