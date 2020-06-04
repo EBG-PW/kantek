@@ -9,6 +9,8 @@ from telethon.tl.types import DocumentAttributeFilename, MessageMediaPhoto
 import urllib.request
 from io import BytesIO
 
+PACK_FULL = "Whoa! That's probably enough stickers for one pack, give it a break. \
+A pack can't have more than 120 stickers at the moment."
 
 @events.register(events.NewMessage(outgoing=True, pattern=f'{cmd_prefix}kang'))
 async def kang(event: NewMessage.Event) -> None:
@@ -222,4 +224,5 @@ async def resize_photo(photo):
         image = image.resize(sizenew)
     else:
         image.thumbnail(maxsize)
+
     return image
