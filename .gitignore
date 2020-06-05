@@ -110,4 +110,4 @@ venv.bak/
 sessions
 config.py
 kantek/tmp
-/kantek/Stickersammlung/
+/kantek/Stickersammlung/*
