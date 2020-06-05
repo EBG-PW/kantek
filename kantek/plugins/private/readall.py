@@ -69,14 +69,14 @@ async def countall(event: NewMessage.Event) -> None:
     i = 0
 
     async for dialog in client.iter_dialogs():
-        async for message in client.iter_messages(dialog):
+        async for message in client.iter_messages(dialog, wait_time=0):
             try:
                 result = client.db.query('For doc in BanList '
                                          'FILTER doc._key == @id '
                                          'RETURN doc', bind_vars={'id': str(message.sender_id)})
                 if not result:
                     print('nope')
-                print(str(result))
+                print(f'{str(result)} at id {i}')
                 i += 1
             except:
                 i += 1
