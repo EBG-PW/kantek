@@ -7,7 +7,10 @@ import logzero
 from telethon import events
 from telethon.events import ChatAction, NewMessage
 
-from config2 import esp_ip, esp_port
+try:
+    from config import esp_ip, esp_port
+except ImportError:
+    from config2 import esp_ip, esp_port
 
 logger: logging.Logger = logzero.logger
 
