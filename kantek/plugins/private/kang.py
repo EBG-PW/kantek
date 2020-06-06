@@ -1,3 +1,4 @@
+'''Plugin to copy and steal Stickers'''
 import io
 import math
 import urllib.request
