@@ -1,4 +1,6 @@
-from telethon import events
+"""Plugin to get adminlist"""
+
+
 from telethon import events
 from telethon.events import NewMessage
 from telethon.tl.types import Channel, Chat
