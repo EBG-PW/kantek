@@ -1,13 +1,15 @@
+'''Plugin to copy and steal Stickers'''
+import io
+import math
+import urllib.request
+
+from PIL import Image
 from telethon import events
 from telethon.events import NewMessage
-from utils.client import KantekClient
-from config import cmd_prefix
-import math
-import io
-from PIL import Image
 from telethon.tl.types import DocumentAttributeFilename, MessageMediaPhoto
-import urllib.request
-from io import BytesIO
+
+from config import cmd_prefix
+from utils.client import KantekClient
 
 PACK_FULL = "Whoa! That's probably enough stickers for one pack, give it a break. \
 A pack can't have more than 120 stickers at the moment."
@@ -72,7 +74,7 @@ async def kang(event: NewMessage.Event) -> None:
         file = io.BytesIO()
 
         if not is_anim:
-            image = await resize_photo(photo)
+            image = await _resize_photo(photo)
             file.name = "sticker.png"
             image.save(file, "PNG")
         else:
@@ -202,8 +204,8 @@ async def kang(event: NewMessage.Event) -> None:
             f"Sticker added! Your pack can be found [here](t.me/addstickers/{packname})",
             parse_mode='md')
 
-@events.register(events.NewMessage(outgoing=True, pattern=f'{cmd_prefix}resize_photo'))
-async def resize_photo(photo):
+
+async def _resize_photo(photo):
     """ Resize the given photo to 512x512 """
     image = Image.open(photo)
     maxsize = (512, 512)
