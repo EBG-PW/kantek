@@ -25,7 +25,7 @@ async def mqtt(event: NewMessage.Event) -> None:
     chat_document = db.groups.get_chat(event.chat_id)
     db_named_tags: Dict = chat_document['named_tags'].getStore()
     no_mqtt = db_named_tags.get('nomqtt')
-    if no_mqtt == 'exclude':
+    if no_mqtt:
         return
 
     data = {'message': str(event.message),
