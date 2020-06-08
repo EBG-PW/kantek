@@ -15,6 +15,8 @@ try:
     from config import esp_ip, esp_port
 except ImportError:
     from config2 import esp_ip, esp_port
+from database.arango import ArangoDB
+from typing import Dict
 
 logger: logging.Logger = logzero.logger
 
@@ -25,19 +27,23 @@ async def blinky(event: Union[ChatAction.Event, NewMessage.Event]) -> None:
     client: KantekClient = event.client
     chat: Channel = await event.get_chat()
     message: Message = event.message
+    db: ArangoDB = client.db
+    chat_document = db.groups.get_chat(event.chat_id)
+    db_named_tags: Dict = chat_document['named_tags'].getStore()
+    espled = db_named_tags.get('espled')
 
-    if message.is_reply:
+    if espled is not None:
+        state = 'e'
+    elif message.is_reply:
         state = 'a'
     elif message.media:
         state = 'b'
     elif event.is_private:
         state = 'c'
 
-
-
     else:
         state = 'nix spezielles'
-
+    print(str(state))
     byte_message = bytes(state, "utf-8")
     opened_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     ip = esp_ip

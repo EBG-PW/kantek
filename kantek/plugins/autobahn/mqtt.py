@@ -19,7 +19,7 @@ logger: logging.Logger = logzero.logger
 @events.register(events.MessageEdited(outgoing=False))
 @events.register(events.NewMessage(outgoing=False))
 async def mqtt(event: NewMessage.Event) -> None:
-    """Plugin to automatically ban users for certain messages."""
+
     client: KantekClient = event.client
     db: ArangoDB = client.db
     chat_document = db.groups.get_chat(event.chat_id)
