@@ -1,4 +1,5 @@
 """Plugin to get the fbans of the most important feds of a User."""
+import asyncio
 import logging
 from typing import Union
 
@@ -112,7 +113,7 @@ async def _collect_user_info(client, user) -> Union[Section, KeyValueItem]:
             print(reason)
             sw_reason = reason
 
-
+        await asyncio.sleep(5)
         # Check Rose Support Official Ban
         await conv.send_message(f'/fbanstat {user.id} 86718661-6bfc-4bd0-9447-7c419eb08e69')
         response = await conv.get_response()
@@ -126,6 +127,7 @@ async def _collect_user_info(client, user) -> Union[Section, KeyValueItem]:
             rose_reason = reason
             print(reason)
 
+        await asyncio.sleep(5)
         # Check Kara Fed official Ban
         await conv.send_message(f'/fbanstat {user.id} 423680c6-9044-4a4b-92ba-b4e6a36aaec6')
         response = await conv.get_response()
@@ -139,7 +141,7 @@ async def _collect_user_info(client, user) -> Union[Section, KeyValueItem]:
             print(reason)
             kara_reason = reason
 
-
+        await asyncio.sleep(5)
         #Check de_ai Ban
         await conv.send_message(f'/fbanstat {user.id} 9477362a-9209-4389-844a-395986b13b0e')
         response = await conv.get_response()
