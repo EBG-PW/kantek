@@ -100,7 +100,7 @@ async def _collect_user_info(client, user) -> Union[Section, KeyValueItem]:
     title = Link(full_name, f'tg://user?id={user.id}')
 
     async with client.conversation(609517172) as conv:
-        #Check Spamwatch ban
+        # Check Spamwatch ban
         await conv.send_message(f'/fbanstat {user.id} 1c2221d9-aa27-4baf-b77c-8822b36254d2')
         response = await conv.get_response()
         text: str = response.message
@@ -142,7 +142,7 @@ async def _collect_user_info(client, user) -> Union[Section, KeyValueItem]:
             kara_reason = reason
 
         await asyncio.sleep(5)
-        #Check de_ai Ban
+        # Check de_ai Ban
         await conv.send_message(f'/fbanstat {user.id} 9477362a-9209-4389-844a-395986b13b0e')
         response = await conv.get_response()
         text: str = response.message
@@ -153,10 +153,6 @@ async def _collect_user_info(client, user) -> Union[Section, KeyValueItem]:
             temp = text.split('\n\n')
             reason = temp[1].split('\n\nDate of ban:')
             print(reason)
-
-
-
-
 
     general = SubSection(
         Bold('general'),
