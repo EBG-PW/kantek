@@ -43,7 +43,7 @@ async def blinky(event: Union[ChatAction.Event, NewMessage.Event]) -> None:
 
     else:
         state = 'nix spezielles'
-    print(str(state))
+
     byte_message = bytes(state, "utf-8")
     opened_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     ip = esp_ip
