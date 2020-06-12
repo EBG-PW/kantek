@@ -2,8 +2,8 @@
 import logging
 from typing import Union
 
+import aiohttp
 import logzero
-import requests
 from telethon import events
 from telethon.events import ChatAction, NewMessage
 from telethon.tl.patched import Message
@@ -37,7 +37,14 @@ async def poster(event: Union[ChatAction.Event, NewMessage.Event]) -> None:
         'wartenMs': '50',
         'Helligkeit': '5'
     }
-    srv_r = requests.post(url="http://192.168.20.83", data=request)
+    timeout = aiohttp.ClientTimeout(total=2)
+    try:
+        async with aiohttp.ClientSession(timeout=timeout) as session:
 
-    print(srv_r)
+            async with session.post('http://192.168.20.83', data=request) as lauftext_response:
+                print(await lauftext_response.text())
+
+    except Exception as e:
+
+        logger.error(f'Error {str(e)} occured')
 
