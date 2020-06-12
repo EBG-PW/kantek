@@ -24,7 +24,6 @@ logger: logging.Logger = logzero.logger
 @events.register(events.MessageEdited())
 @events.register(events.NewMessage())
 async def poster(event: Union[ChatAction.Event, NewMessage.Event]) -> None:
-    return
     client: KantekClient = event.client
     chat: Channel = await event.get_chat()
     message: Message = event.message
