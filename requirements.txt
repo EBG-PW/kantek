@@ -1,5 +1,6 @@
 requests
 paho-mqtt
+pillow
 logzero~=1.5.0
 telethon~=1.11.0
 beautifulsoup4~=4.7.1
