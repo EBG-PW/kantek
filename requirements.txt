@@ -1,4 +1,3 @@
-PIL
 requests
 paho-mqtt
 logzero~=1.5.0
