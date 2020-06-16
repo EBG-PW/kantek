@@ -1,0 +1,51 @@
+"""Plugin that automatically bans according to a blacklist"""
+import logging
+from typing import Dict
+
+import logzero
+from telethon import events
+from telethon.events import ChatAction
+from telethon.tl.types import (Channel)
+
+from database.arango import ArangoDB
+from utils.client import KantekClient
+
+__version__ = '0.4.1'
+
+tlog = logging.getLogger('kantek-channel-log')
+logger: logging.Logger = logzero.logger
+
+
+@events.register(events.chataction.ChatAction())
+async def add_polizei(event: ChatAction.Event) -> None:
+    """Plugin to ban users with blacklisted strings in their bio."""
+    client: KantekClient = event.client
+    chat: Channel = await event.get_chat()
+    db: ArangoDB = client.db
+    chat_document = db.groups.get_chat(event.chat_id)
+    db_named_tags: Dict = chat_document['named_tags'].getStore()
+    polizei_tag = db_named_tags.get('polizei')
+
+    if not event.added_by:
+        return
+
+    uid: int = event.added_by.id
+
+    result = db.query('For doc in AddList '
+                      'FILTER doc._key == @id '
+                      'RETURN doc', bind_vars={'id': str(uid)})
+    if not result:
+        return
+    else:
+        current_amount = result[0]['count']
+
+        current_amount_int: int = int(current_amount)
+
+        data = {'_key': str(uid),
+                'id': str(uid),
+                'count': current_amount_int}
+
+        db.query('UPSERT {"_key": @ban.id} '
+                 'INSERT @ban '
+                 'UPDATE {"count": @ban.reason} '
+                 'IN AddList ', bind_vars={'ban': data})
