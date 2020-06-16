@@ -35,17 +35,19 @@ async def add_polizei(event: ChatAction.Event) -> None:
                       'FILTER doc._key == @id '
                       'RETURN doc', bind_vars={'id': str(uid)})
     if not result:
-        return
+        current_amount = 0
     else:
         current_amount = result[0]['count']
 
-        current_amount_int: int = int(current_amount)
+    current_amount_int: int = int(current_amount)
 
-        data = {'_key': str(uid),
-                'id': str(uid),
-                'count': current_amount_int}
+    new_amount: int = current_amount_int + 1
 
-        db.query('UPSERT {"_key": @ban.id} '
-                 'INSERT @ban '
-                 'UPDATE {"count": @ban.reason} '
-                 'IN AddList ', bind_vars={'ban': data})
+    data = {'_key': str(uid),
+            'id': str(uid),
+            'count': str(new_amount)}
+
+    db.query('UPSERT {"_key": @ban.id} '
+             'INSERT @ban '
+             'UPDATE {"count": @ban.count} '
+             'IN AddList ', bind_vars={'ban': data})
