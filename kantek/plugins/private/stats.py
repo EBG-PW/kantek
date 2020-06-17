@@ -35,12 +35,14 @@ async def stats(event: NewMessage.Event) -> None:  # pylint: disable = R0912, R0
     unread = 0
     largest_group_member_count = 0
     largest_group_with_admin = 0
+    channel = 0
     dialog: Dialog
     async for dialog in client.iter_dialogs():
         entity = dialog.entity
 
         if isinstance(entity, Channel):
             participants_count = (await client.get_participants(dialog, limit=0)).total
+            channel += 1
             if entity.broadcast:
                 broadcast_channels += 1
                 if entity.creator or entity.admin_rights:
@@ -96,6 +98,7 @@ async def stats(event: NewMessage.Event) -> None:  # pylint: disable = R0912, R0
         KeyValueItem(Bold('Unread Mentions'), unread_mentions)),
         KeyValueItem(Bold('Largest Group'), largest_group_member_count),
         KeyValueItem(Bold('Largest Group with Admin'), largest_group_with_admin),
+        KeyValueItem(Bold('Channel type of chats'), channel),
         Italic(f'Took {stop_time:.02f}s'))
 
     await client.respond(event, response, reply=False)
