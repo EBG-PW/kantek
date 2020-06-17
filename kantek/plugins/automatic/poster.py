@@ -28,16 +28,18 @@ async def poster(event: Union[ChatAction.Event, NewMessage.Event]) -> None:
     chat: Channel = await event.get_chat()
     message: Message = event.message
     db: ArangoDB = client.db
-    chat_document = db.groups.get_chat(event.chat_id)
+    chat_document = db.groups.get_chat(11)
     db_named_tags: Dict = chat_document['named_tags'].getStore()
     espled = db_named_tags.get('espled')
+    if espled != 'do_it':
+        return
     user: User = await client.get_entity(event.message.sender_id)
     request = {
         'lauftext': user.first_name,
         'wartenMs': '50',
         'Helligkeit': '5'
     }
-    timeout = aiohttp.ClientTimeout(total=2)
+    timeout = aiohttp.ClientTimeout(total=1)
     try:
         async with aiohttp.ClientSession(timeout=timeout) as session:
 
