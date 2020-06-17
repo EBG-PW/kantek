@@ -7,6 +7,7 @@ from telethon import events
 from telethon.events import ChatAction
 from telethon.tl.types import (Channel)
 
+import config
 from database.arango import ArangoDB
 from utils.client import KantekClient
 
@@ -42,6 +43,11 @@ async def add_polizei(event: ChatAction.Event) -> None:
     current_amount_int: int = int(current_amount)
 
     new_amount: int = current_amount_int + 1
+
+    if new_amount == 20:
+        await client.send_message(
+            config.gban_group,
+            f'Achtung {uid} is spamadding')
 
     data = {'_key': str(uid),
             'id': str(uid),
