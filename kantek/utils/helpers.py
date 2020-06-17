@@ -13,11 +13,15 @@ import photohash
 from PIL import Image
 from telethon import utils
 from telethon.events import NewMessage
-from telethon.tl.types import User
+from telethon.tl.custom import Message
+from telethon.tl.types import User, DocumentAttributeFilename
 
 from utils import parsers
+from utils.client import KantekClient
 
 INVITELINK_PATTERN = re.compile(r'(?:joinchat|join)(?:/|\?invite=)(.*|)')
+
+MESSAGE_LINK_PATTERN = re.compile(r't\.me/(?:c/)?(?P<chat>\w+)/(?P<id>\d+)')
 
 logger: logging.Logger = logzero.logger
 
@@ -105,3 +109,40 @@ async def hash_photo(photo):
     pil_photo = Image.open(BytesIO(photo))
     photo_hash = await loop.run_in_executor(None, photohash.average_hash, pil_photo)
     return str(photo_hash)
+
+
+async def get_linked_message(client: KantekClient, link):
+    match = MESSAGE_LINK_PATTERN.search(link)
+    if not match:
+        return None
+    else:
+        chat = match.group('chat')
+        if chat.isnumeric():
+            chat = int(chat)
+        else:
+            chat = f'@{chat}'
+        msg_id = int(match.group('id'))
+        return await client.iter_messages(entity=chat, ids=[msg_id]).__anext__()
+
+
+async def textify_message(msg: Message):
+    message = []
+
+    if msg.photo:
+        message.append('[photo]')
+    elif msg.sticker:
+        print(msg.sticker)
+        message.append('[sticker]')
+    elif msg.document:
+        filename = [attr.file_name for attr in msg.document.attributes if isinstance(attr, DocumentAttributeFilename)]
+        message.append(f'[document:{filename[0] if filename else ""}:{msg.document.mime_type}]')
+    elif msg.audio:
+        message.append('[audio]')
+    elif msg.contact:
+        message.append('[contact]')
+    elif msg.sticker:
+        message.append('[sticker]')
+    if message:
+        message.append('')
+    message.append(msg.text if msg.text else '[no text/caption]')
+    return '\n'.join(message)

@@ -39,7 +39,6 @@ async def user_info(event: NewMessage.Event) -> None:
     _args = msg.raw_text.split()[1:]
     keyword_args, args = parsers.parse_arguments(' '.join(_args))
     response = ''
-
     if not args and msg.is_reply:
         response = await _info_from_reply(event, **keyword_args)
     elif not args and not msg.is_reply and event.is_private:
@@ -77,7 +76,8 @@ async def _info_from_arguments(event) -> MDTeXDocument:
             users.append(await _collect_user_info(client, user, user_full, **keyword_args))
         except constants.GET_ENTITY_ERRORS as err:
             errors.append(str(entity))
-    if users:
+
+    if users or errors:
         return MDTeXDocument(*users, (Section(Bold('Errors for'), Code(', '.join(errors)))) if errors else '')
 
 
@@ -89,6 +89,8 @@ async def _info_from_reply(event, **kwargs) -> MDTeXDocument:
 
     if get_forward and reply_msg.forward is not None:
         forward: Forward = reply_msg.forward
+        if forward.sender_id is None:
+            return MDTeXDocument(Section(Bold('Error'), 'User has forward privacy enabled'))
         user: User = await client.get_entity(forward.sender_id)
         user_full: UserFull = await client(GetFullUserRequest(forward.sender_id))
     else:

@@ -14,7 +14,7 @@ __version__ = '0.1.0'
 tlog = logging.getLogger('kantek-channel-log')
 
 
-@events.register(events.NewMessage(outgoing=True, pattern=f'{cmd_prefix}f(ollow)?'))
+@events.register(events.NewMessage(outgoing=True, pattern=f'{cmd_prefix}fo(llow)?'))
 async def follow(event: NewMessage.Event) -> None:
     """Command to follow where a URL redirects to."""
     client: KantekClient = event.client

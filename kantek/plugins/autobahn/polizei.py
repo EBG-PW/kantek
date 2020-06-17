@@ -6,6 +6,8 @@ from typing import Dict
 
 import logzero
 from photohash import hashes_are_similar
+from PIL import UnidentifiedImageError
+from photohash import hashes_are_similar
 from pyArango.theExceptions import DocumentNotFoundError
 from telethon import events
 from telethon.events import ChatAction, NewMessage
@@ -105,7 +107,7 @@ async def _banuser(event, chat, userid, bancmd, ban_type, ban_reason):
         elif bancmd is not None:
             await client.respond(event, f'{bancmd} {userid} {formatted_reason}')
             await asyncio.sleep(0.25)
-    await client.gban(userid, formatted_reason)
+    await client.gban(userid, formatted_reason, await helpers.textify_message(event.message))
 
     message_count = len(await client.get_messages(chat, from_user=userid, limit=10))
     if message_count <= 5:
@@ -123,12 +125,8 @@ async def _check_message(event):
         return False, False
 
     # no need to ban bots as they can only be added by users anyway
-    try:
-        user = await client.get_cached_entity(user_id)
-    except ValueError as Err :
-        logger.info(Err)
-        return False, False
-    if user.bot:
+    user = await client.get_cached_entity(user_id)
+    if user is None or user.bot:
         return False, False
 
     # commands used in bots to blacklist items, these will be used by admins
@@ -213,13 +211,17 @@ async def _check_message(event):
         if _entity:
             try:
                 full_entity = await client.get_cached_entity(_entity)
-                channel = full_entity.id
-                profile_photo = await client.download_profile_photo(full_entity, bytes)
-                photo_hash = await hash_photo(profile_photo)
+                if full_entity:
+                    channel = full_entity.id
+                    profile_photo = await client.download_profile_photo(full_entity, bytes)
+                    try:
+                        photo_hash = await hash_photo(profile_photo)
+                        for mhash in mhash_blacklist:
+                            if hashes_are_similar(mhash, photo_hash, tolerance=2):
+                                return db.ab_mhash_blacklist.hex_type, mhash_blacklist[mhash]
+                    except UnidentifiedImageError:
+                        pass
 
-                for mhash in mhash_blacklist:
-                    if hashes_are_similar(mhash, photo_hash, tolerance=2):
-                        return db.ab_mhash_blacklist.hex_type, mhash_blacklist[mhash]
             except constants.GET_ENTITY_ERRORS as err:
                 logger.error(err)
 

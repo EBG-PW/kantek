@@ -74,7 +74,7 @@ class KantekClient(TelegramClient):  # pylint: disable = R0901, W0223
                                     schedule=datetime.timedelta(seconds=delete), reply_to=sent_msg.id)
         return sent_msg
 
-    async def gban(self, uid: Union[int, str], reason: str) -> Tuple[bool, str]:
+    async def gban(self, uid: Union[int, str], reason: str, message: Optional[str] = None) -> Tuple[bool, str]:
         """Command to gban a user
 
         Args:
@@ -92,7 +92,7 @@ class KantekClient(TelegramClient):  # pylint: disable = R0901, W0223
                              'FILTER doc._key == @uid '
                              'RETURN doc', bind_vars={'uid': str(uid)})
         for ban_reason in AUTOMATED_BAN_REASONS:
-            if user and (ban_reason in user[0]['reason'].lower()):
+            if user and (ban_reason in str(user[0]['reason']).lower()):
                 if ban_reason == 'kriminalamt':
                     return False, 'Already banned by kriminalamt'
                 else:
@@ -100,7 +100,7 @@ class KantekClient(TelegramClient):  # pylint: disable = R0901, W0223
 
         if user:
             count = SPAMADD_PATTERN.search(reason)
-            previous_count = SPAMADD_PATTERN.search(user[0]['reason'])
+            previous_count = SPAMADD_PATTERN.search(str(user[0]['reason']))
             if count is not None and previous_count is not None:
                 count = int(count.group('count')) + int(previous_count.group('count'))
                 reason = f"spam adding {count}+ members"
@@ -114,6 +114,10 @@ class KantekClient(TelegramClient):  # pylint: disable = R0901, W0223
         await self.send_message(
             config.gban_group,
             f'/fban {uid} {reason}')
+        await asyncio.sleep(2)
+        await self.send_read_acknowledge(config.gban_group,
+                                         max_id=1000000,
+                                         clear_mentions=True)
 
         data = {'_key': str(uid),
                 'id': str(uid),
@@ -126,7 +130,7 @@ class KantekClient(TelegramClient):  # pylint: disable = R0901, W0223
 
         if self.sw and self.sw.permission in [Permission.Admin,
                                               Permission.Root]:
-            self.sw.add_ban(int(uid), reason)
+            self.sw.add_ban(int(uid), reason, message)
         # Some bots are slow so wait a while before clearing mentions
         # doesnt really do much, sending a message clears unread messages anyway
         # await asyncio.sleep(10)
@@ -181,8 +185,11 @@ class KantekClient(TelegramClient):  # pylint: disable = R0901, W0223
             logger.error(err)
 
     async def get_cached_entity(self, entity: hints.EntitiesLike):
-        input_entity = await self.get_input_entity(entity)
-        return await self.get_entity(input_entity)
+        try:
+            input_entity = await self.get_input_entity(entity)
+            return await self.get_entity(input_entity)
+        except ValueError:
+            return None
 
     async def resolve_url(self, url: str, base_domain: bool = True) -> str:
         """Follow all redirects and return the base domain

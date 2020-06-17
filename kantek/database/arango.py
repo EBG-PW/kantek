@@ -146,25 +146,44 @@ class AutobahnTLDBlacklist(AutobahnBlacklist):
     """Blacklist with blacklisted top level domains"""
     hex_type = '0x7'
 
+
 class StalkList(Collection):
-        """A list of banned ids and their reason"""
-        _fields = {
-            'id': Field([NotNull()]),
+    """A list of banned ids and their reason"""
+    _fields = {
+        'id': Field([NotNull()]),
 
-        }
+    }
 
-        _validation = {
-            'on_save': True,
-        }
+    _validation = {
+        'on_save': True,
+    }
 
-        _properties = {
-            'keyOptions': {
-                'allowUserKeys': True,
-            }
+    _properties = {
+        'keyOptions': {
+            'allowUserKeys': True,
         }
+    }
 
 
 class EventList(Collection):
+    """A list of banned ids and their reason"""
+    _fields = {
+        'id': Field([NotNull()]),
+
+    }
+
+    _validation = {
+        'on_save': True,
+    }
+
+    _properties = {
+        'keyOptions': {
+            'allowUserKeys': True,
+        }
+    }
+
+
+class AddList(Collection):
     """A list of banned ids and their reason"""
     _fields = {
         'id': Field([NotNull()]),
@@ -198,8 +217,6 @@ class BanList(Collection):
             'allowUserKeys': True,
         }
     }
-
-
 
     def add_user(self, _id: int, reason: str) -> Optional[Document]:
         """Add a Chat to the DB or return an existing one.
@@ -266,6 +283,7 @@ class ArangoDB:  # pylint: disable = R0902
         self.banlist: BanList = self._get_collection('BanList')
         self.stalklist: StalkList = self._get_collection('StalkList')
         self.eventlist: EventList = self._get_collection('EventList')
+        self.addlist: AddList = self._get_collection('AddList')
 
     def query(self, query: str, batch_size: int = 100, raw_results: bool = False,
               bind_vars: Dict = None, options: Dict = None,

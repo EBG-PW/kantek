@@ -51,15 +51,11 @@ async def gban(event: NewMessage.Event) -> None:
         await client.gban(uid, ban_reason)
         await client(ReportRequest(chat, [reply_msg.id], InputReportReasonSpam()))
         if chat.creator or chat.admin_rights:
+
             if bancmd == 'ignore':
                 return
             elif bancmd == 'manual' or bancmd is None:
-                await client(EditBannedRequest(
-                    chat, uid, ChatBannedRights(
-                        until_date=datetime.datetime(2038, 1, 1),
-                        view_messages=True
-                    )
-                ))
+                    await client.ban(chat, uid)
             elif bancmd is not None:
                 await reply_msg.reply(f'{bancmd} {ban_reason}')
                 await asyncio.sleep(0.5)
@@ -77,6 +73,16 @@ async def gban(event: NewMessage.Event) -> None:
         else:
             ban_reason = keyword_args.get('reason', DEFAULT_REASON)
 
+        message = keyword_args.get('msg')
+        if not message:
+            link = keyword_args.get('link')
+            if link:
+                try:
+                    linked_msg: Message = await helpers.get_linked_message(client, link)
+                    message = await helpers.textify_message(linked_msg)
+                except Exception:
+                    message = link
+
         skipped_uids = {}
         banned_uids = {}
         progress_message: Optional[Message]
@@ -87,7 +93,7 @@ async def gban(event: NewMessage.Event) -> None:
         while uids:
             uid_batch = uids[:CHUNK_SIZE]
             for uid in uid_batch:
-                banned, reason = await client.gban(uid, ban_reason)
+                banned, reason = await client.gban(uid, ban_reason, message)
                 if not banned:
                     skipped_uids[reason] = skipped_uids.get(reason, []) + [str(uid)]
                 # sleep to avoid flooding the bots too much
@@ -107,8 +113,8 @@ async def gban(event: NewMessage.Event) -> None:
         if verbose:
             sections = []
             if banned_uids:
-                bans = _build_message(banned_uids)
-                sections.append(Section(Bold('GBanned Users'), *bans))
+                bans = _build_message(banned_uids, message)
+                sections.append(Section(Bold(f'GBanned User{"s" if len(banned_uids) > 1 else ""}'), *bans))
             if skipped_uids:
                 bans = _build_message(skipped_uids)
                 sections.append(Section(Bold('Skipped GBan'), *bans))
@@ -116,11 +122,13 @@ async def gban(event: NewMessage.Event) -> None:
             await client.respond(event, MDTeXDocument(*sections))
 
 
-def _build_message(bans: Dict[str, List[str]]) -> List[KeyValueItem]:
+def _build_message(bans: Dict[str, List[str]], message: Optional[str]) -> List[KeyValueItem]:
     sections = []
     for reason, uids in bans.items():
         sections.append(KeyValueItem(Bold('Reason'), reason))
         sections.append(KeyValueItem(Bold('IDs'), Code(', '.join(uids))))
+        if message:
+            sections.append(KeyValueItem(Bold('Message'), 'Attached'))
     return sections
 
 

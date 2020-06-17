@@ -4,6 +4,7 @@ import platform
 
 import telethon
 from telethon import events
+from telethon.errors import ChatSendStickersForbiddenError
 from telethon.events import NewMessage
 from telethon.tl.functions.messages import GetStickerSetRequest
 from telethon.tl.types import InputStickerSetShortName, StickerSet, Channel
@@ -32,7 +33,7 @@ async def kantek(event: NewMessage.Event) -> None:
     stickerset: StickerSet = await client(GetStickerSetRequest(InputStickerSetShortName("kantek")))
     try:
         await client.send_file(chat, stickerset.documents[0])
-    except telethon.errors.rpcerrorlist.ChatSendStickersForbiddenError:
+    except ChatSendStickersForbiddenError:
         pass
     await client.send_message(chat, str(MDTeXDocument(
         Section(f"{Bold('kantek')} userbot",
