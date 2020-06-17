@@ -36,6 +36,8 @@ async def stats(event: NewMessage.Event) -> None:  # pylint: disable = R0912, R0
     largest_group_member_count = 0
     largest_group_with_admin = 0
     channel = 0
+    megagroup = 0
+    publicmega = 0
     dialog: Dialog
     async for dialog in client.iter_dialogs():
         entity = dialog.entity
@@ -51,7 +53,7 @@ async def stats(event: NewMessage.Event) -> None:  # pylint: disable = R0912, R0
                     creator_in_channels += 1
 
             elif entity.megagroup:
-                groups += 1
+                megagroup += 1
                 if participants_count > largest_group_member_count:
                     largest_group_member_count = participants_count
                 if entity.creator or entity.admin_rights:
@@ -60,6 +62,8 @@ async def stats(event: NewMessage.Event) -> None:  # pylint: disable = R0912, R0
                      admin_in_groups += 1
                 if entity.creator:
                     creator_in_groups += 1
+                if entity.has_link:
+                    publicmega += 1
 
         elif isinstance(entity, User):
             private_chats += 1
@@ -84,7 +88,10 @@ async def stats(event: NewMessage.Event) -> None:  # pylint: disable = R0912, R0
             KeyValueItem(Bold('Private Chats'), private_chats),
             KeyValueItem(Bold('Users'), private_chats - bots),
             KeyValueItem(Bold('Bots'), bots)),
-        KeyValueItem(Bold('Groups'), groups),
+        KeyValueItem(Bold('Normal Groups'), groups),
+        KeyValueItem(Bold('Super Groups'), megagroup),
+        SubSection(
+            KeyValueItem(Bold('Public Super Groups'), publicmega)),
         KeyValueItem(Bold('Channels'), broadcast_channels),
         SubSection(
             KeyValueItem(Bold('Admin in Groups'), admin_in_groups),
