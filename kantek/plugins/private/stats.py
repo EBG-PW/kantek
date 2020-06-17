@@ -89,8 +89,8 @@ async def stats(event: NewMessage.Event) -> None:  # pylint: disable = R0912, R0
             KeyValueItem(Bold('Users'), private_chats - bots),
             KeyValueItem(Bold('Bots'), bots)),
         KeyValueItem(Bold('Normal Groups'), groups),
-        KeyValueItem(Bold('Super Groups'), megagroup),
         SubSection(
+            KeyValueItem(Bold('Super Groups'), megagroup),
             KeyValueItem(Bold('Public Super Groups'), publicmega)),
         KeyValueItem(Bold('Channels'), broadcast_channels),
         SubSection(
