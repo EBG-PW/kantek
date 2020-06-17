@@ -111,6 +111,3 @@ async def stats(event: NewMessage.Event) -> None:  # pylint: disable = R0912, R0
     await client.respond(event, response, reply=False)
     await waiting_message.delete()
 
-
-fuck
-you
