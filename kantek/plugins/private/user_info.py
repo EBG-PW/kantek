@@ -134,6 +134,14 @@ async def _collect_user_info(client, user, user_full, **kwargs) -> Union[Section
         title = Bold(full_name)
 
     ban_reason = client.db.banlist.get_user(user.id)
+    added_members = client.db.query('For doc in AddList '
+                                    'FILTER doc._key == @id '
+                                    'RETURN doc', bind_vars={'id': str(user.id)})
+    if not added_members:
+        add_amount = 0
+    else:
+        add_amount = added_members[0]['count']
+
     if ban_reason:
         ban_reason = ban_reason['reason']
 
@@ -148,6 +156,7 @@ async def _collect_user_info(client, user, user_full, **kwargs) -> Union[Section
             KeyValueItem('username', Code(user.username)),
             KeyValueItem('common_groups', Code(user_full.common_chats_count)),
             KeyValueItem('mutual_contact', Code(user.mutual_contact)),
+            KeyValueItem('added_users', Code(add_amount)),
             KeyValueItem('cas_stat', Code(data['ok'])),
             KeyValueItem('ban_reason', Code(ban_reason)) if ban_reason else KeyValueItem('gbanned', Code('False')))
 
