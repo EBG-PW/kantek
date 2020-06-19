@@ -152,7 +152,7 @@ async def _collect_user_info(client, user) -> Union[Section, KeyValueItem]:
         elif 'for the following reason:' in response.message:
             temp = text.split('\n\n')
             reason = temp[1].split('\n\nDate of ban:')
-            print(reason)
+            deai_reason = reason
 
     general = SubSection(
         Bold('general'),
