@@ -108,6 +108,15 @@ class KantekClient(TelegramClient):  # pylint: disable = R0901, W0223
                 if count == previous_count:
                     return False, 'Already banned'
 
+        data = {'_key': str(uid),
+                'id': str(uid),
+                'reason': reason}
+
+        self.db.query('UPSERT {"_key": @ban.id} '
+                      'INSERT @ban '
+                      'UPDATE {"reason": @ban.reason} '
+                      'IN BanList ', bind_vars={'ban': data})
+
         await self.send_message(
             config.gban_group,
             f'<a href="tg://user?id={uid}">{uid}</a>', parse_mode='html')
