@@ -9,7 +9,12 @@ from PIL import Image
 from telethon import events
 from telethon.events import NewMessage
 
-from config import API_TOKEN
+try:
+
+    from config import API_TOKEN
+except ImportError:
+    from config2 import API_TOKEN
+
 from config import cmd_prefix
 from utils.client import KantekClient
 
@@ -21,7 +26,7 @@ async def quote(event: NewMessage.Event) -> None:
     colours = ["#fb6169", "#faa357", "#b48bf2", "#85de85", "#62d4e3", "#65bdf3", "#ff5694"]
     reply = await message.get_reply_message()
     if not reply:
-        return await client.respond(message, "no_reply")
+        await client.respond(message, "no_reply")
     profile_photo_url = reply.from_id
     admintitle = ""
     pfp = None
