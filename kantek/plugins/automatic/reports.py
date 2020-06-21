@@ -47,7 +47,8 @@ async def admin_reports(event: NewMessage.Event) -> None:
     if reply:
         try:
             logged_reply = await reply.forward_to(config.log_channel_id)
-        except MessageIdInvalidError:
+        except MessageIdInvalidError as err:
+            print(err)
             pass
 
     chat_link = getattr(chat, 'username', None) or f'c/{chat.id}'
