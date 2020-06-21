@@ -2,6 +2,7 @@
 import asyncio
 import datetime
 import logging
+import random
 import re
 import socket
 from typing import Optional, Union, Tuple
@@ -88,6 +89,7 @@ class KantekClient(TelegramClient):  # pylint: disable = R0901, W0223
         # if the user account is deleted this can be None
         if uid is None:
             return False, 'Deleted account'
+        await asyncio.sleep(random.randint(range(10)))
         user = self.db.query('For doc in BanList '
                              'FILTER doc._key == @uid '
                              'RETURN doc', bind_vars={'uid': str(uid)})
