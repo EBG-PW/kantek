@@ -1,21 +1,18 @@
 """Plugin to manage the autobahn"""
 import logging
 from typing import Dict, Union
-import spamwatch
 
 import logzero
+import spamwatch
 from telethon import events
 from telethon.errors import UserIdInvalidError
 from telethon.events import ChatAction, NewMessage
 from telethon.tl.types import Channel, ChannelParticipantsAdmins
 
+from config import spamwatch_token
 from database.arango import ArangoDB
 from utils.client import KantekClient
 from utils.mdtex import Bold, Code, KeyValueItem, MDTeXDocument, Mention, Section
-
-from config import spamwatch_host
-from config import spamwatch_token
-
 
 __version__ = '0.1.1'
 
@@ -31,11 +28,7 @@ async def grenzschutz(event: Union[ChatAction.Event, NewMessage.Event]) -> None:
         return
     client: KantekClient = event.client
     chat: Channel = await event.get_chat()
-    if not chat.creator and not chat.admin_rights:
-        return
-    if chat.admin_rights:
-        if not chat.admin_rights.ban_users:
-            return
+
     db: ArangoDB = client.db
     chat_document = db.groups.get_chat(event.chat_id)
     db_named_tags: Dict = chat_document['named_tags'].getStore()
@@ -43,8 +36,6 @@ async def grenzschutz(event: Union[ChatAction.Event, NewMessage.Event]) -> None:
     grenzschutz_tag = db_named_tags.get('grenzschutz')
     silent = grenzschutz_tag == 'silent'
     swclient = spamwatch.Client(spamwatch_token)
-    if grenzschutz_tag == 'exclude' or polizei_tag == 'exclude':
-        return
 
     if isinstance(event, ChatAction.Event):
         uid = event.user_id
@@ -61,6 +52,16 @@ async def grenzschutz(event: Union[ChatAction.Event, NewMessage.Event]) -> None:
     reason = '[SW] ' + ban.reason
 
     await client.gban(uid, reason)
+
+    if grenzschutz_tag == 'exclude' or polizei_tag == 'exclude':
+        return
+
+    if not chat.creator and not chat.admin_rights:
+        return
+    if chat.admin_rights:
+        if not chat.admin_rights.ban_users:
+            return
+
     admins = [p.id for p in (await client.get_participants(event.chat_id, filter=ChannelParticipantsAdmins()))]
     if uid not in admins:
         try:
