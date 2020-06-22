@@ -94,6 +94,10 @@ class KantekClient(TelegramClient):  # pylint: disable = R0901, W0223
         user = self.db.query('For doc in BanList '
                              'FILTER doc._key == @uid '
                              'RETURN doc', bind_vars={'uid': str(uid)})
+
+        if user:
+            if '[SW]' in reason:
+                return False, 'Already banned by self'
         for ban_reason in AUTOMATED_BAN_REASONS:
             if user and (ban_reason in str(user[0]['reason']).lower()):
                 if ban_reason == 'kriminalamt':

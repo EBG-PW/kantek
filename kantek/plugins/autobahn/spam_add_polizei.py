@@ -42,10 +42,6 @@ async def add_polizei(event: ChatAction.Event) -> None:
 
     alertlist: list = [5, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
 
-
-    if new_amount == 35:
-        await client.gban(uid, f'spam adding {new_amount}+ members')
-
     data = {'_key': str(uid),
             'id': str(uid),
             'count': str(new_amount)}
@@ -54,3 +50,12 @@ async def add_polizei(event: ChatAction.Event) -> None:
              'INSERT @ban '
              'UPDATE {"count": @ban.count} '
              'IN AddList ', bind_vars={'ban': data})
+
+    amount = db.query('For doc in AddList '
+                      'FILTER doc._key == @id '
+                      'RETURN doc', bind_vars={'id': str(uid)})
+
+    ban_amount = amount[0]['count']
+
+    if int(ban_amount) == 35:
+        await client.gban(uid, f'spam adding {ban_amount}+ members')
