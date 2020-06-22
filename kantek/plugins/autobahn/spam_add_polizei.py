@@ -5,7 +5,6 @@ from typing import Dict
 import logzero
 from telethon import events
 from telethon.events import ChatAction
-from telethon.tl.types import (Channel)
 
 from database.arango import ArangoDB
 from utils.client import KantekClient
@@ -20,11 +19,9 @@ logger: logging.Logger = logzero.logger
 async def add_polizei(event: ChatAction.Event) -> None:
     """Plugin to ban users with blacklisted strings in their bio."""
     client: KantekClient = event.client
-    chat: Channel = await event.get_chat()
     db: ArangoDB = client.db
     chat_document = db.groups.get_chat(event.chat_id)
     db_named_tags: Dict = chat_document['named_tags'].getStore()
-    polizei_tag = db_named_tags.get('polizei')
 
     if not event.added_by:
         return
