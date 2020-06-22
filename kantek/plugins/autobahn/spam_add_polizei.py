@@ -46,7 +46,7 @@ async def add_polizei(event: ChatAction.Event) -> None:
     alertlist: list = [5, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
 
 
-    if new_amount == 100:
+    if new_amount == 35:
         await client.gban(uid, f'spam adding {new_amount}+ members')
 
     data = {'_key': str(uid),
