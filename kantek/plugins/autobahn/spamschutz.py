@@ -48,7 +48,18 @@ async def grenzschutz(event: Union[ChatAction.Event, NewMessage.Event]) -> None:
     user = await client.get_entity(uid)
     ban = swclient.get_ban(uid)
     if not ban:
-        return
+        result = db.query('For doc in BanList '
+                          'FILTER doc._key == @id '
+                          'RETURN doc', bind_vars={'id': str(uid)})
+        if result:
+            ban_reason = result[0]['reason']
+
+            if '[SW]' in ban_reason:
+                await client.ungban(uid)
+                return
+        else:
+            return
+
     reason = '[SW] ' + ban.reason
 
     await client.gban(uid, reason)
