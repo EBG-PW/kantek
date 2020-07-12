@@ -22,7 +22,7 @@ logger: logging.Logger = logzero.logger
 
 @events.register(events.chataction.ChatAction())
 @events.register(events.NewMessage())
-async def grenzschutz(event: Union[ChatAction.Event, NewMessage.Event]) -> None:
+async def spamschutz(event: Union[ChatAction.Event, NewMessage.Event]) -> None:
     """Plugin to ban blacklisted users."""
     if event.is_private:
         return
