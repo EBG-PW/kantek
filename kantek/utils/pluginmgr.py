@@ -148,6 +148,7 @@ class PluginManager:
 
     @staticmethod
     def _get_plugin_version(path: str) -> str:
+        return "1"
         version = ''
         with open(path, encoding='utf-8') as f:
             tree = ast.parse(f.read())
