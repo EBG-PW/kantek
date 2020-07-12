@@ -56,12 +56,12 @@ async def _info_from_arguments(event) -> MDTeXDocument:
     client: KantekClient = event.client
     keyword_args, args = await helpers.get_args(event)
     search_name = keyword_args.get('search', False)
+    gban_format = keyword_args.get('gban', False)
     if search_name:
         entities = [search_name]
     else:
-        entities = [entity[1] for entity in msg.get_entities_text()
+        entities = [entity[0].user_id for entity in msg.get_entities_text()
                     if isinstance(entity[0], (MessageEntityMention, MessageEntityMentionName))]
-
     # append any user ids to the list
     for uid in args:
         if isinstance(uid, int):
@@ -76,7 +76,8 @@ async def _info_from_arguments(event) -> MDTeXDocument:
             users.append(await _collect_user_info(client, user, user_full, **keyword_args))
         except constants.GET_ENTITY_ERRORS as err:
             errors.append(str(entity))
-
+    if users and gban_format:
+        users = [Code(' '.join(users))]
     if users or errors:
         return MDTeXDocument(*users, (Section(Bold('Errors for'), Code(', '.join(errors)))) if errors else '')
 
@@ -112,6 +113,7 @@ async def _info_from_chat(event) -> MDTeXDocument:
 
 async def _collect_user_info(client, user, user_full, **kwargs) -> Union[Section, KeyValueItem]:
     id_only = kwargs.get('id', False)
+    gban_format = kwargs.get('gban', False)
     show_general = kwargs.get('general', True)
     show_bot = kwargs.get('bot', False)
     show_misc = kwargs.get('misc', False)
@@ -147,6 +149,8 @@ async def _collect_user_info(client, user, user_full, **kwargs) -> Union[Section
 
     if id_only:
         return KeyValueItem(title, Code(user.id))
+    elif gban_format:
+        return str(user.id)
     else:
         general = SubSection(
             Bold('general'),
