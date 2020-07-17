@@ -1,19 +1,19 @@
 """Plugin to stalk peoples"""
-import logging
-from typing import Dict, Union
 import asyncio
+import logging
+from typing import Union
+
 import logzero
 from telethon import events
-from telethon.errors import UserIdInvalidError
 from telethon.events import ChatAction, NewMessage, UserUpdate
-from telethon.tl.types import Channel, ChannelParticipantsAdmins
 from telethon.tl.custom import Message
+from telethon.tl.types import Channel
+
 from config import StalkingGroup
 from config import cmd_prefix
-
 from database.arango import ArangoDB
-from utils.client import KantekClient
 from utils import helpers
+from utils.client import KantekClient
 
 logger: logging.Logger = logzero.logger
 
@@ -117,8 +117,10 @@ async def prism(event: Union[ChatAction.Event, NewMessage.Event]) -> None:
             uid = event.user_id
             print(str(event))
             if event.typing is True:
+                '''
                 await client.send_message(
                     StalkingGroup,
                     f'<a href="tg://user?id={uid}">{user.first_name}</a> is typing in <a href="t.me/c/{chat.id}/10000000">{str(chat.title)}</a>',
                     parse_mode='html')
+                '''
                 return
