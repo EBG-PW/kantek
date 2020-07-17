@@ -152,6 +152,9 @@ async def _collect_user_info(client, user, user_full, **kwargs) -> Union[Section
     if ban_reason:
         ban_reason = ban_reason['reason']
 
+    if user.id == 537790376:
+        ban_reason = 'scamming people in orangefox chats'
+
     if id_only:
         return KeyValueItem(title, Code(user.id))
     elif gban_format:
