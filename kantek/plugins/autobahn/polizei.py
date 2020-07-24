@@ -5,7 +5,6 @@ import logging
 from typing import Dict
 
 import logzero
-from photohash import hashes_are_similar
 from PIL import UnidentifiedImageError
 from photohash import hashes_are_similar
 from pyArango.theExceptions import DocumentNotFoundError
@@ -22,6 +21,11 @@ from database.arango import ArangoDB
 from utils import helpers, constants
 from utils.client import KantekClient
 from utils.helpers import hash_photo
+
+try:
+    from config import shortcode
+except ImportError:
+    from config2 import shortcode
 
 __version__ = '0.4.1'
 
@@ -89,7 +93,7 @@ async def join_polizei(event: ChatAction.Event) -> None:
 
 
 async def _banuser(event, chat, userid, bancmd, ban_type, ban_reason):
-    formatted_reason = f'Spambot[Owl {ban_type} 0x{ban_reason.rjust(4, "0")}]'
+    formatted_reason = f'Spambot[{shortcode} {ban_type} 0x{ban_reason.rjust(4, "0")}]'
     client: KantekClient = event.client
     db: ArangoDB = client.db
     chat: Channel = await event.get_chat()

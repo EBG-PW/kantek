@@ -3,3 +3,5 @@ esp_port = 4210
 
 # this is not valid
 API_TOKEN: str = 'ed'
+
+shortcode: str = 'PORNO'
