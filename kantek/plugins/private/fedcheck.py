@@ -157,7 +157,7 @@ async def _collect_user_info(client, user) -> Union[Section, KeyValueItem]:
     general = SubSection(
         Bold('general'),
         KeyValueItem('id', Code(user.id)),
-        KeyValueItem('Spam-watch', Code(sw_reason)),
+        KeyValueItem('SpamWatch', Code(sw_reason)),
         KeyValueItem('DEAI', Code(deai_reason)),
         KeyValueItem('KARA', Code(kara_reason)),
         KeyValueItem('Rose Support', Code(rose_reason))
