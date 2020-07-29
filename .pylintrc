@@ -18,7 +18,7 @@ ignore-patterns=config.py
 #init-hook=
 
 # Use multiple processes to speed up Pylint.
-jobs=2
+jobs=1
 
 # List of plugins (as comma separated values of python modules names) to load,
 # usually to register additional checkers.
@@ -121,6 +121,12 @@ disable=print-statement,
  bad-continuation,  # clashes with flake8 and I prefer the flake8 style
  no-member,  # Find a better way
  too-few-public-methods,
+ too-many-locals,
+ too-many-arguments,
+ too-many-branches,
+ too-many-statements,
+ missing-module-docstring,
+ logging-fstring-interpolation
 
 # Enable the message, report, category or checker with the given id(s). You can
 # either give multiple identifier separated by comma (,) or put this option
@@ -266,7 +272,7 @@ indent-after-paren=4
 indent-string='    '
 
 # Maximum number of characters on a single line.
-max-line-length=100
+max-line-length=120
 
 # Maximum number of lines in a module
 max-module-lines=1000

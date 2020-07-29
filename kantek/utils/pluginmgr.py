@@ -1,188 +1,240 @@
-"""Contains the Plugin Manager handling loading and unloading of plugins."""
-import ast
+import functools
+import importlib
+import inspect
 import os
+import re
 from dataclasses import dataclass
-import importlib.util
 from importlib._bootstrap import ModuleSpec
 from importlib._bootstrap_external import SourceFileLoader
-from logging import Logger
-from typing import Callable, Dict, List, Tuple
+from typing import Callable, List, Dict, Optional, Tuple
 
-import logzero
-from telethon import TelegramClient
+from telethon import events
+from telethon.events import NewMessage
+from telethon.events.common import EventBuilder
+from telethon.tl.custom import Forward, Message
+from telethon.tl.functions.channels import GetParticipantRequest
+from telethon.tl.types import ChannelParticipantAdmin
 
-logger: Logger = logzero.logger
-
-__version__ = '0.1.0'
+from utils import helpers
+from utils._config import Config
+from utils.mdtex import *
+from utils.tags import Tags
 
 
 @dataclass
-class Callback:
-    """A Plugin callback
+class _Signature:  # pylint: disable = R0902
+    client: bool = False
+    db: bool = False
+    chat: bool = False
+    msg: bool = False
+    args: bool = False
+    kwargs: bool = False
+    event: bool = False
+    tags: bool = False
 
-    Attributes:
-        name: Callback name
-        callback: The callback function
-        private: If the callback is private or not
-    """
-    name: str
+
+@dataclass
+class _SubCommand:
+    callback: Callable
+    command: str
+    signature: _Signature
+    auto_respond: bool
+
+
+@dataclass
+class _Command:
     callback: Callable
     private: bool
+    admins: bool
+    commands: Tuple[str]
+    signature: _Signature
+    auto_respond: bool
+    document: bool = True
+
+    subcommands: Optional[Dict[str, _SubCommand]] = None
+
+    def subcommand(self, command: Optional[str] = None):
+        if self.subcommands is None:
+            self.subcommands = {}
+
+        def decorator(callback: Callable):
+            _command: Optional[str] = command
+            if _command is None:
+                _command = callback.__name__.rstrip('_')
+            signature = inspect.signature(callback)
+            auto_respond = signature.return_annotation is MDTeXDocument
+            args = _Signature(**{n: True for n in signature.parameters.keys()})
+            cmd = _SubCommand(callback, _command, args, auto_respond)
+            self.subcommands[_command] = cmd
+            return cmd
+
+        return decorator
 
 
 @dataclass
-class Plugin:
-    """A Plugin with callbacks.
-
-    Attributes:
-        name: Plugin name without path
-        callbacks: List of callbacks the plugin has
-        full_path: Absolute path to the plugin
-        plugin_path: Plugin folder the plugin lies in
-        path: Plugin Path relative to the Plugin Folder
-        version: The plugin version
-    """
-    name: str
-    callbacks: List[Callback]
-    full_path: str
-    plugin_path: str
-    version: str
-
-    @property
-    def path(self) -> str:
-        """Return the plugin path relative to the plugin folder."""
-        return (os.path.relpath(self.full_path, self.plugin_path)
-                .rstrip('.py')
-                # replace the backslash in windows paths
-                .replace('\\', '/'))
+class _Event:
+    callback: Callable
+    event: EventBuilder
+    name: Optional[str]
 
 
 class PluginManager:
-    """Mange loading and unloading of plugins."""
-    active_plugins: List[Plugin] = []
+    """Load plugins add them as event handlers to the client"""
+    commands: Dict[str, _Command] = {}
+    events: List[_Event] = []
 
-    def __init__(self, client: TelegramClient) -> None:
+    def __init__(self, client):
         self.client = client
-        self.plugin_path: str = os.path.abspath('./plugins')
+        self.config = Config()
+        self._import_plugins()
 
-    def register_all(self) -> List[Plugin]:
-        """Get a list of all plugins and register them with the client.
-
-        Returns: List of active plugins
-
-        """
-        for plugin_name, path in self._get_plugin_list():
-            plugin_version = self._get_plugin_version(path)
-            active_commands = []
-            for callback in self._get_plugin_callbacks(plugin_name, path):
-                logger.debug('Registered plugin %s/%s',
-                             self._get_plugin_location(path), callback.name)
-                active_commands.append(callback)
-                self.client.add_event_handler(callback.callback)
-            self.active_plugins.append(
-                Plugin(plugin_name,
-                       active_commands,
-                       path,
-                       self.plugin_path,
-                       plugin_version))
-
-        logger.info('Registered %s plugins.', len(self.active_plugins))
-        return self.active_plugins
-
-    def unregister_all(self, builtins: bool = False) -> None:
-        """Unregister all plugins
+    @classmethod
+    def command(cls, *commands: str, private: bool = True, admins: bool = False, document: bool = True):
+        """Add a command to the client
 
         Args:
-            builtins: Flag if builtin plugins should be removed too.
+            commands: Command names to be used, will be concated using regex
+            private: True if the command should only be run when sent from the user
+            admins: Set to True if chat admins should be allowed to use the command too
+            document: If the help command should list this command
 
-        Returns: None
+        Returns:
+
         """
-        for plugin in self.active_plugins:
-            if builtins:
-                self.unregister_plugin(plugin)
+        if not commands:
+            raise SyntaxError('Command must have at least one command name')
+
+        def decorator(callback):
+            signature = inspect.signature(callback)
+            auto_respond = signature.return_annotation is MDTeXDocument or signature.return_annotation is Optional[
+                MDTeXDocument]
+            args = _Signature(**{n: True for n in signature.parameters.keys()})
+            cmd = _Command(callback, private, admins, commands, args, auto_respond, document)
+            cls.commands[commands[0]] = cmd
+            return cmd
+
+        return decorator
+
+    @classmethod
+    def event(cls, event, name: str = None):
+        """Add a Event to the client"""
+
+        def decorator(callback):
+            cls.events.append(_Event(callback, event, name))
+            return callback
+
+        return decorator
+
+    def register_all(self):
+        """Add all commands and events to the client"""
+        for p in self.commands.values():
+            pattern = re.compile(fr'{self.config.cmd_prefix}({"|".join(p.commands)})\b')
+            if p.admins:
+                event = events.NewMessage(pattern=pattern)
             else:
-                if not plugin.path.startswith('builtins/'):
-                    self.unregister_plugin(plugin)
+                event = events.NewMessage(outgoing=p.private, pattern=pattern)
+            new_callback = functools.partial(self._callback, p, p.signature, p.admins)
+            self.client.add_event_handler(new_callback, event)
 
-    def unregister_plugin(self, plugin: Plugin) -> None:
-        """Unregister a specific plugin.
+        for e in self.events:
+            self.client.add_event_handler(e.callback, e.event)
 
-        Args:
-            plugin: The plugin to unregister
-
-        Returns: None
-
-        """
-        for callback in plugin.callbacks:
-            logger.debug(self.client.remove_event_handler(callback.callback))
-        self.active_plugins.remove(plugin)
-
-    def _get_plugin_location(self, path: str) -> str:
-        return (os.path.relpath(path, self.plugin_path)
-                .rstrip('.py')
-                # replace the backslash in windows paths
-                .replace('\\', '/'))
-
-    def _get_plugin_list(self) -> List[Tuple[str, str]]:
-        plugins: List[Tuple[str, str]] = []
-        for root, dirs, files in os.walk(self.plugin_path):  # pylint: disable = W0612
+    def _import_plugins(self) -> None:
+        """Import all plugins so the decorators are run"""
+        for root, dirs, files in os.walk(str(self.config.plugin_path)):  # pylint: disable = W0612
             for file in files:
                 path = os.path.join(root, file)
                 name, ext = os.path.splitext(file)
                 if ext == '.py':
-                    plugins.append((name, path))
-        return plugins
-
-    def _get_plugin_callbacks(self, name: str, path: str) -> List[Callback]:
-        _module: ModuleSpec = importlib.util.spec_from_file_location(name, path)
-        loader: SourceFileLoader = _module.loader
-        module = loader.load_module()
-        callbacks = []
-        with open(path, encoding='utf-8') as f:
-            tree = ast.parse(f.read())
-            for item in tree.body:
-                if isinstance(item, ast.AsyncFunctionDef) and not item.name.startswith('_'):
-                    is_private = self.__is_private(self.__get_event_decorator_keywords(item))
-                    callbacks.append(Callback(item.name, getattr(module, item.name), is_private))
-        return callbacks
+                    _module: ModuleSpec = importlib.util.spec_from_file_location(name, path)
+                    loader: SourceFileLoader = _module.loader
+                    loader.load_module()
 
     @staticmethod
-    def _get_plugin_version(path: str) -> str:
-        version = ''
-        with open(path, encoding='utf-8') as f:
-            tree = ast.parse(f.read())
-            for item in tree.body:
-                if isinstance(item, ast.Assign):
-                    target = item.targets[0]
-                    if target.id == '__version__':
-                        version = item.value.s
-        return version
+    async def _callback(cmd: _Command, args: _Signature, admins: bool, event: NewMessage.Event) -> None:
+        """Wrapper around a plugins callback to dynamically pass requested arguments
 
-    @staticmethod
-    def __is_private(keywords: Dict[str, bool]) -> bool:
-        incoming = keywords.get('incoming')
-        outgoing = keywords.get('outgoing')
-        is_private = False
-        if incoming is not None:
-            is_private = not incoming
-        if outgoing is not None:
-            is_private = outgoing
-        return is_private
+        Args:
+            args: The arguments of the plugin callback
+            event: The NewMessage Event
+        """
+        client = event.client
+        msg: Message = event.message
+        if msg.via_bot_id is not None:
+            return
+        if msg.forward is not None:
+            forward: Forward = msg.forward
+            me = await client.get_me()
+            if forward.sender_id is None or forward.sender_id != me.id:
+                return
+        if msg.sticker is not None or msg.dice is not None:
+            return
+        callback = cmd.callback
+        skip_args = 1
+        help_topic = [cmd.commands[0]]
+        if cmd.subcommands:
+            raw_args = msg.raw_text.split()[1:]
+            if raw_args:
+                subcommand: Optional[_SubCommand] = cmd.subcommands.get(raw_args[0])
+                if subcommand:
+                    callback = subcommand.callback
+                    skip_args = 2
+                    args: _Signature = subcommand.signature
+                    cmd: _SubCommand = subcommand
+                    help_topic.append(cmd.command)
 
-    @classmethod
-    def __get_event_decorator_keywords(cls, func: ast.AsyncFunctionDef) -> Dict[str, bool]:
-        keywords = {}
-        for decorator in func.decorator_list:
-            if decorator.func.value.id == 'events':
-                keywords.update(cls.__get_keywords(decorator))
-        return keywords
+        _kwargs, _args = await helpers.get_args(event, skip=skip_args)
 
-    @staticmethod
-    def __get_keywords(decorator: ast.Call) -> Dict[str, bool]:
-        keywords = {}
-        for arg in decorator.args:
-            for keyword in arg.keywords:
-                value = keyword.value
-                if isinstance(value, ast.NameConstant):
-                    keywords.update({keyword.arg: value.value})
-        return keywords
+        if admins and event.is_channel:
+
+            uid = event.message.from_id
+            own_id = (await client.get_me()).id
+            if uid != own_id and _kwargs.get('self', False):
+                return
+            result = await client(GetParticipantRequest(event.chat_id, uid))
+            if not isinstance(result.participant, ChannelParticipantAdmin) and uid != own_id:
+                return
+
+        if _kwargs.get('help', False):
+            _cmd: Optional[_Command] = PluginManager.commands.get('help')
+            if _cmd:
+                cmd = _cmd
+                args: _Signature = cmd.signature
+                callback = cmd.callback
+                _args = help_topic
+                _kwargs = {}
+
+        callback_args = {}
+
+        if args.client:
+            callback_args['client'] = client
+
+        if args.db:
+            callback_args['db'] = client.db
+
+        if args.chat:
+            callback_args['chat'] = await event.get_chat()
+
+        if args.msg:
+            callback_args['msg'] = event.message
+
+        if args.args or args.kwargs:
+            if args.args:
+                callback_args['args'] = _args
+            if args.kwargs:
+                callback_args['kwargs'] = _kwargs
+
+        if args.event:
+            callback_args['event'] = event
+
+        if args.tags:
+            callback_args['tags'] = Tags(event)
+
+        result = await callback(**callback_args)
+        if result and cmd.auto_respond:
+            await client.respond(event, str(result))
+
+
+k = PluginManager
+
+Command = NewMessage.Event

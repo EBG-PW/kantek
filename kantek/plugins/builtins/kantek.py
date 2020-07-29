@@ -1,40 +1,38 @@
-"""Plugin to get information about kantek."""
+"""Plugin to get information about Kantek."""
 import logging
 import platform
 
 import telethon
-from telethon import events
-from telethon.events import NewMessage
-from telethon.tl.types import Chat
+from telethon.errors import ChatSendStickersForbiddenError
+from telethon.tl.functions.messages import GetStickerSetRequest
+from telethon.tl.types import InputStickerSetShortName, StickerSet, Channel
 
-from config import cmd_prefix
-from utils.client import KantekClient
-
-__version__ = '0.1.0'
+from utils._config import Config
+from utils.client import Client
+from utils.mdtex import *
+from utils.pluginmgr import k
 
 tlog = logging.getLogger('kantek-channel-log')
 
 
-@events.register(events.NewMessage(outgoing=True, pattern=f'{cmd_prefix}kantek'))
-async def tag(event: NewMessage.Event) -> None:
-    """Show the information about kantek.
+@k.command('kantek')
+async def kantek(client: Client, chat: Channel) -> MDTeXDocument:
+    """Show information about Kantek.
 
-    Args:
-        event: The event of the command
-
-    Returns: None
-
+    Examples:
+        {cmd}
     """
-    chat: Chat = event.chat
-    client: KantekClient = event.client
-    response = ['**kantek** userbot']
-    _info = {
-        'version': client.kantek_version,
-        'telethon version': telethon.__version__,
-        'python version': platform.python_version(),
-        'plugins loaded': len(client.plugin_mgr.active_plugins)
-    }
-
-    response += [f'  **{k}:**\n    `{v}`' for k, v in _info.items() if v is not None]
-    await client.respond(event, '\n'.join(response))
-    tlog.info('Ran `kantek` in `%s`', chat.title)
+    config = Config()
+    stickerset: StickerSet = await client(GetStickerSetRequest(InputStickerSetShortName("kantek")))
+    try:
+        await client.send_file(chat, stickerset.documents[0])
+    except ChatSendStickersForbiddenError:
+        pass
+    return MDTeXDocument(
+        Section(f"{Bold('Kantek')} userbot",
+                KeyValueItem(Bold('source'), config.source_url),
+                KeyValueItem(Bold('version'), client.kantek_version),
+                KeyValueItem(Bold('telethon version'), telethon.__version__),
+                KeyValueItem(Bold('python version'), platform.python_version()),
+                KeyValueItem(Bold('plugins loaded'),
+                             len(client.plugin_mgr.commands) + len(client.plugin_mgr.events))))

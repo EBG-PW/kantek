@@ -1,122 +1,74 @@
 """Plugin to handle tagging of chats and channels."""
 import logging
-from typing import Dict, List
+from typing import Dict
 
-from telethon import events
-from telethon.events import NewMessage
-from telethon.tl.patched import Message
-from telethon.tl.types import Chat, Message
+from telethon.tl.types import Channel
 
-from config import cmd_prefix
-from database.arango import ArangoDB
-from utils import parsers
-from utils.client import KantekClient
-from utils.mdtex import Bold, Code, Item, KeyValueItem, Section
-
-__version__ = '0.1.0'
+from utils.mdtex import *
+from utils.pluginmgr import k
+from utils.tags import Tags
 
 tlog = logging.getLogger('kantek-channel-log')
 
 
-@events.register(events.NewMessage(outgoing=True, pattern=f'{cmd_prefix}tag'))
-async def tag(event: NewMessage.Event) -> None:
-    """Add or remove tags from groups and channels.
+@k.command('tag')
+async def tag(chat: Channel, tags: Tags) -> MDTeXDocument:
+    """Add, query or remove tags from groups and channels.
 
-    Args:
-        event: The event of the command
+    Tags are used by various plugins to alter their functionality in the specific chats.
+    Check each plugins help to see which tags are accepted.
+    To list the tags of the current chat simply specify no subcommands
 
-    Returns: None
-
+    Examples:
+        {cmd}
     """
-    chat: Chat = event.chat
-    client: KantekClient = event.client
-    db: ArangoDB = client.db
-    chat_document = client.db.groups.get_chat(event.chat_id)
-    msg: Message = event.message
-    args = msg.raw_text.split()[1:]
-    response = ''
-    if not args:
-        db_named_tags: Dict = chat_document['named_tags'].getStore()
-        db_tags: List = chat_document['tags']
-        data = []
-        data += [KeyValueItem(Bold(key), value) for key, value in db_named_tags.items()]
-        data += [Item(_tag) for _tag in db_tags]
-        if not data:
-            data.append(Code('None'))
-        response = Section(Item(f'Tags for **{chat.title}**[`{event.chat_id}`]:'),
-                           *data)
-    elif args[0] == 'add' and len(args) > 1:
-        await _add_tags(event, db)
-    elif args[0] == 'clear':
-        await _clear_tags(event, db)
-    elif args[0] == 'del' and len(args) > 1:
-        await _delete_tags(event, db)
-    if not response:
-        await msg.delete()
-    else:
-        await client.respond(event, response)
-    tlog.info('Ran `tag` in `%s`. Response: %s', chat.title, response)
+    named_tags: Dict = tags.named_tags
+    data = []
+    data += [KeyValueItem(Bold(key), value) for key, value in named_tags.items()]
+    if not data:
+        data.append(Code('None'))
+    return MDTeXDocument(
+        Section(Item(f'Tags for {chat.title}[{Code(chat.id)}]:'),
+                *data)
+    )
 
 
-async def _add_tags(event: NewMessage.Event, db: ArangoDB):
-    """Add tags to chat.
+@tag.subcommand()
+async def add(args, kwargs, tags, event) -> None:
+    """Add tags to the chat.
+    Both positional and keyword argument are supported
 
-    Args:
-        event: The event of the command
-        db: The database object
-
-    Returns: A string with the action taken.
+    **Examples:**
+        {cmd} -strafanzeige polizei: exclude
+        {cmd} gban: verbose
     """
-    msg: Message = event.message
-    args = msg.raw_text.split()[2:]
-    chat_document = db.groups[event.chat_id]
-    db_named_tags: Dict = chat_document['named_tags'].getStore()
-    db_tags: List = chat_document['tags']
-    named_tags, tags = parsers.parse_arguments(' '.join(args))
-    for k, v in named_tags.items():
-        db_named_tags[k] = v
-    for _tag in tags:
-        if _tag not in db_tags:
-            db_tags.append(_tag)
-    chat_document['named_tags'] = db_named_tags
-    chat_document['tags'] = db_tags
-    chat_document.save()
+    for name, value in kwargs.items():
+        tags[name] = value
+    await event.delete()
 
 
-async def _clear_tags(event: NewMessage.Event, db: ArangoDB):
-    """Remove all tags from a chat.
+@tag.subcommand()
+async def del_(args, tags, event) -> None:
+    """Delete the specified tags from the chat.
 
-    Args:
-        event: The event of the command
-        db: The database object
+    Arguments:
+        `keys`: Tags to delete
 
-    Returns: A string with the action taken.
+    **Examples:**
+        {cmd} gban polizei
+        {cmd} network
     """
-    chat_document = db.groups[event.chat_id]
-    chat_document['named_tags'] = {}
-    chat_document['tags'] = []
-    chat_document.save()
-
-
-async def _delete_tags(event: NewMessage.Event, db: ArangoDB):
-    """Delete the specified tags from a chat.
-
-    Args:
-        event: The event of the command
-        db: The database object
-
-    Returns: A string with the action taken.
-    """
-    msg: Message = event.message
-    args = msg.raw_text.split()[2:]
-    chat_document = db.groups[event.chat_id]
-    db_named_tags: Dict = chat_document['named_tags'].getStore()
-    db_tags: List = chat_document['tags']
     for arg in args:
-        if arg in db_named_tags:
-            del db_named_tags[arg]
-            db_named_tags = db_named_tags
-        if arg in db_tags:
-            del db_tags[db_tags.index(arg)]
-    chat_document['named_tags'] = db_named_tags
-    chat_document.save()
+        del tags[arg]
+    await event.delete()
+
+
+@tag.subcommand()
+async def clear(tags: Tags, event) -> None:
+    """Clear all tags from the chat.
+
+    **Examples:**
+        {cmd}
+    """
+    tags.clear()
+    await event.delete()

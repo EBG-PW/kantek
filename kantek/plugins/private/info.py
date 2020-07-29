@@ -1,33 +1,26 @@
 """Plugin to get information about a channel."""
 import logging
-from typing import Dict, List
+from typing import Optional
 
-from telethon import events
-from telethon.events import NewMessage
 from telethon.tl.types import Channel, User
 
-from config import cmd_prefix
-from utils.client import KantekClient
-from utils.mdtex import Bold, Code, Item, KeyValueItem, MDTeXDocument, Section
-
-__version__ = '0.1.0'
+from utils.client import Client
+from utils.mdtex import *
+from utils.pluginmgr import k, Command
+from utils.tags import Tags
 
 tlog = logging.getLogger('kantek-channel-log')
 
 
-@events.register(events.NewMessage(outgoing=True, pattern=f'{cmd_prefix}info'))
-async def info(event: NewMessage.Event) -> None:
+@k.command('info')
+async def info(client: Client, tags: Tags, chat: Channel, event: Command) -> Optional[MDTeXDocument]:
     """Show information about a group or channel.
 
-    Args:
-        event: The event of the command
-
-    Returns: None
-
+    Examples:
+        {cmd}
     """
-    chat: Channel = await event.get_chat()
-    client: KantekClient = event.client
     if event.is_private:
+        await event.delete()
         return
     chat_info = Section(f'info for {chat.title}:',
                         KeyValueItem(Bold('title'), Code(chat.title)),
@@ -58,13 +51,7 @@ async def info(event: NewMessage.Event) -> None:
                          KeyValueItem(Bold('bots'), Code(bot_accounts)),
                          KeyValueItem(Bold('deleted_accounts'), Code(deleted_accounts)))
 
-    chat_document = client.db.groups.get_chat(event.chat_id)
-    db_named_tags: Dict = chat_document['named_tags'].getStore()
-    db_tags: List = chat_document['tags']
     data = []
-    data += [KeyValueItem(Bold(key), ', '.join(value)) for key, value in db_named_tags.items()]
-    data += [Item(_tag) for _tag in db_tags]
-    tags = Section('tags:', *data)
-    info_msg = MDTeXDocument(chat_info, user_stats, tags)
-    await client.respond(event, info_msg)
-    tlog.info('Ran `info` in `%s`', chat.title)
+    data += [KeyValueItem(Bold(key), value) for key, value in tags.named_tags.items()]
+    tags = Section('tags:', *data or [Italic('None')])
+    return MDTeXDocument(chat_info, user_stats, tags)
