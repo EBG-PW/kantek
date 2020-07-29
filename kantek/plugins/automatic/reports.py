@@ -30,6 +30,8 @@ Reportee: <a href="tg://user?id={reportee_id}">{reportee_name}</a> (#id{reportee
 
 @events.register(events.NewMessage(pattern=r'[/!]report|[\s\S]*@admins?'))
 async def admin_reports(event: NewMessage.Event) -> None:
+    if config.log_channel_id == 1:
+        return
     if not event.is_group:
         return
 
