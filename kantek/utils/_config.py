@@ -97,6 +97,7 @@ class Config:  # pylint: disable = R0902
         self.spamwatch_host = config.get('spamwatch_host', self.spamwatch_host)
         self.spamwatch_token = config.get('spamwatch_token', self.spamwatch_token)
         self.debug_mode = config.get('debug_mode', self.debug_mode)
+        self.source_url = config.get('source_url', self.source_url)
 
     def from_legacy_module(self, module):
         """Fetch config options from the legacy config.py"""
