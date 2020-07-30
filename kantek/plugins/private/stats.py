@@ -13,6 +13,7 @@ from utils.pluginmgr import k, Command
 tlog = logging.getLogger('kantek-channel-log')
 
 
+# noinspection PyUnresolvedReferences
 @k.command('stats')
 async def stats(client: Client, event: Command) -> MDTeXDocument:  # pylint: disable = R0912, R0914, R0915
     """Collect stats about the users accounts
@@ -32,11 +33,18 @@ async def stats(client: Client, event: Command) -> MDTeXDocument:  # pylint: dis
     creator_in_channels = 0
     unread_mentions = 0
     unread = 0
+    largest_group_member_count = 0
+    largest_group_with_admin = 0
+    channel = 0
+    megagroup = 0
+    publicmega = 0
     dialog: Dialog
     async for dialog in client.iter_dialogs():
         entity = dialog.entity
 
         if isinstance(entity, Channel):
+            #participants_count = (await client.get_participants(dialog, limit=0)).total
+            channel += 1
             if entity.broadcast:
                 broadcast_channels += 1
                 if entity.creator or entity.admin_rights:
@@ -45,11 +53,17 @@ async def stats(client: Client, event: Command) -> MDTeXDocument:  # pylint: dis
                     creator_in_channels += 1
 
             elif entity.megagroup:
-                groups += 1
+                megagroup += 1
+                #if participants_count > largest_group_member_count:
+                    #largest_group_member_count = participants_count
                 if entity.creator or entity.admin_rights:
+                    #if participants_count > largest_group_with_admin:
+                        #largest_group_with_admin = participants_count
                     admin_in_groups += 1
                 if entity.creator:
                     creator_in_groups += 1
+                if entity.has_link:
+                    publicmega += 1
 
         elif isinstance(entity, User):
             private_chats += 1
@@ -74,7 +88,10 @@ async def stats(client: Client, event: Command) -> MDTeXDocument:  # pylint: dis
             KeyValueItem(Bold('Private Chats'), private_chats),
             KeyValueItem(Bold('Users'), private_chats - bots),
             KeyValueItem(Bold('Bots'), bots)),
-        KeyValueItem(Bold('Groups'), groups),
+        KeyValueItem(Bold('Normal Groups'), groups),
+        SubSection(
+            KeyValueItem(Bold('Super Groups'), megagroup),
+            KeyValueItem(Bold('Public Super Groups'), publicmega)),
         KeyValueItem(Bold('Channels'), broadcast_channels),
         SubSection(
             KeyValueItem(Bold('Admin in Groups'), admin_in_groups),
@@ -86,6 +103,9 @@ async def stats(client: Client, event: Command) -> MDTeXDocument:  # pylint: dis
             KeyValueItem(Bold('Admin Rights'), admin_in_broadcast_channels - creator_in_channels)),
         KeyValueItem(Bold('Unread'), unread),
         KeyValueItem(Bold('Unread Mentions'), unread_mentions)),
+        #KeyValueItem(Bold('Largest Group'), largest_group_member_count),
+        #KeyValueItem(Bold('Largest Group with Admin'), largest_group_with_admin),
+        KeyValueItem(Bold('Channel type of chats'), channel),
         Italic(f'Took {stop_time:.02f}s'))
 
     await waiting_message.delete()
