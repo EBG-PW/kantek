@@ -1,3 +1,4 @@
+import asyncio
 from asyncio import subprocess
 
 from utils._config import Config
@@ -20,6 +21,7 @@ async def update(client: Client, event: Command) -> None:
         Section('Updating',
                 f'Running {Code("git pull")}')))
     await subprocess.create_subprocess_shell('git pull -q')
+    await asyncio.sleep(3)
     proc = await subprocess.create_subprocess_shell('git rev-parse --short HEAD',
                                                     stdout=subprocess.PIPE,
                                                     stderr=subprocess.PIPE)
