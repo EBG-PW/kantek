@@ -101,11 +101,12 @@ class Client(TelegramClient):  # pylint: disable = R0901, W0223
                     return False, 'Already banned by autobahn'
 
         if user:
-            count = SPAMADD_PATTERN.search(reason)
-            previous_count = SPAMADD_PATTERN.search(str(user[0]['reason']))
-            if count is not None and previous_count is not None:
-                count = int(count.group('count')) + int(previous_count.group('count'))
-                reason = f"spam adding {count}+ members"
+            if '[SW]' not in reason:
+                count = SPAMADD_PATTERN.search(reason)
+                previous_count = SPAMADD_PATTERN.search(str(user[0]['reason']))
+                if count is not None and previous_count is not None:
+                    count = int(count.group('count')) + int(previous_count.group('count'))
+                    reason = f"spam adding {count}+ members"
 
         await self.send_message(
             self.config.gban_group,
