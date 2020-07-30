@@ -27,7 +27,7 @@ from utils.pluginmgr import PluginManager
 
 logger: logging.Logger = logzero.logger
 
-AUTOMATED_BAN_REASONS = ['spambot', 'vollzugsanstalt', 'kriminalamt']
+AUTOMATED_BAN_REASONS = ['spambot', 'vollzugsanstalt', 'kriminalamt', '[SW]']
 SPAMADD_PATTERN = re.compile(r"spam adding (?P<count>\d+)\+ members")
 
 
