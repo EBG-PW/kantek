@@ -101,8 +101,6 @@ class Client(TelegramClient):  # pylint: disable = R0901, W0223
                     return False, 'Already banned by autobahn'
 
         if user:
-            if '[SW]' in reason:
-                return False, 'Already banned by self'
             count = SPAMADD_PATTERN.search(reason)
             previous_count = SPAMADD_PATTERN.search(str(user[0]['reason']))
             if count is not None and previous_count is not None:
