@@ -17,6 +17,15 @@ A pack can't have more than 120 stickers at the moment."
 
 @k.command('kang')
 async def kang(client: Client, event: Command) -> None:
+    """Create or Steal Stickers
+
+     Examples:
+         {cmd} emoji
+         Creates Sticker in standard stickerpack
+
+         {cmd} emoji NAME
+         Creates Sticker in stickerpack with specific name
+    """
     user = await client.get_me()
     if not user.username:
         user.username = user.first_name
