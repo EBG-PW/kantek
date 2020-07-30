@@ -77,8 +77,10 @@ async def spamschutz(event: Union[ChatAction.Event, NewMessage.Event]) -> None: 
             if '[SW]' in ban_reason:
                 await client.ungban(uid)
                 return
-        else:
-            return
+
+            else:
+                return
+        return
 
     reason = '[SW] ' + ban.reason
 
