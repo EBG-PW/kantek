@@ -65,10 +65,6 @@ async def spamschutz(event: Union[ChatAction.Event, NewMessage.Event]) -> None: 
         return
     if uid is None:
         return
-    try:
-        user = await client.get_entity(uid)
-    except ValueError as err:
-        logger.error(err)
 
     ban = swclient.get_ban(uid)
     if not ban:
@@ -106,11 +102,16 @@ async def spamschutz(event: Union[ChatAction.Event, NewMessage.Event]) -> None: 
             return
         await event.delete()
         if not silent:
-            message = MDTeXDocument(Section(
-                Bold('SpamWatch Grenzschutz Ban'),
-                KeyValueItem(Bold("User"),
-                             f'{Mention(user.first_name, uid)} [{Code(uid)}]'),
-                KeyValueItem(Bold("Reason"),
-                             ban_reason)
-            ))
-            await client.respond(event, str(message), reply=False, delete=120)
+            try:
+                user = await client.get_entity(uid)
+                message = MDTeXDocument(Section(
+                    Bold('SpamWatch Grenzschutz Ban'),
+                    KeyValueItem(Bold("User"),
+                                 f'{Mention(user.first_name, uid)} [{Code(uid)}]'),
+                    KeyValueItem(Bold("Reason"),
+                                 ban_reason)
+                ))
+                await client.respond(event, str(message), reply=False, delete=120)
+
+            except ValueError as err:
+                logger.error(err)
