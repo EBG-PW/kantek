@@ -11,6 +11,7 @@ from telethon.tl.types import (Channel, ChannelParticipantsAdmins, MessageAction
                                MessageActionChatAddUser)
 
 from database.arango import ArangoDB
+from utils._config import Config
 from utils.client import Client
 from utils.mdtex import *
 from utils.pluginmgr import k
@@ -51,7 +52,7 @@ async def spamschutz(event: Union[ChatAction.Event, NewMessage.Event]) -> None: 
     chat: Channel = await event.get_chat()
 
     db: ArangoDB = client.db
-    swclient: spamwatch.Client = client.sw
+    swclient = spamwatch.Client(Config.original_spamwatch_token)
     tags = Tags(event)
     polizei_tag = tags.get('polizei')
     grenzschutz_tag = tags.get('grenzschutz')
