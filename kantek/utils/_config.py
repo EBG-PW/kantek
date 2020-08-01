@@ -31,6 +31,7 @@ class Config:  # pylint: disable = R0902
 
     spamwatch_host: str = 'https://api.spamwat.ch'
     spamwatch_token: str = None
+    original_spamwatch_token: str = None
 
     debug_mode: bool = False
 
@@ -96,6 +97,7 @@ class Config:  # pylint: disable = R0902
         self.cmd_prefix = config.get('cmd_prefix', self.cmd_prefix)
         self.spamwatch_host = config.get('spamwatch_host', self.spamwatch_host)
         self.spamwatch_token = config.get('spamwatch_token', self.spamwatch_token)
+        self.original_spamwatch_token = config.get('original_spamwatch_token', self.spamwatch_token)
         self.debug_mode = config.get('debug_mode', self.debug_mode)
         self.source_url = config.get('source_url', self.source_url)
 
