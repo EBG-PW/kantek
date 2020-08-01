@@ -35,21 +35,21 @@ async def sw(client: Client, args: List, kwargs: Dict, event: Command) -> None:
 async def _token(event, client, args, keyword_args):
     command, *args = args
     msg: Message = event.message
-    userid = [uid for uid in args if isinstance(uid, int)]
-    if not userid:
+    id = [uid for uid in args if isinstance(uid, int)]
+    if not id:
         if msg.is_reply:
             reply_message: Message = await msg.get_reply_message()
             userid = reply_message.from_id
         else:
             return MDTeXDocument(Section('Missing Argument',
-                                         'A User ID is required.'))
+                                         'A ID is required.'))
     else:
-        userid = userid[0]
+        id = id[0]
     if command == 'create':
         from spamwatch.types import _permission_map  # pylint: disable = C0415
         permission = keyword_args.get('permission', 'User')
         permission = _permission_map.get(permission)
-        token = client.sw.create_token(userid, permission)
+        token = client.sw.create_token(id, permission)
         return MDTeXDocument(Section('SpamWatch Token',
                                      KeyValueItem('ID', Code(token.id)),
                                      KeyValueItem('User', Code(token.userid)),
@@ -58,3 +58,9 @@ async def _token(event, client, args, keyword_args):
                              Section('Links',
                                      KeyValueItem('Endpoint', client.sw_url.split('://')[-1]),
                                      KeyValueItem('Documentation', 'docs.spamwat.ch')))
+
+    if command == 'revoke':
+        token = client.sw.delete_token(id)
+        return MDTeXDocument(Section('SpamWatch Token',
+                                     KeyValueItem('ID', Code(token.id)),
+                                     KeyValueItem('Status', Code('RETIRED'))))
