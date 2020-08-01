@@ -4,6 +4,7 @@ from typing import List, Dict
 
 from spamwatch.types import Permission
 from telethon.tl.patched import Message
+from telethon.tl.types import User
 
 from utils.client import Client
 from utils.mdtex import *
@@ -61,6 +62,16 @@ async def _token(event, client, args, keyword_args):
 
     if command == 'revoke':
         token = client.sw.delete_token(id)
-        return MDTeXDocument(Section('SpamWatch Token',
+        return MDTeXDocument(Section('EBG-Watch Token',
                                      KeyValueItem('ID', Code(token.id)),
                                      KeyValueItem('Status', Code('RETIRED'))))
+
+    if command == 'info':
+        token = client.sw.get_token(id)
+        user: User = await client.get_entity(token.userid)
+        return MDTeXDocument(Section('EBG-Watch Token',
+                                     KeyValueItem('ID', Code(token.id)),
+                                     KeyValueItem('User', Code(token.userid)),
+                                     KeyValueItem('Permission', token.permission.name),
+                                     KeyValueItem('Active', Code(token.retired)),
+                                     KeyValueItem('Username:', Code(user.username))))
