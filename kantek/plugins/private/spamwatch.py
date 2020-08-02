@@ -68,11 +68,16 @@ async def _token(event, client, args, keyword_args):
 
     if command == 'info':
         token = client.sw.get_token(id)
-        user: User = await client.get_entity(token.userid)
+        try:
+            user: User = await client.get_entity(token.userid)
+            username = user.username
+        except:
+            username = 'None'
+            pass
         active: bool = not token.retired
         return MDTeXDocument(Section('EBG-Watch Token',
                                      KeyValueItem('ID', Code(token.id)),
                                      KeyValueItem('User', Code(token.userid)),
                                      KeyValueItem('Permission', token.permission.name),
                                      KeyValueItem('Active', Code(active)),
-                                     KeyValueItem('Username:', Code(user.username or 'None'))))
+                                     KeyValueItem('Username', Code(username))))
