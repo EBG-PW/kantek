@@ -63,7 +63,7 @@ async def _token(event, client, args, keyword_args):
     if command == 'revoke':
         token = client.sw.delete_token(id)
         return MDTeXDocument(Section('EBG-Watch Token',
-                                     KeyValueItem('ID', Code(token.id)),
+                                     KeyValueItem('ID', Code(id)),
                                      KeyValueItem('Status', Code('RETIRED'))))
 
     if command == 'info':
