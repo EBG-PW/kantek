@@ -4,19 +4,17 @@ import math
 import urllib.request
 
 from PIL import Image
-from telethon import events
-from telethon.events import NewMessage
 from telethon.tl.types import DocumentAttributeFilename, MessageMediaPhoto
-from utils._config import Config
-from utils import helpers
+
+import utils.pluginmgr
 from utils.client import Client
-from utils.pluginmgr import k, Command
 
 PACK_FULL = "Whoa! That's probably enough stickers for one pack, give it a break. \
 A pack can't have more than 120 stickers at the moment."
 
-@k.command('kang')
-async def kang(client: Client, event: Command) -> None:
+
+@utils.pluginmgr.k.command('kang')
+async def kang(client: Client, event: utils.pluginmgr.Command) -> None:
     """Create or Steal Stickers
 
      Examples:
@@ -108,7 +106,7 @@ async def kang(client: Client, event: Command) -> None:
                     packname = f"a{user.id}_by_{user.username}_{pack}"
                     packnick = f"@{user.username}'s userbot pack {pack}"
                     await event.edit("`Switching to Pack " + str(pack) +
-                                    " due to insufficient space`")
+                                     " due to insufficient space`")
                     await conv.send_message(packname)
                     x = await conv.get_response()
                     if x.text == "Invalid pack selected.":
@@ -122,8 +120,8 @@ async def kang(client: Client, event: Command) -> None:
                         await client.send_read_acknowledge(conv.chat_id)
                         if is_anim:
                             await client.forward_messages('Stickers',
-                                                       [message.id],
-                                                       event.chat_id)
+                                                          [message.id],
+                                                          event.chat_id)
                         else:
                             file.seek(0)
                             await conv.send_file(file, force_document=True)
@@ -155,7 +153,7 @@ async def kang(client: Client, event: Command) -> None:
                         return
                 if is_anim:
                     await client.forward_messages('Stickers', [message.id],
-                                               event.chat_id)
+                                                  event.chat_id)
                 else:
                     file.seek(0)
                     await conv.send_file(file, force_document=True)
@@ -182,7 +180,7 @@ async def kang(client: Client, event: Command) -> None:
                 await client.send_read_acknowledge(conv.chat_id)
                 if is_anim:
                     await client.forward_messages('Stickers', [message.id],
-                                               event.chat_id)
+                                                  event.chat_id)
                 else:
                     file.seek(0)
                     await conv.send_file(file, force_document=True)

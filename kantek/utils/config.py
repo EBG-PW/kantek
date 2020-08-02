@@ -29,7 +29,7 @@ class ConfigWrapper:
     db_username: str = "kantek"
     db_name: str = "kantek"
     db_host: str = '127.0.0.1'
-    db_port: int = None
+    db_port: int = 80
     db_cluster_mode: bool = False
     cmd_prefix: List[str] = field(default_factory=lambda: ['.'])
 

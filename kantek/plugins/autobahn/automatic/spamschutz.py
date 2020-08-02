@@ -11,7 +11,7 @@ from telethon.tl.types import (Channel, ChannelParticipantsAdmins, MessageAction
                                MessageActionChatAddUser)
 
 from database.arango import ArangoDB
-from utils._config import Config
+from utils.config import Config
 from utils.client import Client
 from utils.mdtex import *
 from utils.pluginmgr import k
