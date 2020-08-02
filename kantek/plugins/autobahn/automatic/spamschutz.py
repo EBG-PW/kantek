@@ -11,8 +11,8 @@ from telethon.tl.types import (Channel, ChannelParticipantsAdmins, MessageAction
                                MessageActionChatAddUser)
 
 from database.arango import ArangoDB
-from utils.config import Config
 from utils.client import Client
+from utils.config import Config
 from utils.mdtex import *
 from utils.pluginmgr import k
 from utils.tags import Tags
@@ -53,7 +53,7 @@ async def spamschutz(event: Union[ChatAction.Event, NewMessage.Event]) -> None: 
     config = Config()
     db: ArangoDB = client.db
     swoclient = SWOClient(config.original_spamwatch_token)
-    tags = Tags(event)
+    tags = await Tags.create(event)
     polizei_tag = tags.get('polizei')
     grenzschutz_tag = tags.get('grenzschutz')
     silent = grenzschutz_tag == 'silent'
@@ -69,11 +69,11 @@ async def spamschutz(event: Union[ChatAction.Event, NewMessage.Event]) -> None: 
 
     ban = swoclient.get_ban(uid)
     if not ban:
-        result = db.query('For doc in BanList '
-                          'FILTER doc._key == @id '
-                          'RETURN doc', bind_vars={'id': str(uid)})
-        if result:
-            ban_reason = result[0]['reason']
+        result = await db.banlist.get(uid)
+        if not result:
+            return
+        else:
+            ban_reason = result.reason
 
             if '[SW]' in ban_reason:
                 await client.ungban(uid)
@@ -81,7 +81,6 @@ async def spamschutz(event: Union[ChatAction.Event, NewMessage.Event]) -> None: 
 
             else:
                 return
-        return
 
     reason = '[SW] ' + ban.reason
 
