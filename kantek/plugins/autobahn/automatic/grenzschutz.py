@@ -9,7 +9,7 @@ from telethon.events import ChatAction, NewMessage
 from telethon.tl.types import (Channel, ChannelParticipantsAdmins, MessageActionChatJoinedByLink,
                                MessageActionChatAddUser)
 
-from database.arango import ArangoDB
+from database.database import Database
 from utils.client import Client
 from utils.mdtex import *
 from utils.pluginmgr import k
@@ -53,8 +53,8 @@ async def grenzschutz(event: Union[ChatAction.Event, NewMessage.Event]) -> None:
     if chat.admin_rights:
         if not chat.admin_rights.ban_users:
             return
-    db: ArangoDB = client.db
-    tags = Tags(event)
+    db: Database = client.db
+    tags = await Tags.create(event)
     polizei_tag = tags.get('polizei')
     grenzschutz_tag = tags.get('grenzschutz')
     silent = grenzschutz_tag == 'silent'
@@ -74,13 +74,11 @@ async def grenzschutz(event: Union[ChatAction.Event, NewMessage.Event]) -> None:
     except ValueError as err:
         logger.error(err)
 
-    result = db.query('For doc in BanList '
-                      'FILTER doc._key == @id '
-                      'RETURN doc', bind_vars={'id': str(uid)})
+    result = await db.banlist.get(uid)
     if not result:
         return
     else:
-        ban_reason = result[0]['reason']
+        ban_reason = result.reason
     admins = [p.id for p in await client.get_participants(event.chat_id, filter=ChannelParticipantsAdmins())]
     if uid not in admins:
         try:

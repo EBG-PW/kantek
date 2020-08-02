@@ -12,12 +12,29 @@ Because of that it checks every message your account receives for blacklisted it
 If you want to use Kantek without the administration part, simply remove the `plugins/autobahn` folder to disable these features. 
 
 ## Requirements
-Python 3.6+ is required to run the bot.
-ArangoDB 3.5+ is used to store bot data.
+Python 3.8+ is required to run the bot.
+ArangoDB 3.5+ or Postgres is used to store data.
 
 ## Setup
 - Copy the example config file to `config.json`
-- Create a user and a Database in ArangoDB. Give the user full permissions to the Database. The config defaults to the user and database name to `kantek` can be changed with [db_username](#db_username) and [db_name](#db_name) respectively. 
+Read either the ArangoDB section or the PostgreSQL section depending on what you prefer
+ArangoDB might be deprecated in the future so using postgres is suggested.
+
+### PostgreSQL
+- Set `db_type` to `postgres` in the config
+- Create a database and a user in postgres
+- kantek uses [migrant](https://github.com/jaemk/migrant) for migrations. Follow  the installation instructions [here](https://github.com/jaemk/migrant#installation).
+- Copy the `example.Migrant.toml` to `Migrant.toml` and fill out the details.
+- Run `migrant setup`
+- Run `migrant apply --all` 
+
+### ArangoDB
+- Set `db_type` to `arango` in the config
+- Install the driver with `pip install pyArango~=1.3.4`
+- Create a user and a Database in ArangoDB. Give the user full permissions to the Database. The config defaults to the user and database name to `kantek` can be changed with [db_username](#db_username) and [db_name](#db_name) respectively.
+
+After setting up the database:
+
 - Put the Authentication data into the config file.
 - Run bot.py
 
@@ -35,6 +52,13 @@ Get it from http://my.telegram.org/
 | Required | Type | Default   |
 | -------- | ---- | --------- |
 | Yes      | str  | `-`       |
+
+### db_type
+The database to use. Choices from `arango` or `postgres`
+
+| Required | Type | Default |
+| -------- | ---- | ------- |
+| No       | str  | arango  |
 
 ### db_username
 
@@ -55,10 +79,32 @@ Get it from http://my.telegram.org/
 | Yes      | str  | `-`       |
 
 ### db_host
+The IP the Database runs on. For ArangoDB the http is automatically added
+
+| Required | Type | Default    |
+| -------- | ---- | ---------- |
+| No       | str  | 127.0.0.1  |
+
+### db_port
+
+Default depends on the DB type. 
+
+ArangoDB: 8529
+Postgres: 5432
+
+| Required | Type | Default          |
+| -------- | ---- | ---------------- |
+| No       | int  | See description  |
+
+### db_cluster_mode
+Set this if you use your Database in a cluster
+
+If using ArangoDB this will mean you blacklist indices will be very large
 
 | Required | Type | Default                |
 | -------- | ---- | ---------------------- |
-| No       | str  | http://127.0.0.1:8529  |
+| No       | bool | false  |
+
 
 ### log_bot_token
 
@@ -79,19 +125,12 @@ Get it from http://my.telegram.org/
 | No       | int  | `-`       |
 
 ### cmd_prefix
-If a valid regex character is used it has to be escaped. 
-For example to use `\` as prefix you would have to put `\\\\` into the config.  
+ Provide single prefix or a list of prefixes
+ These will be escaped automatically
 
-| Required | Type | Default |
-| -------- | ---- | ------- |
-| No       | str  | `.`     |
-
-### help_prefix
-The prefix that is used in the help commands examples. This does not need to be regex escaped.
-
-| Required | Type | Default |
-| -------- | ---- | ------- |
-| No       | str  | `.`     |
+| Required | Type     | Default |
+| -------- | -------- | ------- |
+| No       | str|list | `.`     |
 
 ### session_name
 

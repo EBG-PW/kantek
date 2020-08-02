@@ -2,8 +2,8 @@ import inspect
 import re
 from typing import Callable
 
-from utils._config import Config
 from utils.client import Client
+from utils.config import Config
 from utils.mdtex import *
 from utils.pluginmgr import k, _Command, _Event
 
@@ -40,6 +40,7 @@ async def help_(client: Client, args, kwargs) -> MDTeXDocument:
             if e.name:
                 _events.append(e.name)
         toc.append(Section('Event List', *sorted(_events)))
+        toc.append(Section('Misc', 'parsers'))
         toc.append(Italic('Provide a command/event name as argument to get help for it.'))
         return toc
     if args:
@@ -73,7 +74,7 @@ def get_event_info(event, subcommands, config) -> MDTeXDocument:
 def get_command_info(cmd, subcommands, config) -> MDTeXDocument:
     cmd_name = cmd.commands[0]
     if not subcommands:
-        help_cmd = f'{config.help_prefix}{cmd_name}'
+        help_cmd = f'{config.cmd_prefix[0]}{cmd_name}'
         description = get_description(cmd.callback, help_cmd)
         help_msg = MDTeXDocument(Section(f'Help for {help_cmd}'), description)
 
@@ -101,7 +102,7 @@ def get_command_info(cmd, subcommands, config) -> MDTeXDocument:
         if subcommand is None:
             return MDTeXDocument(
                 Section('Error', f'Unknown subcommand {Code(subcommands[0])} for command {Code(cmd_name)}'))
-        help_cmd = f'{config.help_prefix}{cmd_name} {subcommand.command}'
+        help_cmd = f'{config.cmd_prefix[0]}{cmd_name} {subcommand.command}'
         description = get_description(subcommand.callback, help_cmd)
 
         help_msg = MDTeXDocument(Section(f'Help for {help_cmd}'), description)
@@ -114,12 +115,13 @@ def get_description(callback: Callable, help_cmd: str) -> str:
     description = inspect.getdoc(callback)
     if description is None:
         return 'No description'
-    description = description.format(cmd=help_cmd, prefix=config.help_prefix)
+    description = description.format(cmd=help_cmd, prefix=config.cmd_prefix[0])
     description = SECTION_PATTERN.sub(str(Bold(r'\g<name>')), description)
     return description
 
 
 def get_misc_topics(topic, subtopics) -> MDTeXDocument:
+    config = Config()
     subtopic = None
     if subtopics:
         subtopic = subtopics[0]
@@ -129,7 +131,11 @@ def get_misc_topics(topic, subtopics) -> MDTeXDocument:
                 Section(f'Available Parsers',
                         KeyValueItem(Italic(Bold('time')),
                                      'Specify durations with a shorthand',
-                                     colon_styles=(Bold, Italic))))
+                                     colon_styles=(Bold, Italic)),
+                        KeyValueItem(Italic(Bold('args')),
+                                     'Examples for the argument parser',
+                                     colon_styles=(Bold, Italic)))
+            )
         elif subtopic == 'time':
             return MDTeXDocument(
                 Section('Time'),
@@ -145,9 +151,10 @@ def get_misc_topics(topic, subtopics) -> MDTeXDocument:
             )
         elif subtopic == 'args':
             return MDTeXDocument(
-                Section('Time'),
+                Section('Arguments'),
                 'Parse arguments into positional and keyword arguments. '
                 'Convert values into their respective types',
+                f'To test them out copy them and pass them to {Code(f"{config.cmd_prefix[0]}dev args")}',
 
                 Section('Examples:',
                         SubSection('Positonal Arguments',
@@ -163,9 +170,12 @@ def get_misc_topics(topic, subtopics) -> MDTeXDocument:
                                    Code('"positional argument with spaces"')),
                         SubSection('Ranges',
                                    Code('range: 1..10'),
+                                   Code('1..10'),
+                                   Code('..10'),
                                    Code('ids: -10..20')),
                         SubSection('Lists',
                                    Code('vals: ["val1", "val2"]'),
-                                   Code('vals: [1, 2, 3]')),
+                                   Code('vals: [1, 2, 3]'),
+                                   Code('[1,2,3]')),
                         ),
             )

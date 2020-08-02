@@ -2,16 +2,16 @@
 import re
 from typing import Dict, List, Pattern, Tuple, Union
 
-KEYWORD_ARGUMENT: Pattern = re.compile(r'(\S+):\s?(\[.+?\]|\".+\"|[\w-]\S*)')
+KEYWORD_ARGUMENT: Pattern = re.compile(r'(\S+):\s?(\[.+?\]|\".+\"|[\w\-\.]\S*)')
 FLAG_ARGUMENT: Pattern = re.compile(r'(?:\s|^)-\w+')
 QUOTED_ARGUMENT: Pattern = re.compile(r'(?:\")(.*?)(?:\")')
-RANGE_PATTERN: Pattern = re.compile(r'-?\d+\.\.-?\d+')
+RANGE_PATTERN: Pattern = re.compile(r'(?P<start>-?\d+)?\.\.(?P<end>-?\d+)?')
 BOOL_MAP = {
     'false': False,
     'true': True,
 }
 
-Value = Union[int, str, float, complex, bool]
+Value = Union[int, str, float, complex, bool, range, List['Value']]
 KeywordArgument = Union[Value, range, List[Value]]
 
 EXPR_PATTERN: Pattern = re.compile(r'(?P<duration>\d+)(?P<unit>[smhdw])')
@@ -25,7 +25,7 @@ MULTIPLICATION_MAP = {
 }
 
 
-def _parse_number(val: str) -> Value:
+def _parse_types(val: str) -> Value:
     if val.isdecimal():
         return int(val)
 
@@ -39,7 +39,18 @@ def _parse_number(val: str) -> Value:
         return complex(val.replace('i', 'j'))
     except ValueError:
         pass
-    return val
+
+    if re.search(r'\[.*\]', val):
+        val = re.sub(r'[\[\]]', '', val).split(',')
+        return [_parse_types(v.strip()) for v in val]
+    elif match := re.search(RANGE_PATTERN, val):
+        end = int(match.group('end'))
+        if start := match.group('start'):
+            return range(int(start), end)
+        else:
+            return range(end)
+    else:
+        return BOOL_MAP.get(val.lower(), val)
 
 
 def arguments(args: str) -> Tuple[Dict[str, KeywordArgument], List[Value]]:
@@ -105,6 +116,15 @@ def arguments(args: str) -> Tuple[Dict[str, KeywordArgument], List[Value]]:
     >>> arguments('posarg -flag 125e-5')
     ({'flag': True}, ['posarg', 0.00125])
 
+    >>> arguments('[1,2,3] 1..20')
+    ({}, [[1, 2, 3], range(1, 20)])
+
+    >>> arguments('[1..5,6..10]')
+    ({}, [[range(1, 5), range(6, 10)]])
+
+    >>> arguments('..20 range: ..20')
+    ({'range': range(0, 20)}, [range(0, 20)])
+
     Args:
         args: The string with the arguments that should be parsed
 
@@ -121,16 +141,9 @@ def arguments(args: str) -> Tuple[Dict[str, KeywordArgument], List[Value]]:
             continue
 
         val = re.sub(r'\"', '', value)
-        val = _parse_number(val)
+        val = _parse_types(val)
         if isinstance(val, str):
-            if re.search(r'\[.*\]', val):
-                val = re.sub(r'[\[\]]', '', val).split(',')
-                val = [_parse_number(v.strip()) for v in val]
-            elif re.search(RANGE_PATTERN, val):
-                start, stop = val.split('..')
-                val = range(int(start), int(stop))
-            else:
-                val = BOOL_MAP.get(val.lower(), val)
+            val = _parse_types(val)
         keyword_args.update({name: val})
 
     args = re.sub(KEYWORD_ARGUMENT, '', args)
@@ -143,7 +156,7 @@ def arguments(args: str) -> Tuple[Dict[str, KeywordArgument], List[Value]]:
     quoted_args = re.findall(QUOTED_ARGUMENT, args)
     args = re.sub(QUOTED_ARGUMENT, '', args)
     # convert any numbers to int
-    args = [_parse_number(val) for val in args.split()]
+    args = [_parse_types(val) for val in args.split()]
     return keyword_args, args + quoted_args
 
 

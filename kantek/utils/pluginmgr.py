@@ -1,6 +1,7 @@
 import functools
 import importlib
 import inspect
+import logging
 import os
 import re
 from dataclasses import dataclass
@@ -8,6 +9,7 @@ from importlib._bootstrap import ModuleSpec
 from importlib._bootstrap_external import SourceFileLoader
 from typing import Callable, List, Dict, Optional, Tuple
 
+import logzero
 from telethon import events
 from telethon.events import NewMessage
 from telethon.events.common import EventBuilder
@@ -16,9 +18,12 @@ from telethon.tl.functions.channels import GetParticipantRequest
 from telethon.tl.types import ChannelParticipantAdmin
 
 from utils import helpers
-from utils._config import Config
+from utils.config import Config
 from utils.mdtex import *
 from utils.tags import Tags
+
+logger = logzero.setup_logger('kantek-logger', level=logging.DEBUG)
+tlog = logging.getLogger('kantek-channel-log')
 
 
 @dataclass
@@ -106,8 +111,8 @@ class PluginManager:
 
         def decorator(callback):
             signature = inspect.signature(callback)
-            auto_respond = signature.return_annotation is MDTeXDocument or signature.return_annotation is Optional[
-                MDTeXDocument]
+            auto_respond = (signature.return_annotation is MDTeXDocument
+                            or signature.return_annotation is Optional[MDTeXDocument])
             args = _Signature(**{n: True for n in signature.parameters.keys()})
             cmd = _Command(callback, private, admins, commands, args, auto_respond, document)
             cls.commands[commands[0]] = cmd
@@ -128,7 +133,8 @@ class PluginManager:
     def register_all(self):
         """Add all commands and events to the client"""
         for p in self.commands.values():
-            pattern = re.compile(fr'{self.config.cmd_prefix}({"|".join(p.commands)})\b')
+            prefix = '|'.join([re.escape(p) for p in self.config.cmd_prefix])
+            pattern = re.compile(fr'({prefix})({"|".join(p.commands)})\b', re.I)
             if p.admins:
                 event = events.NewMessage(pattern=pattern)
             else:
@@ -137,7 +143,7 @@ class PluginManager:
             self.client.add_event_handler(new_callback, event)
 
         for e in self.events:
-            self.client.add_event_handler(e.callback, e.event)
+            self.client.add_event_handler(functools.partial(self._event_callback, e), e.event)
 
     def _import_plugins(self) -> None:
         """Import all plugins so the decorators are run"""
@@ -149,6 +155,15 @@ class PluginManager:
                     _module: ModuleSpec = importlib.util.spec_from_file_location(name, path)
                     loader: SourceFileLoader = _module.loader
                     loader.load_module()
+
+    @staticmethod
+    async def _event_callback(event: _Event, tg_event) -> None:
+        try:
+            await event.callback(tg_event)
+        except Exception as err:
+            name = event.callback.__name__
+            tlog.error(f'An error occured in the event `{name}`', exc_info=err)
+            logger.exception(err)
 
     @staticmethod
     async def _callback(cmd: _Command, args: _Signature, admins: bool, event: NewMessage.Event) -> None:
@@ -228,11 +243,20 @@ class PluginManager:
             callback_args['event'] = event
 
         if args.tags:
-            callback_args['tags'] = Tags(event)
+            callback_args['tags'] = await Tags.create(event)
 
-        result = await callback(**callback_args)
-        if result and cmd.auto_respond:
-            await client.respond(event, str(result))
+        try:
+            result = await callback(**callback_args)
+            if result and cmd.auto_respond:
+                await client.respond(event, str(result))
+        except Exception as err:
+            command = ''
+            if isinstance(cmd, _Command):
+                command = cmd.commands[0]
+            elif isinstance(cmd, _SubCommand):
+                command = cmd.command
+            tlog.error(f'An error occured while running `{command}`', exc_info=err)
+            logger.exception(err)
 
 
 k = PluginManager

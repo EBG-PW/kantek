@@ -6,7 +6,7 @@ from spamwatch.types import Permission
 from telethon.tl.custom import Forward, Message
 from telethon.tl.types import MessageEntityMention, MessageEntityMentionName, User, Channel
 
-from database.arango import ArangoDB
+from database.database import Database
 from utils import helpers, constants
 from utils.client import Client
 from utils.mdtex import *
@@ -17,7 +17,7 @@ tlog = logging.getLogger('kantek-channel-log')
 
 
 @k.command('user', 'u')
-async def user_info(msg: Message, tags: Tags, client: Client, db: ArangoDB,
+async def user_info(msg: Message, tags: Tags, client: Client, db: Database,
                     args: List, kwargs: Dict) -> Optional[MDTeXDocument]:
     """Show information about a user. Can be used in reply to a message.
 
@@ -99,7 +99,7 @@ async def _info_from_reply(client, msg, db, kwargs, tags) -> MDTeXDocument:
     user_section = await _collect_user_info(client, user, db, **kwargs)
     if anzeige and isinstance(user_section, Section):
         data = await helpers.create_strafanzeige(user.id, reply_msg)
-        key = db.strafanzeigen.add(data)
+        key = await db.strafanzeigen.add(data)
         user_section.append(SubSection('Strafanzeige', KeyValueItem('code', Code(f'sa: {key}'))))
     return MDTeXDocument(user_section)
 
@@ -129,9 +129,9 @@ async def _collect_user_info(client, user, db, **kwargs) -> Union[str, Section, 
         title = Bold(full_name)
 
     sw_ban = None
-    ban_reason = db.banlist.get_user(user.id)
+    ban_reason = await db.banlist.get(user.id)
     if ban_reason:
-        ban_reason = ban_reason['reason']
+        ban_reason = ban_reason.reason
     if client.sw and client.sw.permission.value <= Permission.User.value:
         sw_ban = client.sw.get_ban(int(user.id))
         if sw_ban:
@@ -153,7 +153,7 @@ async def _collect_user_info(client, user, db, **kwargs) -> Union[str, Section, 
         if user.username is not None or show_all:
             general.append(KeyValueItem('username', Code(user.username)))
 
-        if ban_reason and not show_spamwatch:
+        if ban_reason:
             general.append(KeyValueItem('ban_reason', Code(ban_reason)))
         elif not show_spamwatch:
             general.append(KeyValueItem('gbanned', Code('False')))
@@ -169,6 +169,8 @@ async def _collect_user_info(client, user, db, **kwargs) -> Union[str, Section, 
                 KeyValueItem('admin', Code(sw_ban.admin)),
                 KeyValueItem('message', Code(ban_message)),
             ])
+        elif not client.sw:
+            spamwatch.append(Italic('Disabled'))
         else:
             spamwatch.append(KeyValueItem('banned', Code('False')))
 

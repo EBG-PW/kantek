@@ -1,4 +1,5 @@
-from telethon.errors import UsernameInvalidError, UsernameNotOccupiedError, InviteHashInvalidError
+from telethon.errors import (UsernameInvalidError, UsernameNotOccupiedError, InviteHashInvalidError,
+                             AuthBytesInvalidError, FileIdInvalidError)
 
 TELEGRAM_DOMAINS = ['t.me',
                     'telegram.org',
@@ -10,5 +11,7 @@ TELEGRAM_DOMAINS = ['t.me',
                     'contest.dev']
 
 GET_ENTITY_ERRORS = (UsernameNotOccupiedError, UsernameInvalidError, ValueError, InviteHashInvalidError)
+
+DOWNLOAD_ERRORS = (AuthBytesInvalidError, FileIdInvalidError)
 
 SCHEDULE_DELETION_COMMAND = "kantek_scheduled_delete"

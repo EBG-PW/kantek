@@ -4,6 +4,7 @@ import csv
 import hashlib
 import logging
 import re
+import subprocess
 import urllib
 from io import BytesIO, StringIO
 from typing import Dict, List, Tuple
@@ -14,9 +15,10 @@ from PIL import Image
 from telethon import utils
 from telethon.events import NewMessage
 from telethon.tl.custom import Message
-from telethon.tl.types import User, DocumentAttributeFilename
+from telethon.tl.types import User, DocumentAttributeFilename, PeerChannel, PeerUser
 
 from utils import parsers
+from utils.config import Config
 
 INVITELINK_PATTERN = re.compile(r'(?:joinchat|join)(?:/|\?invite=)(.*|)')
 
@@ -51,7 +53,7 @@ async def get_args(event: NewMessage.Event, skip: int = 1) -> Tuple[Dict[str, st
 
 
 async def rose_csv_to_dict(data: bytes) -> List[Dict[str, str]]:
-    """Convert a fedban list from Rose to a json that can be imported into ArangoDB
+    """Convert a fedban list from Rose to a json that can be imported into the database
 
     Args:
         filename: The name of the csv
@@ -67,7 +69,7 @@ async def rose_csv_to_dict(data: bytes) -> List[Dict[str, str]]:
     for line in csv_file:
         _id = line[0]
         reason = line[-1]
-        bans.append({'_key': _id, 'id': _id, 'reason': reason})
+        bans.append({'id': _id, 'reason': reason})
     return bans
 
 
@@ -152,8 +154,23 @@ async def textify_message(msg: Message):
 
 
 async def create_strafanzeige(uid, msg: Message):
-    chat_id = (msg.chat_id * -1) - int(1e12)
+    if isinstance(msg.to_id, PeerChannel):
+        chat_id = msg.to_id.channel_id
+    elif isinstance(msg.to_id, PeerUser):
+        chat_id = msg.from_id
+    else:
+        chat_id = msg.chat_id
     msg_id = msg.id
     msg_link = f't.me/c/{chat_id}/{msg_id}'
     data = f'{uid} link:{msg_link}'
     return data
+
+
+def get_commit():
+    proc = subprocess.check_output(['git', 'rev-parse', '--short', 'HEAD'])
+    return proc.decode().strip()
+
+
+def link_commit(hash):
+    config = Config()
+    return f'{config.source_url}/commit/{hash}'

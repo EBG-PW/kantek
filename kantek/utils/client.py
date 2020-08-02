@@ -19,8 +19,8 @@ from telethon.tl.patched import Message
 from telethon.tl.types import ChatBannedRights, User
 from yarl import URL
 
-from database.arango import ArangoDB
-from utils._config import Config
+from database.database import Database
+from utils.config import Config
 from utils.constants import SCHEDULE_DELETION_COMMAND
 from utils.mdtex import *
 from utils.pluginmgr import PluginManager
@@ -34,7 +34,7 @@ SPAMADD_PATTERN = re.compile(r"spam adding (?P<count>\d+)\+ members")
 class Client(TelegramClient):  # pylint: disable = R0901, W0223
     """Custom telethon client that has the plugin manager as attribute."""
     plugin_mgr: Optional[PluginManager] = None
-    db: Optional[ArangoDB] = None
+    db: Database = None
     kantek_version: str = ''
     sw: spamwatch.Client = None
     sw_url: str = None
@@ -90,11 +90,9 @@ class Client(TelegramClient):  # pylint: disable = R0901, W0223
         # if the user account is deleted this can be None
         if uid is None:
             return False, 'Deleted account'
-        user = self.db.query('For doc in BanList '
-                             'FILTER doc._key == @uid '
-                             'RETURN doc', bind_vars={'uid': str(uid)})
+        user = await self.db.banlist.get(uid)
         for ban_reason in AUTOMATED_BAN_REASONS:
-            if user and (ban_reason in str(user[0]['reason']).lower()):
+            if user and (ban_reason in user.reason.lower()):
                 if ban_reason == 'kriminalamt':
                     return False, 'Already banned by kriminalamt'
                 else:
@@ -118,14 +116,12 @@ class Client(TelegramClient):  # pylint: disable = R0901, W0223
             self.config.gban_group,
             f'/fban {uid} {reason}')
 
-        data = {'_key': str(uid),
-                'id': str(uid),
-                'reason': reason}
+        data = {
+            'id': str(uid),
+            'reason': reason
+        }
 
-        self.db.query('UPSERT {"_key": @ban.id} '
-                      'INSERT @ban '
-                      'UPDATE {"reason": @ban.reason} '
-                      'IN BanList ', bind_vars={'ban': data})
+        await self.db.banlist.upsert_multiple([data])
 
         if self.sw and self.sw.permission in [Permission.Admin,
                                               Permission.Root]:
@@ -165,8 +161,7 @@ class Client(TelegramClient):  # pylint: disable = R0901, W0223
                                          max_id=1000000,
                                          clear_mentions=True)
 
-        self.db.query('REMOVE {"_key": @uid} '
-                      'IN BanList', bind_vars={'uid': str(uid)})
+        await self.db.banlist.remove(uid)
         if self.sw and self.sw.permission in [Permission.Admin,
                                               Permission.Root]:
             self.sw.delete_ban(int(uid))
@@ -228,3 +223,8 @@ class Client(TelegramClient):  # pylint: disable = R0901, W0223
             self._me = await super().get_me()
         else:
             return self._me
+
+    def disconnect(self):
+        loop = asyncio.get_event_loop()
+        loop.create_task(self.aioclient.close())
+        return super().disconnect()

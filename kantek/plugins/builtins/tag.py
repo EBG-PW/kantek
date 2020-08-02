@@ -24,7 +24,7 @@ async def tag(chat: Channel, tags: Tags) -> MDTeXDocument:
     """
     named_tags: Dict = tags.named_tags
     data = []
-    data += [KeyValueItem(Bold(key), value) for key, value in named_tags.items()]
+    data += [KeyValueItem(key, Code(value)) for key, value in named_tags.items()]
     if not data:
         data.append(Code('None'))
     return MDTeXDocument(
@@ -43,7 +43,7 @@ async def add(args, kwargs, tags, event) -> None:
         {cmd} gban: verbose
     """
     for name, value in kwargs.items():
-        tags[name] = value
+        await tags.set(name, value)
     await event.delete()
 
 
@@ -59,7 +59,7 @@ async def del_(args, tags, event) -> None:
         {cmd} network
     """
     for arg in args:
-        del tags[arg]
+        await tags.remove(arg)
     await event.delete()
 
 
@@ -70,5 +70,5 @@ async def clear(tags: Tags, event) -> None:
     **Examples:**
         {cmd}
     """
-    tags.clear()
+    await tags.clear()
     await event.delete()
