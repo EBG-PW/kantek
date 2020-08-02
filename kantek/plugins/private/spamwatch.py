@@ -75,4 +75,4 @@ async def _token(event, client, args, keyword_args):
                                      KeyValueItem('User', Code(token.userid)),
                                      KeyValueItem('Permission', token.permission.name),
                                      KeyValueItem('Active', Code(active)),
-                                     KeyValueItem('Username:', Code(user.username))))
+                                     KeyValueItem('Username:', Code(user.username or 'None'))))
