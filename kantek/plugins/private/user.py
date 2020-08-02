@@ -2,6 +2,7 @@
 import logging
 from typing import Union, Dict, List, Optional
 
+from spamwatch.client import Client as SWOClient
 from spamwatch.types import Permission
 from telethon.tl.custom import Forward, Message
 from telethon.tl.types import MessageEntityMention, MessageEntityMentionName, User, Channel
@@ -9,6 +10,7 @@ from telethon.tl.types import MessageEntityMention, MessageEntityMentionName, Us
 from database.database import Database
 from utils import helpers, constants
 from utils.client import Client
+from utils.config import Config
 from utils.mdtex import *
 from utils.pluginmgr import k
 from utils.tags import Tags
@@ -112,7 +114,11 @@ async def _collect_user_info(client, user, db, **kwargs) -> Union[str, Section, 
     show_misc = kwargs.get('misc', False)
     show_all = kwargs.get('all', False)
     full_ban_msg = kwargs.get('full', False)
+    show_ebgwatch = kwargs.get('ebg', False)
     show_spamwatch = kwargs.get('sw', False)
+
+    config = Config()
+    swoclient = SWOClient(config.original_spamwatch_token)
 
     if show_all:
         show_general = True
@@ -128,16 +134,24 @@ async def _collect_user_info(client, user, db, **kwargs) -> Union[str, Section, 
     else:
         title = Bold(full_name)
 
+    ebg_ban = None
     sw_ban = None
     ban_reason = await db.banlist.get(user.id)
     if ban_reason:
         ban_reason = ban_reason.reason
     if client.sw and client.sw.permission.value <= Permission.User.value:
-        sw_ban = client.sw.get_ban(int(user.id))
+        ebg_ban = client.sw.get_ban(int(user.id))
+        if ebg_ban:
+            ebg_ban_message = ebg_ban.message
+            if ebg_ban_message and not full_ban_msg:
+                ebg_ban_message = f'{ebg_ban_message[:128]}{"[...]" if len(ebg_ban_message) > 128 else ""}'
+
+    if swoclient and swoclient.permission.value <= Permission.User.value:
+        sw_ban = swoclient.get_ban(int(user.id))
         if sw_ban:
-            ban_message = sw_ban.message
-            if ban_message and not full_ban_msg:
-                ban_message = f'{ban_message[:128]}{"[...]" if len(ban_message) > 128 else ""}'
+            sw_ban_message = sw_ban.message
+            if sw_ban_message and not full_ban_msg:
+                sw_ban_message = f'{sw_ban_message[:128]}{"[...]" if len(sw_ban_message) > 128 else ""}'
 
     if id_only:
         return KeyValueItem(title, Code(user.id))
@@ -155,10 +169,24 @@ async def _collect_user_info(client, user, db, **kwargs) -> Union[str, Section, 
 
         if ban_reason:
             general.append(KeyValueItem('ban_reason', Code(ban_reason)))
-        elif not show_spamwatch:
+        elif not ebg_ban:
             general.append(KeyValueItem('gbanned', Code('False')))
-        if sw_ban and not show_spamwatch:
-            general.append(KeyValueItem('ban_msg', Code(ban_message)))
+        if ebg_ban and not show_ebgwatch:
+            general.append(KeyValueItem('ban_msg', Code(ebg_ban_message)))
+
+        ebgwatch = SubSection('EBGWatch')
+        if ebg_ban:
+            ebgwatch.extend([
+                KeyValueItem('reason', Code(ebg_ban.reason)),
+                KeyValueItem('date', Code(ebg_ban.date)),
+                KeyValueItem('timestamp', Code(ebg_ban.timestamp)),
+                KeyValueItem('admin', Code(ebg_ban.admin)),
+                KeyValueItem('message', Code(ebg_ban_message)),
+            ])
+        elif not client.sw:
+            ebgwatch.append(Italic('Disabled'))
+        else:
+            ebgwatch.append(KeyValueItem('banned', Code('False')))
 
         spamwatch = SubSection('SpamWatch')
         if sw_ban:
@@ -167,9 +195,9 @@ async def _collect_user_info(client, user, db, **kwargs) -> Union[str, Section, 
                 KeyValueItem('date', Code(sw_ban.date)),
                 KeyValueItem('timestamp', Code(sw_ban.timestamp)),
                 KeyValueItem('admin', Code(sw_ban.admin)),
-                KeyValueItem('message', Code(ban_message)),
+                KeyValueItem('message', Code(sw_ban_message)),
             ])
-        elif not client.sw:
+        elif not swoclient:
             spamwatch.append(Italic('Disabled'))
         else:
             spamwatch.append(KeyValueItem('banned', Code('False')))
@@ -195,6 +223,7 @@ async def _collect_user_info(client, user, db, **kwargs) -> Union[str, Section, 
 
         return Section(title,
                        general if show_general else None,
+                       ebgwatch if show_ebgwatch else None,
                        spamwatch if show_spamwatch else None,
                        misc if show_misc else None,
                        bot if show_bot else None)
