@@ -89,7 +89,7 @@ async def grenzschutz(event: Union[ChatAction.Event, NewMessage.Event]) -> None:
         await event.delete()
         if not silent:
             message = MDTeXDocument(Section(
-                Bold('SpamWatch Grenzschutz Ban'),
+                Bold('EBG-Watch Grenzschutz Ban'),
                 KeyValueItem(Bold("User"),
                              f'{Mention(user.first_name, uid)} [{Code(uid)}]'),
                 KeyValueItem(Bold("Reason"),
