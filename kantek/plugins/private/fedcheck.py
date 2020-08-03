@@ -1,12 +1,12 @@
 """"Plugin to get the fbans of the most important feds of a User."""
-"""import asyncio
+import asyncio
 import logging
 from typing import Union, Dict, List, Optional
 
 from telethon.tl.custom import Forward, Message
 from telethon.tl.types import MessageEntityMention, MessageEntityMentionName, User
 
-#from database.arango import ArangoDB
+
 from utils import helpers, constants
 from utils.client import Client
 from utils.mdtex import *
@@ -19,9 +19,9 @@ tlog = logging.getLogger('kantek-channel-log')
 
 
 @k.command('fedstat', 'fs')
-async def fedcheck(msg: Message, tags: Tags, client: Client, db: ArangoDB,
+async def fedcheck(msg: Message, tags: Tags, client: Client, db,
                    args: List, kwargs: Dict) -> Optional[MDTeXDocument]:
-    return
+
     if not args and msg.is_reply:
         return await _info_from_reply(client, msg, db, kwargs, tags)
     elif args:
@@ -138,4 +138,3 @@ async def _collect_user_info(client, user) -> Union[str, Section, KeyValueItem]:
     )
 
     return Section(title, general)
-"""
