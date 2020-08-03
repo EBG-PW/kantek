@@ -10,7 +10,7 @@ from telethon.events import ChatAction, NewMessage
 from telethon.tl.types import (Channel, ChannelParticipantsAdmins, MessageActionChatJoinedByLink,
                                MessageActionChatAddUser)
 
-#from database.arango import ArangoDB
+
 from utils.client import Client
 from utils.config import Config
 from utils.mdtex import *
@@ -24,7 +24,7 @@ logger: logging.Logger = logzero.logger
 @k.event(events.chataction.ChatAction())
 @k.event(events.NewMessage(), name='spamschutz')
 async def spamschutz(event: Union[ChatAction.Event, NewMessage.Event]) -> None:  # pylint: disable = R0911
-    return
+
     """Automatically gban spamwatch banned users.
 
     This plugin gban users banned in Spamwatch upon joining,getting added to the group or when writing a message. A message will be sent to notify Users of the action, this message will be deleted after 2 minutes.
@@ -52,7 +52,7 @@ async def spamschutz(event: Union[ChatAction.Event, NewMessage.Event]) -> None: 
     client: Client = event.client
     chat: Channel = await event.get_chat()
     config = Config()
-    db: ArangoDB = client.db
+    db = client.db
     swoclient = SWOClient(config.original_spamwatch_token)
     tags = await Tags.create(event)
     polizei_tag = tags.get('polizei')
@@ -108,11 +108,11 @@ async def spamschutz(event: Union[ChatAction.Event, NewMessage.Event]) -> None: 
             try:
                 user = await client.get_entity(uid)
                 message = MDTeXDocument(Section(
-                    Bold('SpamWatch Grenzschutz Ban'),
+                    Bold('SpamSchutz Grenzschutz Ban'),
                     KeyValueItem(Bold("User"),
                                  f'{Mention(user.first_name, uid)} [{Code(uid)}]'),
                     KeyValueItem(Bold("Reason"),
-                                 ban_reason)
+                                 reason)
                 ))
                 await client.respond(event, str(message), reply=False, delete=120)
 
