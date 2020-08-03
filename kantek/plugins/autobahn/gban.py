@@ -7,7 +7,7 @@ from telethon.errors import UserNotParticipantError
 from telethon.tl.custom import Message
 from telethon.tl.functions.channels import GetParticipantRequest
 from telethon.tl.functions.messages import ReportRequest
-from telethon.tl.types import Channel, InputReportReasonSpam, InputPeerChannel
+from telethon.tl.types import Channel, InputReportReasonSpam, InputPeerChannel, ChannelParticipantCreator
 
 from database.database import Database
 from utils import helpers, parsers
@@ -24,7 +24,7 @@ CHUNK_SIZE = 10
 
 @k.command('gban')
 async def gban(client: Client, db: Database, tags: Tags, chat: Channel, msg: Message,
-               args: List, kwargs: Dict, event: Command) -> None:
+               args: List, kwargs: Dict, event: Command) -> Optional[MDTeXDocument]:
     """Globally ban a user.
 
     This will not actively ban them from any chats except the one command was issued in as reply. GBanned users will be automatically banned on join or when writing a message by the Grenzschutz module.
@@ -76,17 +76,18 @@ async def gban(client: Client, db: Database, tags: Tags, chat: Channel, msg: Mes
         reply_msg: Message = await msg.get_reply_message()
         uid = reply_msg.from_id
         if args:
-            ban_reason = args[0]
+            ban_reason = ' '.join(args)
         else:
             ban_reason = DEFAULT_REASON
             try:
                 participant = await client(GetParticipantRequest(event.chat_id, reply_msg.from_id))
-                join_date = participant.participant.date
+                if not isinstance(participant.participant, ChannelParticipantCreator):
+                    join_date = participant.participant.date
 
-                if (reply_msg.date - datetime.timedelta(hours=1)) < join_date:
-                    ban_reason = 'joinspam'
-                elif only_joinspam:
-                    return
+                    if (reply_msg.date - datetime.timedelta(hours=1)) < join_date:
+                        ban_reason = 'joinspam'
+                    elif only_joinspam:
+                        return
             except UserNotParticipantError:
                 pass
 
@@ -165,7 +166,7 @@ async def gban(client: Client, db: Database, tags: Tags, chat: Channel, msg: Mes
                 bans = _build_message(skipped_uids)
                 sections.append(Section('Skipped GBan', *bans))
 
-            await client.respond(event, MDTeXDocument(*sections))
+            return MDTeXDocument(*sections)
 
 
 def _build_message(bans: Dict[str, List[str]], message: Optional[str] = None) -> List[KeyValueItem]:
