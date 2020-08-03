@@ -101,7 +101,7 @@ async def spamschutz(event: Union[ChatAction.Event, NewMessage.Event]) -> None: 
         try:
             await client.ban(chat, uid)
         except UserIdInvalidError as err:
-            logger.error("Error occured while banning %s", err)
+            logger.error("Error occurred while banning %s", err)
             return
         await event.delete()
         if not silent:
@@ -114,7 +114,7 @@ async def spamschutz(event: Union[ChatAction.Event, NewMessage.Event]) -> None: 
                     KeyValueItem(Bold("Reason"),
                                  reason)
                 ))
-                await client.respond(event, str(message), reply=False, delete=120)
+                await client.respond(event, str(message), reply=False, delete='2m')
 
             except ValueError as err:
                 logger.error(err)
