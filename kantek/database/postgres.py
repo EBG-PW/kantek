@@ -5,7 +5,6 @@ from typing import Dict, Optional, List
 
 import asyncpg as asyncpg
 from asyncpg.pool import Pool
-from pyArango.theExceptions import CreationError
 
 from database.types import BlacklistItem, Chat, BannedUser
 
@@ -18,27 +17,26 @@ class TableWrapper:
 class Chats(TableWrapper):
 
     async def add(self, chat_id: int) -> Optional[Chat]:
-        """Add a Chat to the DB or return an existing one.
-        Args:
-            chat_id: The id of the chat
-        Returns: The chat Document
-        """
         async with self.pool.acquire() as conn:
             await conn.execute("INSERT INTO chats VALUES ($1, '{}') ON CONFLICT DO NOTHING", chat_id)
         return Chat(chat_id, {})
 
     async def get(self, chat_id: int) -> Chat:
-        """Return a Chat document
-        Args:
-            chat_id: The id of the chat
-        Returns: The chat Document
-        """
         async with self.pool.acquire() as conn:
             row = await conn.fetchrow("SELECT * FROM chats WHERE id = $1", chat_id)
         if row:
-            return Chat(row['id'], json.loads(row['tags']))
+            return Chat(row['id'], json.loads(row['tags']), json.loads(row['permissions'] or '{}'), row['locked'])
         else:
             return await self.add(chat_id)
+
+    async def lock(self, chat_id: int, permissions: Dict[str, bool]) -> None:
+        async with self.pool.acquire() as conn:
+            await conn.execute("UPDATE chats SET locked = TRUE, permissions=$2 WHERE id = $1",
+                                      chat_id, json.dumps(permissions))
+
+    async def unlock(self, chat_id: int) -> None:
+        async with self.pool.acquire() as conn:
+            await conn.execute("UPDATE chats SET locked = FALSE WHERE id = $1", chat_id)
 
     async def update_tags(self, chat_id: int, new: Dict):
         async with self.pool.acquire() as conn:
@@ -77,13 +75,13 @@ class AutobahnBlacklist(TableWrapper):
 
     async def retire(self, item):
         async with self.pool.acquire() as conn:
-            result = await conn.fetchrow("UPDATE blacklists.bio SET retired=TRUE WHERE item=$1 RETURNING id", str(item))
+            result = await conn.fetchrow(f"UPDATE blacklists.{self.name} SET retired=TRUE WHERE item=$1 RETURNING id", str(item))
         return result
 
     async def get_all(self) -> List[BlacklistItem]:
         """Get all strings in the Blacklist."""
         async with self.pool.acquire() as conn:
-            rows = await conn.fetch(f"SELECT * FROM blacklists.{self.name}")
+            rows = await conn.fetch(f"SELECT * FROM blacklists.{self.name} WHERE retired=false")
         return [BlacklistItem(row['id'], row['item'], row['retired']) for row in rows]
 
     async def get_indices(self, indices, _):
@@ -128,12 +126,6 @@ class AutobahnMHashBlacklist(AutobahnBlacklist):
     name = 'mhash'
 
 
-class AutobahnTLDBlacklist(AutobahnBlacklist):
-    """Blacklist with blacklisted top level domains"""
-    hex_type = '0x7'
-    name = 'tld'
-
-
 class BanList(TableWrapper):
     async def add_user(self, _id: int, reason: str) -> Optional[BannedUser]:
         # unused
@@ -156,7 +148,7 @@ class BanList(TableWrapper):
 
     async def get_multiple(self, uids, _) -> List[BannedUser]:
         async with self.pool.acquire() as conn:
-            rows = await conn.fetch(f"SELECT * FROM banlist WHERE id = any($1::BIGINT[])", uids)
+            rows = await conn.fetch(f"SELECT * FROM banlist WHERE id = ANY($1::BIGINT[])", uids)
         return [BannedUser(row['id'], row['reason']) for row in rows]
 
     async def count_reason(self, reason, _) -> int:
@@ -168,7 +160,7 @@ class BanList(TableWrapper):
             return (await conn.fetchrow("SELECT count(*) FROM banlist"))['count']
 
     async def upsert_multiple(self, bans, _) -> None:
-        bans = [(int(u['id']), u['reason'], datetime.datetime.now(), None) for u in bans]
+        bans = [(int(u['id']), str(u['reason']), datetime.datetime.now(), None) for u in bans]
         async with self.pool.acquire() as conn:
             async with conn.transaction():
                 await conn.execute('CREATE TEMPORARY TABLE _data(id BIGINT, reason TEXT, date TIMESTAMP, message TEXT)'
@@ -189,7 +181,7 @@ class BanList(TableWrapper):
     async def get_all_not_in(self, not_in, _) -> List[BannedUser]:
         not_in = list(map(int, not_in))
         async with self.pool.acquire() as conn:
-            rows = await conn.fetch(f"SELECT * FROM banlist WHERE NOT (id = any($1::BIGINT[]))", not_in)
+            rows = await conn.fetch(f"SELECT * FROM banlist WHERE NOT (id = ANY($1::BIGINT[]))", not_in)
         return [BannedUser(row['id'], row['reason']) for row in rows]
 
 
@@ -212,8 +204,9 @@ class Postgres:  # pylint: disable = R0902
     async def connect(self, host, port, username, password, name) -> None:
         if port is None:
             port = 5432
-        self.pool = await asyncpg.create_pool(user=username, password=password,
-                                              database=name, host=host, port=port)
+        self.pool: Pool = await asyncpg.create_pool(user=username, password=password,
+                                                    database=name, host=host, port=port)
+
         self.chats: Chats = Chats(self.pool)
         self.ab_bio_blacklist: AutobahnBioBlacklist = AutobahnBioBlacklist(self.pool)
         self.ab_string_blacklist: AutobahnStringBlacklist = AutobahnStringBlacklist(self.pool)
@@ -221,7 +214,6 @@ class Postgres:  # pylint: disable = R0902
         self.ab_domain_blacklist: AutobahnDomainBlacklist = AutobahnDomainBlacklist(self.pool)
         self.ab_file_blacklist: AutobahnFileBlacklist = AutobahnFileBlacklist(self.pool)
         self.ab_mhash_blacklist: AutobahnMHashBlacklist = AutobahnMHashBlacklist(self.pool)
-        self.ab_tld_blacklist: AutobahnTLDBlacklist = AutobahnTLDBlacklist(self.pool)
         self.ab_collection_map = {
             '0x0': self.ab_bio_blacklist,
             '0x1': self.ab_string_blacklist,
@@ -229,7 +221,9 @@ class Postgres:  # pylint: disable = R0902
             '0x4': self.ab_domain_blacklist,
             '0x5': self.ab_file_blacklist,
             '0x6': self.ab_mhash_blacklist,
-            '0x7': self.ab_tld_blacklist
         }
         self.banlist: BanList = BanList(self.pool)
         self.strafanzeigen: Strafanzeigen = Strafanzeigen(self.pool)
+
+    async def disconnect(self):
+        await self.pool.close()

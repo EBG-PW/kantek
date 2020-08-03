@@ -25,19 +25,19 @@ class ConfigWrapper:
 
     plugin_path: str
 
-    db_type: str = 'arango'
+    db_type: str = 'postgres'
     db_username: str = "kantek"
     db_name: str = "kantek"
     db_host: str = '127.0.0.1'
-    db_port: int = 80
-    db_cluster_mode: bool = False
-    cmd_prefix: List[str] = field(default_factory=lambda: ['.'])
+    db_port: int = None
+
+    prefix: str = '.'
+    prefixes: List[str] = field(default_factory=lambda: ['.'])
 
     session_name: str = 'kantek-session'
 
     spamwatch_host: str = 'https://api.spamwat.ch'
     spamwatch_token: str = None
-    original_spamwatch_token: str = None
 
     debug_mode: bool = False
 
@@ -60,9 +60,19 @@ class Config:  # pylint: disable = R0902
             with open(config_path) as f:
                 config = json.load(f)
                 config['plugin_path'] = plugin_path
+                prefixes = config.get('prefixes', [])
+                if prefix := config.get('prefix'):
+                    prefixes.append(prefix)
                 if prefix := config.get('cmd_prefix'):
+                    logger.info('Using deprecated option `cmd_prefix` use `prefix` or `prefixes` instead.')
                     if isinstance(prefix, str):
-                        config['cmd_prefix'] = [prefix]
+                        prefixes.append(prefix)
+                    else:
+                        prefixes.extend(prefix)
+                    del config['cmd_prefix']
+                if prefixes:
+                    config['prefixes'] = prefixes
+                    config['prefix'] = prefixes[0]
                 cfg = ConfigWrapper(**config)
                 cfg.session_name = (sessions_dir / cfg.session_name).absolute()
                 cls.instance = cfg

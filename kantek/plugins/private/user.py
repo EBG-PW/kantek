@@ -1,4 +1,3 @@
-"""Plugin to get information about a user."""
 import logging
 from typing import Union, Dict, List, Optional
 
@@ -166,6 +165,9 @@ async def _collect_user_info(client, user, db, **kwargs) -> Union[str, Section, 
             general.append(KeyValueItem('last_name', Code(user.last_name)))
         if user.username is not None or show_all:
             general.append(KeyValueItem('username', Code(user.username)))
+
+        if user.scam or show_all:
+            general.append(KeyValueItem('scam', Code(user.scam)))
 
         if ban_reason:
             general.append(KeyValueItem('ban_reason', Code(ban_reason)))

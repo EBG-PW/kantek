@@ -8,6 +8,8 @@ from utils.config import Config
 class UnknownDatabaseError(Exception):
     pass
 
+class DeprecatedDatabaseError(Exception):
+    pass
 
 class ItemDoesNotExistError(Exception):
     pass
@@ -19,7 +21,6 @@ class Table:
 
 
 class Blacklist(Table):
-    # temporary until I remove arangodb
     name = None
 
     async def add(self, item: str) -> BlacklistItem:
@@ -130,6 +131,12 @@ class Chats(Table):
     async def get(self, chat_id: int) -> Chat:
         return await self.db.chats.get(chat_id)
 
+    async def lock(self, chat_id: int, permissions: Dict[str, bool]):
+        await self.db.chats.lock(chat_id, permissions)
+
+    async def unlock(self, chat_id: int):
+        await self.db.chats.unlock(chat_id)
+
     async def update_tags(self, chat_id: int, new: Dict):
         return await self.db.chats.update_tags(chat_id, new)
 
@@ -143,7 +150,6 @@ class Blacklists:
         self.domain = DomainBlacklist(parent)
         self.file = FileBlacklist(parent)
         self.mhash = MHashBlacklist(parent)
-        self.tld = TLDBlacklist(parent)
         self._map = {
             '0x0': self.bio,
             '0x1': self.string,
@@ -151,7 +157,6 @@ class Blacklists:
             '0x4': self.domain,
             '0x5': self.file,
             '0x6': self.mhash,
-            '0x7': self.tld
         }
 
     async def get(self, hex_type: str):
@@ -160,15 +165,10 @@ class Blacklists:
 
 class Database:
     db: Union['ArangoDB', 'Postgres']
+
     async def connect(self, config: Config):
         if config.db_type == 'arango':
-            from database.arango import ArangoDB
-
-            self.db = ArangoDB()
-            await self.db.connect(config.db_host, config.db_port,
-                                  config.db_username,
-                                  config.db_password,
-                                  config.db_name)
+            raise DeprecatedDatabaseError('ArangoDB has been deprecated. Please use Postgres instead.')
         elif config.db_type == 'postgres':
             from database.postgres import Postgres
             self.db = Postgres()
@@ -177,8 +177,11 @@ class Database:
                                   config.db_password,
                                   config.db_name)
         else:
-            raise UnknownDatabaseError('Choose from: arango')
+            raise UnknownDatabaseError('Choose from: postgres')
         self.strafanzeigen = Strafanzeigen(self)
         self.banlist = Banlist(self)
         self.blacklists = Blacklists(self)
         self.chats = Chats(self)
+
+    async def disconnect(self):
+        await self.db.disconnect()
