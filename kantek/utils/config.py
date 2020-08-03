@@ -38,6 +38,7 @@ class ConfigWrapper:
 
     spamwatch_host: str = 'https://api.spamwat.ch'
     spamwatch_token: str = None
+    original_spamwatch_token: str = None
 
     debug_mode: bool = False
 
