@@ -36,6 +36,7 @@ class Client(TelegramClient):  # pylint: disable = R0901, W0223
     db: Database = None
     kantek_version: str = ''
     sw: spamwatch.Client = None
+    swo: spamwatch.Client = None
     sw_url: str = None
     aioclient: ClientSession = None
     config: Config
