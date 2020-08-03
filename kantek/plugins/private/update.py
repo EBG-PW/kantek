@@ -1,4 +1,4 @@
-from asyncio import subprocess
+import subprocess
 
 from utils import helpers
 from utils.client import Client
