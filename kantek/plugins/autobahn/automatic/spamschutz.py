@@ -10,7 +10,7 @@ from telethon.events import ChatAction, NewMessage
 from telethon.tl.types import (Channel, ChannelParticipantsAdmins, MessageActionChatJoinedByLink,
                                MessageActionChatAddUser)
 
-from database.arango import ArangoDB
+#from database.arango import ArangoDB
 from utils.client import Client
 from utils.config import Config
 from utils.mdtex import *
@@ -24,6 +24,7 @@ logger: logging.Logger = logzero.logger
 @k.event(events.chataction.ChatAction())
 @k.event(events.NewMessage(), name='spamschutz')
 async def spamschutz(event: Union[ChatAction.Event, NewMessage.Event]) -> None:  # pylint: disable = R0911
+    return
     """Automatically gban spamwatch banned users.
 
     This plugin gban users banned in Spamwatch upon joining,getting added to the group or when writing a message. A message will be sent to notify Users of the action, this message will be deleted after 2 minutes.
