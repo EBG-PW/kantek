@@ -1,5 +1,5 @@
 from telethon.errors import (UsernameInvalidError, UsernameNotOccupiedError, InviteHashInvalidError,
-                             AuthBytesInvalidError, FileIdInvalidError)
+                             AuthBytesInvalidError, FileIdInvalidError, FloodWaitError)
 
 TELEGRAM_DOMAINS = ['t.me',
                     'telegram.org',
@@ -10,6 +10,6 @@ TELEGRAM_DOMAINS = ['t.me',
                     'graph.org',
                     'contest.dev']
 
-GET_ENTITY_ERRORS = (UsernameNotOccupiedError, UsernameInvalidError, ValueError, InviteHashInvalidError)
+GET_ENTITY_ERRORS = (UsernameNotOccupiedError, UsernameInvalidError, ValueError, InviteHashInvalidError, FloodWaitError)
 
 DOWNLOAD_ERRORS = (AuthBytesInvalidError, FileIdInvalidError)
