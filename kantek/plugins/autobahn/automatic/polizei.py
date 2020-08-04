@@ -140,7 +140,7 @@ async def _check_message(event):  # pylint: disable = R0911
         result = await client(GetParticipantRequest(event.chat_id, user_id))
         if isinstance(result.participant, ChannelParticipantAdmin):
             return False, False
-    except (ValueError, UserNotParticipantError):
+    except (ValueError, TypeError, UserNotParticipantError):
         return False, False
 
     # no need to ban bots as they can only be added by users anyway
@@ -249,7 +249,7 @@ async def _check_message(event):  # pylint: disable = R0911
                         except UnidentifiedImageError:
                             pass
 
-            except (*constants.GET_ENTITY_ERRORS, ChannelPrivateError):
+            except (*constants.GET_ENTITY_ERRORS, ChannelPrivateError, ):
                 pass
 
         # urllib doesnt like urls without a protocol
