@@ -54,7 +54,7 @@ async def spamschutz(event: Union[ChatAction.Event, NewMessage.Event]) -> None: 
     config = Config()
     db = client.db
     swoclient = client.swo
-    tags = await Tags.create(event)
+    tags = await Tags.from_event(event)
     polizei_tag = tags.get('polizei')
     grenzschutz_tag = tags.get('grenzschutz')
     silent = grenzschutz_tag == 'silent'
