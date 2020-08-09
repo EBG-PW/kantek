@@ -12,6 +12,7 @@ from utils.pluginmgr import k, Command
 tlog = logging.getLogger('kantek-channel-log')
 
 
+
 # TODO: Make this nice, this is just a skeleton so I have an easy way of creating tokens,
 #  preferably clean this up at some point
 @k.command('spamwatch', 'sw', document=False)
