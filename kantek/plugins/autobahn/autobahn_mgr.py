@@ -199,10 +199,6 @@ async def del_(db: Database, args) -> MDTeXDocument:
         if hex_type is None or blacklist is None:
             continue
 
-        if hex_type == '0x3':
-            _, chat_id, _ = await helpers.resolve_invite_link(str(item))
-            item = chat_id
-
         try:
             await blacklist.retire(item)
             removed_items.append(Code(item))
@@ -253,7 +249,11 @@ async def query(args, kwargs, db: Database) -> MDTeXDocument:
         all_items = await blacklist.get_indices(list(code)[:MAX_QUERY_ITEMS])
     else:
         all_items = blacklist_items
-    items = [KeyValueItem(Bold(item.index), Code(item.value)) for item in all_items[:MAX_QUERY_ITEMS]]
+
+    items = []
+    for item in all_items[:MAX_QUERY_ITEMS]:
+        kvitem = KeyValueItem(Bold(item.index), f"{Code(item.value)} {Italic('(retired)') if item.retired else ''}")
+        items.append(kvitem)
 
     return MDTeXDocument(
         Section(f'Items for type: {item_type}[{hex_type}]', *items or [Italic('None')]),

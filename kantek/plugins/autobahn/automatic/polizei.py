@@ -7,7 +7,7 @@ import logzero
 from PIL import UnidentifiedImageError
 from photohash import hashes_are_similar
 from telethon import events
-from telethon.errors import UserNotParticipantError, ChannelPrivateError
+from telethon.errors import UserNotParticipantError, ChannelPrivateError, FloodWaitError
 from telethon.events import ChatAction, NewMessage
 from telethon.tl.custom import Message
 from telethon.tl.custom import MessageButton
@@ -19,6 +19,7 @@ from telethon.tl.types import (Channel, MessageEntityTextUrl, UserFull, MessageE
 from database.database import Database
 from utils import helpers, constants
 from utils.client import Client
+from utils.constants import GET_ENTITY_ERRORS
 from utils.helpers import hash_photo
 from utils.pluginmgr import k
 from utils.tags import Tags
@@ -44,7 +45,7 @@ async def polizei(event: NewMessage.Event) -> None:
         return
     client: Client = event.client
     chat: Channel = await event.get_chat()
-    tags = await Tags.create(event)
+    tags = await Tags.from_event(event)
     bancmd = tags.get('gbancmd', 'manual')
     polizei_tag = tags.get('polizei')
     if polizei_tag == 'exclude':
@@ -66,7 +67,7 @@ async def join_polizei(event: ChatAction.Event) -> None:
     client: Client = event.client
     chat: Channel = await event.get_chat()
     db: Database = client.db
-    tags = await Tags.create(event)
+    tags = await Tags.from_event(event)
     bancmd = tags.get('gbancmd')
     polizei_tag = tags.get('polizei')
     if polizei_tag == 'exclude':
@@ -232,7 +233,10 @@ async def _check_message(event):  # pylint: disable = R0911
 
         if _entity:
             try:
-                full_entity = await client.get_cached_entity(_entity)
+                try:
+                    full_entity = await client.get_cached_entity(_entity)
+                except (FloodWaitError, *GET_ENTITY_ERRORS):
+                    full_entity = None
                 if full_entity:
                     channel = full_entity.id
                     try:
@@ -280,7 +284,7 @@ async def _check_message(event):  # pylint: disable = R0911
                 return db.blacklists.channel.hex_type, result.index
 
     for string in await db.blacklists.string.get_all():
-        if string.value in msg.raw_text:
+        if string.value in msg.raw_text and not string.retired:
             return db.blacklists.string.hex_type, string.index
 
     if msg.file:
@@ -312,8 +316,9 @@ async def _check_message(event):  # pylint: disable = R0911
                 photo_hash = None
             if photo_hash:
                 for mhash in await db.blacklists.mhash.get_all():
-                    if hashes_are_similar(mhash.value, photo_hash, tolerance=2):
-                        return db.blacklists.mhash.hex_type, mhash.index
+                    if not mhash.retired:
+                        if hashes_are_similar(mhash.value, photo_hash, tolerance=2):
+                            return db.blacklists.mhash.hex_type, mhash.index
 
     return False, False
 

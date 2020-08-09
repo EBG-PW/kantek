@@ -2,7 +2,7 @@ import json
 import logging
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import List
+from typing import List, Optional
 
 import logzero
 
@@ -41,6 +41,8 @@ class ConfigWrapper:
     original_spamwatch_token: str = None
 
     debug_mode: bool = False
+
+    kill_command: Optional[str] = None
 
     source_url: str = 'src.kv2.dev'
 

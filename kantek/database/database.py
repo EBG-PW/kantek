@@ -1,7 +1,7 @@
 import secrets
 from typing import Union, Dict, List, Optional
 
-from database.types import BlacklistItem, BannedUser, Chat
+from database.types import BlacklistItem, BannedUser, Chat, Template
 from utils.config import Config
 
 
@@ -14,6 +14,10 @@ class DeprecatedDatabaseError(Exception):
 
 
 class ItemDoesNotExistError(Exception):
+    pass
+
+
+class TemplateAlreadyExistsError(Exception):
     pass
 
 
@@ -107,6 +111,10 @@ class Banlist(Table):
         reason = self.db.convert_wildcard(reason)
         return await self.db.banlist.count_reason(reason)
 
+    async def get_with_reason(self, reason) -> List[BannedUser]:
+        reason = self.db.convert_wildcard(reason)
+        return await self.db.banlist.get_with_reason(reason)
+
     async def total_count(self) -> int:
         return await self.db.banlist.total_count()
 
@@ -135,6 +143,21 @@ class Chats(Table):
 
     async def update_tags(self, chat_id: int, new: Dict):
         return await self.db.chats.update_tags(chat_id, new)
+
+
+class Templates(Table):
+    async def add(self, name: str, content: str) -> Template:
+        await self.db.templates.add(name, content)
+        return Template(name, content)
+
+    async def get(self, name: str) -> Template:
+        return await self.db.templates.get(name)
+
+    async def get_all(self) -> List[Template]:
+        return await self.db.templates.get_all()
+
+    async def delete(self, name: str) -> None:
+        return await self.db.templates.delete(name)
 
 
 class Blacklists:
@@ -178,6 +201,7 @@ class Database:
         self.banlist = Banlist(self)
         self.blacklists = Blacklists(self)
         self.chats = Chats(self)
+        self.templates = Templates(self)
 
     async def disconnect(self):
         await self.db.disconnect()

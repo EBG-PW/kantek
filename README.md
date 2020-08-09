@@ -87,18 +87,21 @@ Postgres: 5432
 | No       | int  | See description  |
 
 ### log_bot_token
+The bot token for the bot that logs into the log channel
 
 | Required | Type | Default   |
 | -------- | ---- | --------- |
 | Yes      | str  | `-`       |
 
 ### log_channel_id
+The channel id for the log bot
 
 | Required | Type | Default   |
 | -------- | ---- | --------- |
 | Yes      | int  | `-`       |
 
 ### gban_group
+The group where gban and fban commands are sent to
 
 | Required | Type | Default   |
 | -------- | ---- | --------- |
@@ -142,6 +145,13 @@ Useful for local development. Disabled actually banning a user in groups and rep
 | Required | Type  | Default |
 | -------- | ----- | ------- |
 | No       | bool  | `False` |
+
+### kill_command
+Command to be run when executing `.kill`. For example `systemctl stop kantek` or `pm2 stop kantek`
+
+| Required | Type  | Default |
+| -------- | ----- | ------- |
+| No       | str   | `-`     |
 
 ### source_url
 Used in .kantek and .update
