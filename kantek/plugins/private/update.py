@@ -68,7 +68,8 @@ async def update(client: Client, event: Command, tags: Tags) -> None:
             else:
                 await client.respond(event, msg)
             return
-    # endregion'''
+    # endregion
+    '''
 
     if not silent:
         await progess_message.delete()
