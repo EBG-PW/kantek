@@ -23,7 +23,7 @@ async def template(args, db: Database, event, msg: Message) -> Optional[MDTeXDoc
 
     _template = await db.templates.get(args[0])
     if _template:
-        await msg.edit(_template.content)
+        await msg.edit(_template.content, link_preview=True)
     else:
         await event.delete
 
