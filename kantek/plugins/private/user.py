@@ -86,7 +86,7 @@ async def _info_from_arguments(client, msg, db, args, kwargs) -> MDTeXDocument:
 
 async def _info_from_reply(client, msg, db, kwargs, tags) -> MDTeXDocument:
     get_forward = kwargs.get('forward', True)
-    anzeige = tags.get('strafanzeige', False) or kwargs.get('sa', False)
+    anzeige = tags.get('strafanzeige', True) or kwargs.get('sa', False)
 
     reply_msg: Message = await msg.get_reply_message()
 
