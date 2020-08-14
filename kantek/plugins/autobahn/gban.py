@@ -90,7 +90,7 @@ async def gban(client: Client, db: Database, tags: Tags, chat: Channel, msg: Mes
                         ban_reason = 'joinspam'
                     elif only_joinspam:
                         return
-            except UserNotParticipantError:
+            except (UserNotParticipantError, TypeError):
                 pass
 
         message = await helpers.textify_message(reply_msg)
