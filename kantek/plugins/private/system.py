@@ -30,11 +30,8 @@ async def system(client: Client, event: Command) -> MDTeXDocument:
     except FileNotFoundError:
         response = MDTeXDocument(Section(Bold('Neofetch Version 5 or higher Binary couldnt be found. please get it '
                                               'from https://github.com/dylanaraps/neofetch/releases '
-                                              'and drop it (the binary file) in /usr/local/bin with the name owlfetch. '
-                                              'also make sure to set the rights so it can be executed.'
-                                              '\n'
-                                              'PS: if youre @geozukunft please reconsider your life as an engineer if '
-                                              'you cant even follow theese instructions')))
+                                              'and drop it (the binary file named neofetch) in /usr/local/bin and rename it to owlfetch, '
+                                              'also make sure to set the rights so it can be executed.')))
         return response
 
     system_info = json.loads(fetch.stdout)
