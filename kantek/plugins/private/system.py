@@ -28,7 +28,9 @@ async def system(client: Client, event: Command) -> MDTeXDocument:
         fetch = subprocess.run(['owlfetch', '--json'], stdout=subprocess.PIPE)
 
     except FileNotFoundError:
-        response = MDTeXDocument(Section(Bold('Something went wrong')))
+        response = MDTeXDocument(Section(Bold('Neofetch Version 5 or higher Binary couldnt be found. please get it '
+                                              'from https://github.com/dylanaraps/neofetch/releases '
+                                              'and drop it in /usr/local/bin with the name owlfetch.')))
         return response
 
     system_info = json.loads(fetch.stdout)
