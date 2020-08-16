@@ -2,6 +2,7 @@ import logging
 from typing import Union, Dict, List, Optional
 
 from spamwatch.client import Client as SWOClient
+from kantex.md import *
 from spamwatch.types import Permission
 from telethon.tl.custom import Forward, Message
 from telethon.tl.types import MessageEntityMention, MessageEntityMentionName, User, Channel
@@ -11,6 +12,7 @@ from utils import helpers, constants
 from utils.client import Client
 from utils.config import Config
 from utils.mdtex import *
+from utils.errors import Error
 from utils.pluginmgr import k
 from utils.tags import Tags
 
@@ -19,7 +21,7 @@ tlog = logging.getLogger('kantek-channel-log')
 
 @k.command('user', 'u')
 async def user_info(msg: Message, tags: Tags, client: Client, db: Database,
-                    args: List, kwargs: Dict) -> Optional[MDTeXDocument]:
+                    args: List, kwargs: Dict) -> Optional[KanTeXDocument]:
     """Show information about a user. Can be used in reply to a message.
 
     Arguments:
@@ -53,7 +55,7 @@ async def user_info(msg: Message, tags: Tags, client: Client, db: Database,
         return await _info_from_arguments(client, msg, db, args, kwargs)
 
 
-async def _info_from_arguments(client, msg, db, args, kwargs) -> MDTeXDocument:
+async def _info_from_arguments(client, msg, db, args, kwargs) -> KanTeXDocument:
     gban_format = kwargs.get('gban', False)
     entities = []
     for entity in msg.get_entities_text():
@@ -81,10 +83,10 @@ async def _info_from_arguments(client, msg, db, args, kwargs) -> MDTeXDocument:
     if users and gban_format:
         users = [Code(' '.join(users))]
     if users or errors:
-        return MDTeXDocument(*users, (Section('Errors for', Code(', '.join(errors)))) if errors else '')
+        return KanTeXDocument(*users, (Section('Errors for', Code(', '.join(errors)))) if errors else '')
 
 
-async def _info_from_reply(client, msg, db, kwargs, tags) -> MDTeXDocument:
+async def _info_from_reply(client, msg, db, kwargs, tags) -> KanTeXDocument:
     get_forward = kwargs.get('forward', True)
     anzeige = tags.get('strafanzeige', True) or kwargs.get('sa', False)
 
@@ -93,7 +95,7 @@ async def _info_from_reply(client, msg, db, kwargs, tags) -> MDTeXDocument:
     if get_forward and reply_msg.forward is not None:
         forward: Forward = reply_msg.forward
         if forward.sender_id is None:
-            return MDTeXDocument(Section('Error', 'User has forward privacy enabled'))
+            raise Error('User has forward privacy enabled')
         user: User = await client.get_entity(forward.sender_id)
     else:
         user: User = await client.get_entity(reply_msg.sender_id)
@@ -102,7 +104,7 @@ async def _info_from_reply(client, msg, db, kwargs, tags) -> MDTeXDocument:
         data = await helpers.create_strafanzeige(user.id, reply_msg)
         key = await db.strafanzeigen.add(data)
         user_section.append(SubSection('Strafanzeige', KeyValueItem('code', Code(f'sa: {key}'))))
-    return MDTeXDocument(user_section)
+    return KanTeXDocument(user_section)
 
 
 async def _collect_user_info(client, user, db, **kwargs) -> Union[str, Section, KeyValueItem]:

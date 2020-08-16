@@ -11,6 +11,7 @@ from io import BytesIO
 from typing import Callable, List, Dict, Optional, Tuple
 
 import logzero
+from kantex.md import KanTeXDocument
 from telethon import events
 from telethon.errors import MessageTooLongError
 from telethon.events import NewMessage
@@ -23,6 +24,7 @@ from telethon.utils import get_display_name
 from utils import helpers
 from utils.config import Config
 from utils.constants import GET_ENTITY_ERRORS
+from utils.errors import Error
 from utils.mdtex import *
 from utils.tags import Tags
 
@@ -73,7 +75,7 @@ class _Command:
             if _command is None:
                 _command = callback.__name__.rstrip('_')
             signature = inspect.signature(callback)
-            auto_respond = signature.return_annotation is MDTeXDocument
+            auto_respond = signature.return_annotation is KanTeXDocument
             args = _Signature(**{n: True for n in signature.parameters.keys()})
             cmd = _SubCommand(callback, _command, args, auto_respond, delete)
             self.subcommands[_command] = cmd
@@ -118,8 +120,8 @@ class PluginManager:
 
         def decorator(callback):
             signature = inspect.signature(callback)
-            auto_respond = (signature.return_annotation is MDTeXDocument
-                            or signature.return_annotation is Optional[MDTeXDocument])
+            auto_respond = (signature.return_annotation is KanTeXDocument
+                            or signature.return_annotation is Optional[KanTeXDocument])
             args = _Signature(**{n: True for n in signature.parameters.keys()})
             cmd = _Command(callback, private, admins, commands, args, auto_respond, document, delete)
             cls.commands[commands[0]] = cmd
@@ -286,8 +288,16 @@ class PluginManager:
             else:
                 raise
         except Exception as err:
-            tlog.error(f'An error occured while running {Code(command_name)}', exc_info=err)
-            logger.exception(err)
+            if cmd.auto_respond:
+                error_name = err.__class__.__name__
+                error_name = re.sub(r'([A-Z])', r' \1', error_name)
+                doc = KanTeXDocument(
+                    Section(error_name,
+                            Italic(str(err))))
+                await client.respond(event, str(doc), reply=not delete)
+            if not isinstance(err, Error):
+                tlog.error(f'An error occured while running {Code(command_name)}', exc_info=err)
+                logger.exception(err)
 
 
 k = PluginManager

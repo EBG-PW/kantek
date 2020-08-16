@@ -1,8 +1,9 @@
 import subprocess
 
+from kantex.md import *
+
 from utils import helpers
 from utils.client import Client
-from utils.mdtex import *
 from utils.pluginmgr import k, Command
 from utils.tags import Tags
 
@@ -23,7 +24,7 @@ async def update(client: Client, event: Command, tags: Tags) -> None:
     old_commit = helpers.get_commit()
     # region git pull
     if not silent:
-        progess_message = await client.respond(event, MDTeXDocument(
+        progess_message = await client.respond(event, KanTeXDocument(
             Section('Updating',
                     f'Running {Code("git pull")}')))
     else:
@@ -31,7 +32,7 @@ async def update(client: Client, event: Command, tags: Tags) -> None:
 
     proc = subprocess.call(['git', 'pull', '-q'])
     if proc != 0:
-        msg = MDTeXDocument(
+        msg = KanTeXDocument(
             Section('Error',
                     f'{Code("git")} returned non-zero exit code.',
                     'Please update manually'))
@@ -45,21 +46,35 @@ async def update(client: Client, event: Command, tags: Tags) -> None:
     new_commit = helpers.get_commit()
     if old_commit == new_commit:
         await client.respond(
-            event, MDTeXDocument(
+            event, KanTeXDocument(
                 Section('No Update Available',
                         Italic('Doing nothing'))))
         return
 
+    # region pip install
+    proc = subprocess.call(['pip', 'install', '-r', 'requirements.txt'])
+    if proc != 0:
+        msg = KanTeXDocument(
+            Section('Error',
+                    f'{Code("pip")} returned non-zero exit code.',
+                    'Please update manually'))
+        if not silent:
+            await progess_message.edit(str(msg))
+        else:
+            await client.respond(event, msg)
+        return
+    # endregion
+
     # region migrant
     '''
     if not silent:
-        await progess_message.edit(str(MDTeXDocument(
+        await progess_message.edit(str(KanTeXDocument(
             Section('Updating',
                     f'Running {Code("migrant apply --all")}'))))
     proc = subprocess.run(['migrant', 'apply', '--all'], stderr=subprocess.PIPE)
     if proc.returncode != 0:
         if b'MigrationComplete' not in proc.stderr:
-            msg = MDTeXDocument(
+            msg = KanTeXDocument(
                 Section('Error',
                         f'{Code("migrant")} returned non-zero exit code.',
                         'Please update manually'))
@@ -74,7 +89,7 @@ async def update(client: Client, event: Command, tags: Tags) -> None:
     if not silent:
         await progess_message.delete()
         await client.respond(
-            event, MDTeXDocument(
+            event, KanTeXDocument(
                 Section('Updated Kantek',
                         KeyValueItem('New commit', Link(new_commit, helpers.link_commit(new_commit))),
                         Italic('Restarting bot'))))

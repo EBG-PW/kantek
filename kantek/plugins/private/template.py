@@ -1,16 +1,17 @@
 from typing import Optional
 
+from kantex.md import *
 from telethon.tl.custom import Message
 
 from database.database import Database
-from utils.mdtex import *
+from utils.errors import MissingArgumentsError
 from utils.pluginmgr import k
 
 QUERY_MAX_LENGTH = 20
 
 
 @k.command('template', 't')
-async def template(args, db: Database, event, msg: Message) -> Optional[MDTeXDocument]:
+async def template(args, db: Database, event, msg: Message) -> Optional[KanTeXDocument]:
     """Edit the command with the templates content
 
     Arguments:
@@ -29,7 +30,7 @@ async def template(args, db: Database, event, msg: Message) -> Optional[MDTeXDoc
 
 
 @template.subcommand()
-async def add(args, db: Database) -> MDTeXDocument:
+async def add(args, db: Database) -> KanTeXDocument:
     """Add a template
 
     Arguments:
@@ -40,18 +41,18 @@ async def add(args, db: Database) -> MDTeXDocument:
         {cmd} test testcontent
     """
     if len(args) < 2:
-        return MDTeXDocument(Section('Error', Italic('Missing arguments.')))
+        raise MissingArgumentsError(f'Missing {Code("name")} and {Code("content")}')
     name, content = args[:2]
     existing = await db.templates.get(args[0])
     await db.templates.add(name, content)
-    return MDTeXDocument(
+    return KanTeXDocument(
         Section(f'Template {"update" if existing else "created"}',
                 KeyValueItem('name', Code(name)),
                 KeyValueItem('content', Code(content))))
 
 
 @template.subcommand()
-async def del_(args, db: Database) -> MDTeXDocument:
+async def del_(args, db: Database) -> KanTeXDocument:
     """Delete the specified template names
 
     Arguments:
@@ -59,18 +60,18 @@ async def del_(args, db: Database) -> MDTeXDocument:
     """
     for name in args:
         await db.templates.delete(name)
-    return MDTeXDocument(Section('Templates deleted', Code(', '.join(args))))
+    return KanTeXDocument(Section('Templates deleted', Code(', '.join(args))))
 
 
 @template.subcommand()
-async def query(db: Database) -> MDTeXDocument:
+async def query(db: Database) -> KanTeXDocument:
     """List all templates
 
     Examples:
         {cmd}
     """
     templates = await db.templates.get_all()
-    return MDTeXDocument(
+    return KanTeXDocument(
         Section('Templates',
                 *[KeyValueItem(t.name, Code(f'{t.content[:QUERY_MAX_LENGTH]}'
                                             f'{"..." if len(t.content) > QUERY_MAX_LENGTH else ""}')) for t in templates]))

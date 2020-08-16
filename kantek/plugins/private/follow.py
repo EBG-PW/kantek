@@ -2,16 +2,17 @@ import logging
 from typing import List
 
 from aiohttp import InvalidURL, TooManyRedirects
+from kantex.md import *
 
 from utils.client import Client
-from utils.mdtex import *
+from utils.errors import MissingArgumentsError
 from utils.pluginmgr import k
 
 tlog = logging.getLogger('kantek-channel-log')
 
 
 @k.command('follow', 'f')
-async def follow(client: Client, args: List) -> MDTeXDocument:
+async def follow(client: Client, args: List) -> KanTeXDocument:
     """Follow URL redirects until the end
 
     Arguments:
@@ -22,7 +23,7 @@ async def follow(client: Client, args: List) -> MDTeXDocument:
         {cmd} src.kv2.dev
     """
     if not args:
-        return MDTeXDocument(Section('Error', Italic('No URL was provided')))
+        raise MissingArgumentsError('No url was provided')
     sections = []
     for i, url in enumerate(args):
         if not url.startswith('http'):
@@ -38,7 +39,7 @@ async def follow(client: Client, args: List) -> MDTeXDocument:
             responses.append(Italic(f'Invalid URL: {Code(url)}'))
         sections.append(SubSection(f'URL {i + 1}', *responses))
 
-    return MDTeXDocument(Section('Follow', *sections))
+    return KanTeXDocument(Section('Follow', *sections))
 
 
 def format_responses(responses):

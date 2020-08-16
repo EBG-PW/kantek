@@ -6,7 +6,7 @@ from telethon.tl.patched import Message
 from telethon.tl.types import User
 
 from utils.client import Client
-from utils.mdtex import *
+from kantex.md import *
 from utils.pluginmgr import k, Command
 
 tlog = logging.getLogger('kantek-channel-log')
@@ -24,7 +24,7 @@ async def sw(client: Client, args: List, kwargs: Dict, event: Command) -> None:
     result = ''
 
     if client.sw.permission != Permission.Root:
-        await client.respond(event, MDTeXDocument(Section('Insufficient Permission',
+        await client.respond(event, KanTeXDocument(Section('Insufficient Permission',
                                                           'Root Permission required.')))
     if subcommand == 'token':
         result = await _token(event, client, args, kwargs)
@@ -41,7 +41,7 @@ async def _token(event, client, args, keyword_args):
             reply_message: Message = await msg.get_reply_message()
             userid = reply_message.from_id
         else:
-            return MDTeXDocument(Section('Missing Argument',
+            return KanTeXDocument(Section('Missing Argument',
                                          'A ID is required.'))
     else:
         id = id[0]
@@ -50,7 +50,7 @@ async def _token(event, client, args, keyword_args):
         permission = keyword_args.get('permission', 'User')
         permission = _permission_map.get(permission)
         token = client.sw.create_token(id, permission)
-        return MDTeXDocument(Section('SpamWatch Token',
+        return KanTeXDocument(Section('SpamWatch Token',
                                      KeyValueItem('ID', Code(token.id)),
                                      KeyValueItem('User', Code(token.userid)),
                                      KeyValueItem('Permission', token.permission.name),
@@ -61,7 +61,7 @@ async def _token(event, client, args, keyword_args):
 
     if command == 'revoke':
         token = client.sw.delete_token(id)
-        return MDTeXDocument(Section('EBG-Watch Token',
+        return KanTeXDocument(Section('EBG-Watch Token',
                                      KeyValueItem('ID', Code(id)),
                                      KeyValueItem('Status', Code('RETIRED'))))
 
@@ -74,7 +74,7 @@ async def _token(event, client, args, keyword_args):
             username = 'None'
             pass
         active: bool = not token.retired
-        return MDTeXDocument(Section('EBG-Watch Token',
+        return KanTeXDocument(Section('EBG-Watch Token',
                                      KeyValueItem('ID', Code(token.id)),
                                      KeyValueItem('User', Code(token.userid)),
                                      KeyValueItem('Permission', token.permission.name),
