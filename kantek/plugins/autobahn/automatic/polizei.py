@@ -134,9 +134,7 @@ async def _check_message(event):  # pylint: disable = R0911
     user_id = msg.from_id
     if user_id is None:
         return False, False
-    # exclude users below a certain id to avoid banning "legit" users
-    if user_id and user_id < 610000000:
-        return False, False
+
     try:
         result = await client(GetParticipantRequest(event.chat_id, user_id))
         if isinstance(result.participant, ChannelParticipantAdmin):
@@ -211,7 +209,10 @@ async def _check_message(event):  # pylint: disable = R0911
         channel = ''
         _entity = None
         if isinstance(entity, MessageEntityUrl):
-            domain = await client.resolve_url(text)
+            try:
+                domain = await client.resolve_url(text)
+            except ValueError:
+                pass
             face_domain = await helpers.netloc(text)
             if domain in constants.TELEGRAM_DOMAINS:
                 # remove any query parameters like ?start=
