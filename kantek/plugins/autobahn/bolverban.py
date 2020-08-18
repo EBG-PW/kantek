@@ -79,7 +79,7 @@ async def bban(client: Client, db: Database, tags: Tags, chat: Channel, msg: Mes
         results: custom.inlineresults = await client.inline_query('JoinProtectionBot', f'token {uid}')
         haftbefehl: custom.InlineResult = results[0]
 
-        message = haftbefehl.click(chat, reply_to=reply_msg)
+        message = await haftbefehl.click(chat, reply_to=reply_msg)
 
     else:
         return KanTeXDocument(Section('Error', SubSection(Code('Not an reply'))))
