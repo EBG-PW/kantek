@@ -49,7 +49,7 @@ async def bban(client: Client, db: Database, tags: Tags, chat: Channel, msg: Mes
                                                                   f'gban {uid} {offender.username if offender.username else offender.first_name}')
         haftbefehl: custom.InlineResult = results[0]
 
-        message = haftbefehl.click(chat, reply_to=reply_msg)
+        message = await haftbefehl.click(chat, reply_to=reply_msg)
 
 
     else:
