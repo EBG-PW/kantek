@@ -1,21 +1,13 @@
-import asyncio
-import datetime
 import logging
 from typing import Dict, Optional, List
 
-from telethon.errors import UserNotParticipantError
+from kantex.md import *
 from telethon.tl import custom
-
 from telethon.tl.custom import Message
-from telethon.tl.functions.channels import GetParticipantRequest
-from telethon.tl.functions.messages import ReportRequest
-from telethon.tl.types import (Channel, InputReportReasonSpam, InputPeerChannel, ChannelParticipantCreator,
-                               InputMessagesFilterPhotos, User)
+from telethon.tl.types import (Channel, User)
 
 from database.database import Database
-from utils import helpers, parsers
 from utils.client import Client
-from kantex.md import *
 from utils.pluginmgr import k, Command
 from utils.tags import Tags
 
