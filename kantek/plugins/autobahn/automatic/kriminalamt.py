@@ -34,7 +34,7 @@ async def kriminalamt(event: ChatAction.Event) -> None:
     chat: Channel = await event.get_chat()
     user: User = await event.get_user()
     tags = await Tags.from_event(event)
-    enabled = tags.get('kriminalamt', False)
+    enabled = tags.get('kriminalamt', True)
     bancmd = tags.get('gbancmd', 'manual')
     delay = 1
     if not event.user_joined or not (chat.creator or chat.admin_rights):
