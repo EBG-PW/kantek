@@ -166,7 +166,7 @@ async def _collect_user_info(client, user, db, **kwargs) -> Union[str, Section, 
             if bw_ban:
                 bw_ban_message = bw_ban.message
                 if bw_ban_message and not full_ban_msg:
-                    bw_ban_message = f'{sw_ban_message[:128]}{"[...]" if len(sw_ban_message) > 128 else ""}'
+                    bw_ban_message = f'{bw_ban_message[:128]}{"[...]" if len(bw_ban_message) > 128 else ""}'
 
 
     if id_only:
