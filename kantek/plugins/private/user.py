@@ -117,9 +117,15 @@ async def _collect_user_info(client, user, db, **kwargs) -> Union[str, Section, 
     full_ban_msg = kwargs.get('full', False)
     show_ebgwatch = kwargs.get('ebg', False)
     show_spamwatch = kwargs.get('sw', False)
+    show_bolverwatch = kwargs.get('bw', False)
 
     config = Config()
-    swoclient = SWOClient(config.original_spamwatch_token)
+    if config.original_spamwatch_token:
+        swoclient = SWOClient(config.original_spamwatch_token)
+    if config.bolver_spamwatch_token:
+        swbclient = SWOClient(config.bolver_spamwatch_token, host='https://spamapi.bolverblitz.net/')
+    else:
+        swbclient = None
 
     if show_all:
         show_general = True
@@ -153,6 +159,15 @@ async def _collect_user_info(client, user, db, **kwargs) -> Union[str, Section, 
             sw_ban_message = sw_ban.message
             if sw_ban_message and not full_ban_msg:
                 sw_ban_message = f'{sw_ban_message[:128]}{"[...]" if len(sw_ban_message) > 128 else ""}'
+
+    if swbclient is not None:
+        if swbclient  and swbclient.permission.value <= Permission.User.value:
+            bw_ban = swbclient.get_ban(int(user.id))
+            if bw_ban:
+                bw_ban_message = bw_ban.message
+                if bw_ban_message and not full_ban_msg:
+                    bw_ban_message = f'{sw_ban_message[:128]}{"[...]" if len(sw_ban_message) > 128 else ""}'
+
 
     if id_only:
         return KeyValueItem(title, Code(user.id))
@@ -206,6 +221,23 @@ async def _collect_user_info(client, user, db, **kwargs) -> Union[str, Section, 
         else:
             spamwatch.append(KeyValueItem('banned', Code('False')))
 
+        bolverwatch = SubSection('BolverWatch')
+        if swbclient is not None:
+            if bw_ban:
+                bolverwatch.extend([
+                    KeyValueItem('reason', Code(bw_ban.reason)),
+                    KeyValueItem('date', Code(bw_ban.date)),
+                    KeyValueItem('timestamp', Code(bw_ban.timestamp)),
+                    KeyValueItem('admin', Code(bw_ban.admin)),
+                    KeyValueItem('message', Code(bw_ban_message)),
+                ])
+            elif not swbclient:
+                bolverwatch.append(Italic('Disabled'))
+            else:
+                bolverwatch.append(KeyValueItem('banned', Code('False')))
+        else:
+            bolverwatch.append(Italic('Disabled'))
+
         bot = SubSection(
             Bold('Bot'),
             KeyValueItem('bot', Code(user.bot)),
@@ -229,5 +261,6 @@ async def _collect_user_info(client, user, db, **kwargs) -> Union[str, Section, 
                        general if show_general else None,
                        ebgwatch if show_ebgwatch else None,
                        spamwatch if show_spamwatch else None,
+                       bolverwatch if show_bolverwatch else None,
                        misc if show_misc else None,
                        bot if show_bot else None)
