@@ -15,6 +15,7 @@ class ConfigWrapper:
     api_id: int
     api_hash: str
     phone: str
+    phone_reporter: str
 
     db_password: str
 
