@@ -9,7 +9,7 @@ from telethon.tl.types import MessageEntityMention, MessageEntityMentionName, Us
 
 from utils import helpers, constants
 from utils.client import Client
-from utils.mdtex import *
+from kantex.md import *
 from utils.pluginmgr import k
 from utils.tags import Tags
 
@@ -20,7 +20,7 @@ tlog = logging.getLogger('kantek-channel-log')
 
 @k.command('fedstat', 'fs')
 async def fedcheck(msg: Message, tags: Tags, client: Client, db,
-                   args: List, kwargs: Dict) -> Optional[MDTeXDocument]:
+                   args: List, kwargs: Dict) -> Optional[KanTeXDocument]:
 
     if not args and msg.is_reply:
         return await _info_from_reply(client, msg, db, kwargs, tags)
@@ -28,7 +28,7 @@ async def fedcheck(msg: Message, tags: Tags, client: Client, db,
         return await _info_from_arguments(client, msg, db, args, kwargs)
 
 
-async def _info_from_arguments(client, msg, db, args, kwargs) -> MDTeXDocument:
+async def _info_from_arguments(client, msg, db, args, kwargs) -> KanTeXDocument:
     entities = []
     for entity in msg.get_entities_text():
         obj, text = entity
@@ -50,22 +50,22 @@ async def _info_from_arguments(client, msg, db, args, kwargs) -> MDTeXDocument:
         except constants.GET_ENTITY_ERRORS as err:
             errors.append(str(entity))
     if users:
-        return MDTeXDocument(*users, (Section(Bold('Errors for'), Code(', '.join(errors)))) if errors else '')
+        return KanTeXDocument(*users, (Section(Bold('Errors for'), Code(', '.join(errors)))) if errors else '')
 
 
-async def _info_from_reply(client, msg, db, kwargs, tags) -> MDTeXDocument:
+async def _info_from_reply(client, msg, db, kwargs, tags) -> KanTeXDocument:
     get_forward = kwargs.get('forward', True)
     reply_msg: Message = await msg.get_reply_message()
 
     if get_forward and reply_msg.forward is not None:
         forward: Forward = reply_msg.forward
         if forward.sender_id is None:
-            return MDTeXDocument(Section('Error', 'User has forward privacy enabled'))
+            return KanTeXDocument(Section('Error', 'User has forward privacy enabled'))
         user: User = await client.get_entity(forward.sender_id)
     else:
         user: User = await client.get_entity(reply_msg.sender_id)
     user_section = await _collect_user_info(client, user)
-    return MDTeXDocument(user_section)
+    return KanTeXDocument(user_section)
 
 
 async def _collect_user_info(client, user) -> Union[str, Section, KeyValueItem]:

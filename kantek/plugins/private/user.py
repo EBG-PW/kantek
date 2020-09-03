@@ -11,7 +11,6 @@ from database.database import Database
 from utils import helpers, constants
 from utils.client import Client
 from utils.config import Config
-from utils.mdtex import *
 from utils.errors import Error
 from utils.pluginmgr import k
 from utils.tags import Tags
