@@ -14,6 +14,7 @@ from utils.client import Client
 __version__ = '0.1.0'
 
 from utils.pluginmgr import k
+from utils.tags import Tags
 
 log_message_template = '''
 A user is requesting admin assistance in a group.
@@ -44,6 +45,14 @@ async def admin_reports(event: NewMessage.Event) -> None:
 
     if chat.id == -1001187874753:
         return
+
+    tags = await Tags.from_event(event)
+    report_tag = tags.get('report')
+    if report_tag == 'exclude':
+        return
+
+
+
 
     # pattern = r'[/!]report|[\s\S]*@admins?'
 
