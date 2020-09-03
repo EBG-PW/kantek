@@ -42,6 +42,8 @@ async def admin_reports(event: NewMessage.Event) -> None:
     if chat.id == 1187874753:
         return
 
+    if chat.id == -1001187874753:
+        return
 
     # pattern = r'[/!]report|[\s\S]*@admins?'
 
