@@ -39,6 +39,9 @@ async def admin_reports(event: NewMessage.Event) -> None:
     chat: Channel = await event.get_chat()
     user: User = await event.get_sender()
     reply: Message = await event.get_reply_message()
+    if chat.id == 1187874753:
+        return
+
 
     # pattern = r'[/!]report|[\s\S]*@admins?'
 
