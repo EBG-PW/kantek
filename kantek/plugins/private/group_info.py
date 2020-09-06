@@ -63,3 +63,5 @@ async def user_info(msg: Message, tags: Tags, client: Client, db: Database,
 
     if failed:
         tlog.warning(f'Could not set tags for {Code(", ".join(failed))}')
+
+    return response
