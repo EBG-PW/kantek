@@ -13,7 +13,7 @@ from telethon.tl.types import (Channel, ChannelParticipantsAdmins, MessageAction
 
 from utils.client import Client
 from utils.config import Config
-from utils.mdtex import *
+from kantex.md import *
 from utils.pluginmgr import k
 from utils.tags import Tags
 
@@ -107,7 +107,7 @@ async def spamschutz(event: Union[ChatAction.Event, NewMessage.Event]) -> None: 
         if not silent:
             try:
                 user = await client.get_entity(uid)
-                message = MDTeXDocument(Section(
+                message = KanTeXDocument(Section(
                     Bold('SpamSchutz Grenzschutz Ban'),
                     KeyValueItem(Bold("User"),
                                  f'{Mention(user.first_name, uid)} [{Code(uid)}]'),

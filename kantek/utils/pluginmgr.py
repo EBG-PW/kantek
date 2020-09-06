@@ -26,7 +26,7 @@ from utils import helpers
 from utils.config import Config
 from utils.constants import GET_ENTITY_ERRORS
 from utils.errors import Error
-from utils.mdtex import *
+from kantex.md import *
 from utils.tags import Tags
 
 logger = logzero.setup_logger('kantek-logger', level=logging.DEBUG)

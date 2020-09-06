@@ -33,9 +33,10 @@ async def main() -> None:
     db = Database()
     await db.connect(config)
 
-    client = Client(str(config.session_name), config.api_id, config.api_hash)
+    client = Client(str(config.session_name), config.api_id, config.api_hash, request_retries=8, retry_delay=10, auto_reconnect=True, flood_sleep_threshold=60)
     # noinspection PyTypeChecker
-    await client.start(config.phone)
+    while not client.is_connected():
+        await client.start(config.phone)
     client.config = config
     client.kantek_version = __version__
 

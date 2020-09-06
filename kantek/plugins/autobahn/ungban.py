@@ -28,9 +28,9 @@ async def ungban(client: Client, db: Database, msg: Message, args: List) -> Opti
 
     unbanned_users = []
     for uid in users_to_unban:
-        if await db.banlist.get(uid):
-            await client.ungban(uid)
-            unbanned_users.append(str(uid))
+        # if await db.banlist.get(uid):
+        await client.ungban(uid)
+        unbanned_users.append(str(uid))
     if unbanned_users:
         return KanTeXDocument(
             Section('Un-GBanned Users',
