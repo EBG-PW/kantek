@@ -7,7 +7,7 @@ import logzero
 from PIL import UnidentifiedImageError
 from photohash import hashes_are_similar
 from telethon import events
-from telethon.errors import UserNotParticipantError, ChannelPrivateError, FloodWaitError
+from telethon.errors import UserNotParticipantError, ChannelPrivateError, FloodWaitError, ChatAdminRequiredError
 from telethon.events import ChatAction, NewMessage
 from telethon.tl.custom import Message
 from telethon.tl.custom import MessageButton
@@ -45,6 +45,7 @@ async def polizei(event: NewMessage.Event) -> None:
         return
     client: Client = event.client
     chat: Channel = await event.get_chat()
+
     tags = await Tags.from_event(event)
     bancmd = tags.get('gbancmd', 'manual')
     polizei_tag = tags.get('polizei')
@@ -139,7 +140,7 @@ async def _check_message(event):  # pylint: disable = R0911
         result = await client(GetParticipantRequest(event.chat_id, user_id))
         if isinstance(result.participant, ChannelParticipantAdmin):
             return False, False
-    except (ValueError, TypeError, UserNotParticipantError):
+    except (ValueError, TypeError, UserNotParticipantError, ChatAdminRequiredError):
         return False, False
 
     # no need to ban bots as they can only be added by users anyway
