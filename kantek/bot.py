@@ -13,7 +13,7 @@ from utils.loghandler import TGChannelLogHandler
 from utils.pluginmgr import PluginManager
 
 logger = logzero.setup_logger('kantek-logger', level=logging.DEBUG)
-telethon_logger = logzero.setup_logger('telethon', level=logging.INFO)
+telethon_logger = logzero.setup_logger('telethon', level=logging.DEBUG)
 tlog = logging.getLogger('kantek-channel-log')
 
 tlog.setLevel(logging.INFO)
@@ -35,8 +35,10 @@ async def main() -> None:
 
     client = Client(str(config.session_name), config.api_id, config.api_hash, request_retries=8, retry_delay=10, auto_reconnect=True, flood_sleep_threshold=60)
     # noinspection PyTypeChecker
-    while not client.is_connected():
-        await client.start(config.phone)
+
+    await client.connect()
+    if not await client.is_user_authorized():
+        await client.start()
     client.config = config
     client.kantek_version = __version__
 
