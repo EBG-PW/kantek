@@ -1,4 +1,3 @@
-"""Plugin that automatically bans according to a blacklist"""
 import asyncio
 import itertools
 import logging
@@ -44,8 +43,10 @@ async def polizei(event: NewMessage.Event) -> None:
     if event.is_private:
         return
     client: Client = event.client
-    chat: Channel = await event.get_chat()
-
+    try:
+        chat: Channel = await event.get_chat()
+    except ChannelPrivateError:
+        return
     tags = await Tags.from_event(event)
     bancmd = tags.get('gbancmd', 'manual')
     polizei_tag = tags.get('polizei')
@@ -66,7 +67,10 @@ async def join_polizei(event: ChatAction.Event) -> None:
     if not event.user_joined:
         return
     client: Client = event.client
-    chat: Channel = await event.get_chat()
+    try:
+        chat: Channel = await event.get_chat()
+    except ChannelPrivateError:
+        return
     db: Database = client.db
     tags = await Tags.from_event(event)
     bancmd = tags.get('gbancmd')
@@ -255,7 +259,7 @@ async def _check_message(event):  # pylint: disable = R0911
                         except UnidentifiedImageError:
                             pass
 
-            except (*constants.GET_ENTITY_ERRORS, ChannelPrivateError, ):
+            except (*constants.GET_ENTITY_ERRORS, ChannelPrivateError):
                 pass
 
         # urllib doesnt like urls without a protocol
