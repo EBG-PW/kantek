@@ -39,6 +39,8 @@ async def admin_reports(event: NewMessage.Event) -> None:
     client: Client = event.client
     chat: Channel = await event.get_chat()
     user: User = await event.get_sender()
+    if user is None:
+        return
     reply: Message = await event.get_reply_message()
     ebg_ban = client.sw.get_ban(int(user.id))
     if ebg_ban:

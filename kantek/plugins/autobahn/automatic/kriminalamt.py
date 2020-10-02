@@ -40,6 +40,9 @@ async def kriminalamt(event: ChatAction.Event) -> None:
     if not event.user_joined or not (chat.creator or chat.admin_rights):
         return
 
+    if user == None:
+        logger.warning(f'Found None User on {chat}')
+
     if not enabled or user.bot:
         return
 
