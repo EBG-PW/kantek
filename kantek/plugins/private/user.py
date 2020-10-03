@@ -112,11 +112,13 @@ async def _collect_user_info(client, user, db, **kwargs) -> Union[str, Section, 
     show_general = kwargs.get('general', True)
     show_bot = kwargs.get('bot', False)
     show_misc = kwargs.get('misc', False)
+    show_spe = kwargs.get('spe', False)
     show_all = kwargs.get('all', False)
     full_ban_msg = kwargs.get('full', False)
     show_ebgwatch = kwargs.get('ebg', False)
     show_spamwatch = kwargs.get('sw', False)
     show_bolverwatch = kwargs.get('bw', False)
+    is_cute = kwargs.get('c', False)
 
     config = Config()
     if config.original_spamwatch_token:
@@ -131,6 +133,9 @@ async def _collect_user_info(client, user, db, **kwargs) -> Union[str, Section, 
         show_bot = True
         show_misc = True
         show_spamwatch = True
+        show_spe = True
+        show_ebgwatch = True
+        show_bolverwatch = True
 
     mention_name = kwargs.get('mention', False)
 
@@ -255,10 +260,24 @@ async def _collect_user_info(client, user, db, **kwargs) -> Union[str, Section, 
             KeyValueItem('min', Code(user.min)),
             KeyValueItem('lang_code', Code(user.lang_code)))
 
+        special_stuff = SubSection('Additional Info')
+        if show_spe:
+
+            cute: str = ('yes' if (user.id == 483808054) else 'no' )
+            if is_cute:
+                cute: str = f'{user.first_name} is very cute!!1'
+            sus: str = ('yes' if ((user.id % 2) == 0) and (user.id > 100000000) else 'no')
+
+            special_stuff.extend([
+                KeyValueItem('Cute', cute),
+                KeyValueItem('Sus', sus)
+             ])
+
         return Section(title,
                        general if show_general else None,
                        ebgwatch if show_ebgwatch else None,
                        spamwatch if show_spamwatch else None,
                        bolverwatch if show_bolverwatch else None,
                        misc if show_misc else None,
+                       special_stuff if show_spe else None,
                        bot if show_bot else None)
