@@ -1,7 +1,10 @@
 """Plugin to log all admin reports."""
+import logging
 from html import escape
 
 import re
+
+import logzero
 from telethon import events
 from telethon.errors import MessageIdInvalidError
 from telethon.events import NewMessage
@@ -15,6 +18,10 @@ __version__ = '0.1.0'
 
 from utils.pluginmgr import k
 from utils.tags import Tags
+
+tlog = logging.getLogger('kantek-channel-log')
+logger: logging.Logger = logzero.logger
+
 
 log_message_template = '''
 A user is requesting admin assistance in a group.
@@ -38,25 +45,27 @@ async def admin_reports(event: NewMessage.Event) -> None:
     msg: Message = event.message
     client: Client = event.client
     chat: Channel = await event.get_chat()
-    user: User = await event.get_sender()
-    if user is None:
-        return
-    reply: Message = await event.get_reply_message()
-    ebg_ban = client.sw.get_ban(int(user.id))
-    if ebg_ban:
-        return
+    try:
+        user: User = await event.get_sender()
+        if user is None:
+            return
+        reply: Message = await event.get_reply_message()
+        ebg_ban = client.sw.get_ban(int(user.id))
+        if ebg_ban:
+            return
 
-    if chat.id == 1187874753:
-        return
+        if chat.id == 1187874753:
+            return
 
-    if chat.id == -1001187874753:
-        return
+        if chat.id == -1001187874753:
+            return
 
-    tags = await Tags.from_event(event)
-    report_tag = tags.get('report')
-    if report_tag == 'exclude':
-        return
-
+        tags = await Tags.from_event(event)
+        report_tag = tags.get('report')
+        if report_tag == 'exclude':
+            return
+    except Exception as e:
+        tlog.critical(e)
 
 
 
