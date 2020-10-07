@@ -9,7 +9,7 @@ from utils.pluginmgr import k
 tlog = logging.getLogger('kantek-channel-log')
 
 
-@k.command('purge')
+@k.command('purge', admins=True)
 async def puge(client: Client, chat: Channel, msg: Message, args, event) -> None:
     """Purge all messages from the the point the command was sent to the message that was replied to.
 
@@ -20,6 +20,8 @@ async def puge(client: Client, chat: Channel, msg: Message, args, event) -> None
         {cmd}
     """
     await msg.delete()
+    if not chat.megagroup:
+        return
     if not msg.is_reply:
         if args:
             count = args[0]
