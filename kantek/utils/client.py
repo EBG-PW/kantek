@@ -5,6 +5,7 @@ import logging
 import re
 import socket
 from typing import Optional, Union, Tuple
+from random import randint
 
 import logzero
 import spamwatch
@@ -92,6 +93,10 @@ class Client(TelegramClient):  # pylint: disable = R0901, W0223
         # if the user account is deleted this can be None
         if uid is None:
             return False, 'Deleted account'
+
+        time_to_sleep: int = randint(1, 20)
+        asyncio.sleep(time_to_sleep)
+
         user = await self.db.banlist.get(uid)
         for ban_reason in AUTOMATED_BAN_REASONS:
             if user and (ban_reason in user.reason.lower()):
@@ -108,6 +113,13 @@ class Client(TelegramClient):  # pylint: disable = R0901, W0223
                     count = int(count.group('count')) + int(previous_count.group('count'))
                     reason = f"spam adding {count}+ members"
 
+        data = {
+            'id': str(uid),
+            'reason': reason
+        }
+
+        await self.db.banlist.upsert_multiple([data])
+
         await self.send_message(
             self.config.gban_group,
             f'<a href="tg://user?id={uid}">{uid}</a>', parse_mode='html')
@@ -117,13 +129,6 @@ class Client(TelegramClient):  # pylint: disable = R0901, W0223
         await self.send_message(
             self.config.gban_group,
             f'/fban {uid} {reason}')
-
-        data = {
-            'id': str(uid),
-            'reason': reason
-        }
-
-        await self.db.banlist.upsert_multiple([data])
 
         if self.sw and self.sw.permission in [Permission.Admin,
                                               Permission.Root]:
