@@ -42,4 +42,4 @@ async def purge(client: Client, chat: Channel, msg: Message, args, kwargs: Dict,
     if sure:
         await client.delete_messages(chat, message_ids)
     else:
-        await client.respond(msg, 'Please use -YesImSure to clarify you understand the extend of your actions!!')
+        await client.respond(reply_msg, 'Please use -YesImSure to clarify you understand the extend of your actions!!')
