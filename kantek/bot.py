@@ -13,7 +13,7 @@ from utils.loghandler import TGChannelLogHandler
 from utils.pluginmgr import PluginManager
 
 logger = logzero.setup_logger('kantek-logger', level=logging.DEBUG)
-telethon_logger = logzero.setup_logger('telethon', level=logging.DEBUG)
+telethon_logger = logzero.setup_logger('telethon', level=logging.WARNING)
 tlog = logging.getLogger('kantek-channel-log')
 
 tlog.setLevel(logging.INFO)
