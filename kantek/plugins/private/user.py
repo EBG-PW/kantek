@@ -110,6 +110,7 @@ async def _collect_user_info(client, user, db, **kwargs) -> Union[str, Section, 
     id_only = kwargs.get('id', False)
     gban_format = kwargs.get('gban', False)
     show_general = kwargs.get('general', True)
+    no_general = kwargs.get('ng', False)
     show_bot = kwargs.get('bot', False)
     show_misc = kwargs.get('misc', False)
     show_spe = kwargs.get('spe', False)
@@ -119,6 +120,9 @@ async def _collect_user_info(client, user, db, **kwargs) -> Union[str, Section, 
     show_spamwatch = kwargs.get('sw', False)
     show_bolverwatch = kwargs.get('bw', False)
     is_cute = kwargs.get('c', False)
+
+    if no_general:
+        show_general = False
 
     config = Config()
     if config.original_spamwatch_token:
