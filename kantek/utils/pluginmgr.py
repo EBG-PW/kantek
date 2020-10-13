@@ -220,7 +220,7 @@ class PluginManager:
 
         chat = await event.get_chat()
         if admins and event.is_channel:
-            uid = event.message.from_id
+            uid = event.message.sender_id
             own_id = (await client.get_me()).id
             if uid != own_id and _kwargs.get('self', False) or (not chat.creator and not chat.admin_rights):
                 return
