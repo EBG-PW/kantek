@@ -19,7 +19,7 @@ from telethon.events import NewMessage
 from telethon.events.common import EventBuilder
 from telethon.tl.custom import Forward, Message
 from telethon.tl.functions.channels import GetParticipantRequest
-from telethon.tl.types import ChannelParticipantAdmin, DocumentAttributeFilename
+from telethon.tl.types import ChannelParticipantAdmin, DocumentAttributeFilename, ChannelParticipantCreator
 from telethon.utils import get_display_name
 
 from utils import helpers
@@ -225,7 +225,7 @@ class PluginManager:
             if uid != own_id and _kwargs.get('self', False) or (not chat.creator and not chat.admin_rights):
                 return
             result = await client(GetParticipantRequest(event.chat_id, uid))
-            if not isinstance(result.participant, ChannelParticipantAdmin) and uid != own_id:
+            if not isinstance(result.participant, (ChannelParticipantAdmin, ChannelParticipantCreator)) and uid != own_id:
                 return
 
         if _kwargs.get('help', False):
