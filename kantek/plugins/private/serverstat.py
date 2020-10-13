@@ -77,7 +77,7 @@ async def bbservers(msg: Message, tags: Tags, client: Client, db,
     """
     all_true: bool = kwargs.get('all', False)
 
-    await msg.delete()
+
 
     chat: Channel = msg.chat
 
