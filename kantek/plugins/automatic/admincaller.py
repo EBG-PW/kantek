@@ -78,6 +78,11 @@ async def admin_reports(event: NewMessage.Event) -> None:
 
     logged_reply = None
     if reply:
+        reply_user: User = await reply.get_sender()
+        ebg_ban = client.sw.get_ban(int(reply_user.id))
+        if ebg_ban:
+            return
+
         try:
             logged_reply = await reply.forward_to(-1001187874753)
         except MessageIdInvalidError:
@@ -92,7 +97,6 @@ async def admin_reports(event: NewMessage.Event) -> None:
 
     if logged_reply:
         logged_reply_chat: Channel = await logged_reply.get_chat()
-        reply_user: User = await reply.get_sender()
         logged_link = f'{logged_reply_chat.id}/{logged_reply.id}'
         log_messsage += log_reply_template.format(reportee_id=reply_user.id,
                                                   reportee_name=escape(
