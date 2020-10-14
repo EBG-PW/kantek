@@ -16,9 +16,9 @@ __version__ = '0.1.2'
 tlog = logging.getLogger('kantek-channel-log')
 
 
-async def roundToBits(Input: int, bit) -> str:
-    size = Input
-    hrSize = ""
+async def roundToBits(input_number: int, bit) -> str:
+    size = input_number
+    size_string = ""
     b = size
     k = size / 1024.0
     m = size / 1048576.0
@@ -26,17 +26,17 @@ async def roundToBits(Input: int, bit) -> str:
     t = size / 1099511627776.0
 
     if b > 1:
-        hrSize = f'{round(b, 2)}' 'bit/s' if bit else 'B'
+        size_string = f'{round(b, 2)} {"bit/s" if bit else "B"}'
     if k > 1:
-        hrSize = f'{round(k, 2)}' 'kbit/s' if bit else 'KB'
+        size_string = f'{round(k, 2)} {"Kbit/s" if bit else "KB"}'
     if m > 1:
-        hrSize = f'{round(m, 2)}' 'mbit/s' if bit else 'MB'
+        size_string = f'{round(m, 2)} {"Mbit/s" if bit else "MB"}'
     if g > 1:
-        hrSize = f'{round(g, 2)}' 'gbit/s' if bit else 'GB'
+        size_string = f'{round(g, 2)} {"Gbit/s" if bit else "GB"}'
     if t > 1:
-        hrSize = f'{round(t, 2)}' 'tbit/s' if bit else 'TB'
+        size_string = f'{round(t, 2)} {"Tbit/s" if bit else "TB"}'
 
-    return hrSize
+    return size_string
 
 
 
