@@ -1,7 +1,7 @@
 import secrets
 from typing import Union, Dict, List, Optional
 
-from database.types import BlacklistItem, BannedUser, Chat, Template
+from database.types import BlacklistItem, BannedUser, Chat, Template, WhitelistUser
 from utils.config import Config
 
 
@@ -160,6 +160,17 @@ class Templates(Table):
         return await self.db.templates.delete(name)
 
 
+class Whitelist(Table):
+    async def get(self, uid) -> WhitelistUser:
+        return await self.db.whitelist.get_user(uid)
+
+    async def add(self, uid: int) -> WhitelistUser:
+        return await self.db.whitelist.add_user(uid)
+
+    async def remove(self, uid: int) -> None:
+        return await self.db.whitelist.remove(uid)
+
+
 class Blacklists:
     def __init__(self, parent: 'Database'):
         self.db = parent.db
@@ -199,6 +210,7 @@ class Database:
             raise UnknownDatabaseError('Choose from: postgres')
         self.strafanzeigen = Strafanzeigen(self)
         self.banlist = Banlist(self)
+        self.whitelist = Whitelist(self)
         self.blacklists = Blacklists(self)
         self.chats = Chats(self)
         self.templates = Templates(self)

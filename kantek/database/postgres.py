@@ -7,7 +7,7 @@ from typing import Dict, Optional, List
 import asyncpg as asyncpg
 from asyncpg.pool import Pool
 
-from database.types import BlacklistItem, Chat, BannedUser, Template
+from database.types import BlacklistItem, Chat, BannedUser, Template, WhitelistUser
 
 
 class TableWrapper:
@@ -96,7 +96,8 @@ class Blacklist(TableWrapper):
 
     async def get_indices(self, indices):
         async with self.pool.acquire() as conn:
-            rows = await conn.fetch(f"SELECT * FROM blacklists.{self.name} WHERE id = any($1::integer[]) ORDER BY id", indices)
+            rows = await conn.fetch(f"SELECT * FROM blacklists.{self.name} WHERE id = any($1::integer[]) ORDER BY id",
+                                    indices)
         return [BlacklistItem(row['id'], row['item'], row['retired']) for row in rows]
 
 
@@ -251,6 +252,27 @@ class Templates(TableWrapper):
             await conn.execute("DELETE FROM templates WHERE name = $1", name)
 
 
+class WhiteList(TableWrapper):
+    async def add_user(self, uid: int) -> Optional[WhitelistUser]:
+        async with self.pool.acquire() as conn:
+            await conn.execute('INSERT INTO whitelist VALUES ($1)', uid)
+
+    async def get_user(self, uid: int) -> Optional[WhitelistUser]:
+        """Fetch a users document
+        Args:
+            uid: User ID
+        Returns: None or the Document
+        """
+        async with self.pool.acquire() as conn:
+            row = await conn.fetchrow("SELECT * FROM whitelist WHERE id = $1", uid)
+        if row:
+            return WhitelistUser(row['id'])
+
+    async def remove(self, uid):
+        async with self.pool.acquire() as conn:
+            await conn.execute("DELETE FROM whitelist WHERE id = $1", uid)
+
+
 class Blacklists:
     def __init__(self, pool):
         self.pool = pool
@@ -287,6 +309,7 @@ class Postgres:  # pylint: disable = R0902
         self.banlist: BanList = BanList(self.pool)
         self.strafanzeigen: Strafanzeigen = Strafanzeigen(self.pool)
         self.templates: Templates = Templates(self.pool)
+        self.whitelist: WhiteList = WhiteList(self.pool)
 
     async def disconnect(self):
         await self.pool.close()
