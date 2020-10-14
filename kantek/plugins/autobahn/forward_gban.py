@@ -64,7 +64,7 @@ async def fwgban(client: Client, db: Database, tags: Tags, chat: Channel, msg: M
         reply_msg: Message = await msg.get_reply_message()
         forward: Forward = reply_msg.forward
         if forward.sender_id is None:
-            raise Error('User has forward privacy enabled')
+            raise Error('User has forward privacy enabled or is a Channel')
 
         uid = forward.sender_id
         if args:
@@ -85,20 +85,18 @@ async def fwgban(client: Client, db: Database, tags: Tags, chat: Channel, msg: M
         banned_uids: Dict = {}
         message = await helpers.textify_message(reply_msg)
         banned_uids[ban_reason] = banned_uids.get(ban_reason, []) + [str(uid)]
+        if verbose:
+            sections = []
+            if banned_uids:
+                bans = _build_message(banned_uids, message)
+                sections.append(Section(f'GBanned User', *bans))
+
+            return KanTeXDocument(*sections)
+
         await client.gban(uid, ban_reason, message)
-
-
 
     else:
         pass
-
-    if verbose:
-        sections = []
-        if banned_uids:
-            bans = _build_message(banned_uids, message)
-            sections.append(Section(f'GBanned User', *bans))
-
-        return KanTeXDocument(*sections)
 
 
 def _build_message(bans: Dict[str, List[str]], message: Optional[str] = None) -> List[KeyValueItem]:
