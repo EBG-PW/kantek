@@ -4,7 +4,7 @@ import logging
 from typing import Dict, Optional, List
 
 from telethon.errors import UserNotParticipantError
-from telethon.tl.custom import Message
+from telethon.tl.custom import Message, Forward
 from telethon.tl.functions.channels import GetParticipantRequest
 from telethon.tl.functions.messages import ReportRequest
 from telethon.tl.types import (Channel, InputReportReasonSpam, InputPeerChannel, ChannelParticipantCreator,
@@ -14,6 +14,8 @@ from database.database import Database
 from utils import helpers, parsers
 from utils.client import Client
 from kantex.md import *
+
+from utils.errors import Error
 from utils.pluginmgr import k, Command
 from utils.tags import Tags
 
@@ -60,8 +62,11 @@ async def fwgban(client: Client, db: Database, tags: Tags, chat: Channel, msg: M
     if msg.is_reply:
         bancmd = tags.get('gbancmd')
         reply_msg: Message = await msg.get_reply_message()
+        forward: Forward = reply_msg.forward
+        if forward.sender_id is None:
+            raise Error('User has forward privacy enabled')
 
-        uid = reply_msg.from_id
+        uid = forward.sender_id
         if args:
             ban_reason = ' '.join(args)
         else:
