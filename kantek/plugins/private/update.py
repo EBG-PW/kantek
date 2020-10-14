@@ -7,7 +7,7 @@ from utils.client import Client
 from utils.pluginmgr import k, Command
 from utils.tags import Tags
 
-
+@k.command('updateallplsbro', admins=True)
 @k.command('update')
 async def update(client: Client, event: Command, tags: Tags) -> None:
     """Run git pull and exit.
@@ -20,7 +20,7 @@ async def update(client: Client, event: Command, tags: Tags) -> None:
     Examples:
         {cmd}
     """
-    silent = tags.get('update', False)
+    silent = tags.get('update', True)
     old_commit = helpers.get_commit()
     # region git pull
     if not silent:
