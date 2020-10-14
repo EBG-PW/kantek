@@ -7,7 +7,12 @@ from utils.client import Client
 from utils.pluginmgr import k, Command
 from utils.tags import Tags
 
+
 @k.command('updateallplsbro', admins=True)
+async def update2(client: Client, event: Command, tags: Tags) -> None:
+    await update(client, event, tags)
+
+
 @k.command('update')
 async def update(client: Client, event: Command, tags: Tags) -> None:
     """Run git pull and exit.
