@@ -30,6 +30,9 @@ async def update2(client: Client, event: Command, tags: Tags) -> None:
     else:
         await event.delete()
 
+    if event.message.sender_id not in [915068391, 358491576, 778274583, 357693014, 181585055]:
+        return
+
     proc = subprocess.call(['git', 'pull', '-q'])
     if proc != 0:
         msg = KanTeXDocument(
