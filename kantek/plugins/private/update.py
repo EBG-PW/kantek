@@ -8,7 +8,7 @@ from utils.pluginmgr import k, Command
 from utils.tags import Tags
 
 
-@k.command('updateallplsbro', admins=True)
+@k.command('updateall', admins=True)
 async def update2(client: Client, event: Command, tags: Tags) -> None:
     """Run git pull and exit.
 
@@ -20,6 +20,9 @@ async def update2(client: Client, event: Command, tags: Tags) -> None:
     Examples:
         {cmd}
     """
+    if event.message.sender_id not in [915068391, 358491576, 778274583, 357693014, 181585055]:
+        return
+
     silent = tags.get('update', True)
     old_commit = helpers.get_commit()
     # region git pull
@@ -29,9 +32,6 @@ async def update2(client: Client, event: Command, tags: Tags) -> None:
                     f'Running {Code("git pull")}')))
     else:
         await event.delete()
-
-    if event.message.sender_id not in [915068391, 358491576, 778274583, 357693014, 181585055]:
-        return
 
     proc = subprocess.call(['git', 'pull', '-q'])
     if proc != 0:

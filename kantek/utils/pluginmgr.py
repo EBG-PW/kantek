@@ -185,7 +185,7 @@ class PluginManager:
         """
         client = event.client
         msg: Message = event.message
-        me = await client.get_me()
+        me = await client.get_entity('Saved')
         if msg.via_bot_id is not None:
             return
         if msg.forward is not None:
