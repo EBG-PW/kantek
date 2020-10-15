@@ -84,7 +84,8 @@ async def fwgban(client: Client, db: Database, tags: Tags, chat: Channel, msg: M
                 pass
         banned_uids: Dict = {}
         message = await helpers.textify_message(reply_msg)
-        banned_uids[ban_reason] = banned_uids.get(ban_reason, []) + [str(uid)]
+        banned, reason = await client.gban(uid, ban_reason, message)
+        banned_uids[reason] = banned_uids.get(reason, []) + [str(uid)]
         if verbose:
             sections = []
             if banned_uids:
@@ -93,7 +94,7 @@ async def fwgban(client: Client, db: Database, tags: Tags, chat: Channel, msg: M
 
             return KanTeXDocument(*sections)
 
-        await client.gban(uid, ban_reason, message)
+
 
     else:
         pass
