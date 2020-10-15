@@ -25,7 +25,7 @@ DEFAULT_REASON = 'spam[gban]'
 CHUNK_SIZE = 10
 
 
-@k.command('fban', delete=False)
+@k.command('fban', delete=True)
 async def fwgban(client: Client, db: Database, tags: Tags, chat: Channel, msg: Message,
                  args: List, kwargs: Dict, event: Command) -> Optional[KanTeXDocument]:
     """Globally ban a user.

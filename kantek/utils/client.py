@@ -94,7 +94,7 @@ class Client(TelegramClient):  # pylint: disable = R0901, W0223
         if uid is None:
             return False, 'Deleted account'
 
-        time_to_sleep: int = randint(1, 20)
+        time_to_sleep: int = randint(1, 3)
         await asyncio.sleep(time_to_sleep)
 
         user = await self.db.banlist.get(uid)
