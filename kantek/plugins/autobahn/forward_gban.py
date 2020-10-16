@@ -41,8 +41,7 @@ async def fwgban(client: Client, db: Database, tags: Tags, chat: Channel, msg: M
     Tags:
         gban:
             verbose: Send a message when a user was banned by id
-        gbancmd:
-            *: Send `{{bancmd}} {{ban_reason}}` in reply to the message
+
 
     Examples (as replies):
         {cmd} "some reason here"
