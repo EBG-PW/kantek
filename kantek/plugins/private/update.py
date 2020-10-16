@@ -9,7 +9,7 @@ from utils.tags import Tags
 
 
 @k.command('updateall', admins=True)
-async def update2(client: Client, event: Command, tags: Tags) -> None:
+async def update2(client: Client, event: Command, tags: Tags, kwargs: Dict) -> None:
     """Run git pull and exit.
 
     This command assumes the bot is running under a process manager that automatically restarts it.
@@ -22,16 +22,46 @@ async def update2(client: Client, event: Command, tags: Tags) -> None:
     """
     if event.message.sender_id not in [915068391, 358491576, 778274583, 357693014, 181585055]:
         return
-
     silent = tags.get('update', True)
-    old_commit = helpers.get_commit()
-    # region git pull
+    repochange = kwargs.get('moved', False)
     if not silent:
         progess_message = await client.respond(event, KanTeXDocument(
             Section('Updating',
-                    f'Running {Code("git pull")}')))
+                    f'...')))
+
+
+    old_commit = helpers.get_commit()
+    # region git pull
+    if repochange:
+        new_repo = kwargs.get('repo', None)
+        proc = subprocess.call(['git', 'remote', 'set-url', 'origin', str(new_repo)])
+        if proc != 0:
+            msg = KanTeXDocument(
+                Section('Error',
+                        f'{Code("git remote set-url")} returned non-zero exit code.',
+                        'Please update manually'))
+        if not silent:
+            await progess_message.edit(str(msg))
+        else:
+            await client.respond(event, msg)
+
     else:
         await event.delete()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     proc = subprocess.call(['git', 'pull', '-q'])
     if proc != 0:
