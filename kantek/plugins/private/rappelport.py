@@ -1,10 +1,10 @@
+from telethon import TelegramClient
 from telethon.tl.custom import Message
 from telethon.tl.types import Channel, PeerChannel
 
 from utils.client import Client
-from utils.pluginmgr import k
 from utils.config import Config
-from telethon import TelegramClient
+from utils.pluginmgr import k
 
 
 @k.command('report', delete=True)
@@ -28,7 +28,8 @@ async def report(client: Client, chat: Channel, msg: Message, args, kwargs, even
             async with client2:
                 await client2.get_dialogs()
 
-                reported = await client2.forward_messages(messages=result.id, from_peer=PeerChannel(channel_id=1187874753),
+                reported = await client2.forward_messages(messages=result.id,
+                                                          from_peer=PeerChannel(channel_id=1187874753),
                                                           entity=PeerChannel(channel_id=1251251585))
 
                 print(reported)

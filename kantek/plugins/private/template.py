@@ -75,4 +75,5 @@ async def query(db: Database) -> KanTeXDocument:
     return KanTeXDocument(
         Section('Templates',
                 *[KeyValueItem(t.name, Code(f'{t.content[:QUERY_MAX_LENGTH]}'
-                                            f'{"..." if len(t.content) > QUERY_MAX_LENGTH else ""}')) for t in templates]))
+                                            f'{"..." if len(t.content) > QUERY_MAX_LENGTH else ""}')) for t in
+                  templates]))

@@ -39,7 +39,6 @@ async def roundToBits(input_number: int, bit) -> str:
     return size_string
 
 
-
 @k.command('servers', 'svs')
 async def bbservers(msg: Message, tags: Tags, client: Client, db,
                     args: List, kwargs: Dict) -> Optional[KanTeXDocument]:
@@ -54,8 +53,6 @@ async def bbservers(msg: Message, tags: Tags, client: Client, db,
 
     """
     all_true: bool = kwargs.get('all', False)
-
-
 
     chat: Channel = msg.chat
 
