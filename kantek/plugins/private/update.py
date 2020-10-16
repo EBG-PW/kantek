@@ -29,7 +29,6 @@ async def update2(client: Client, event: Command, tags: Tags, kwargs: Dict) -> N
             Section('Updating',
                     f'...')))
 
-
     old_commit = helpers.get_commit()
     # region git pull
     if repochange:
@@ -47,21 +46,6 @@ async def update2(client: Client, event: Command, tags: Tags, kwargs: Dict) -> N
 
     else:
         await event.delete()
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
     proc = subprocess.call(['git', 'pull', '-q'])
     if proc != 0:
