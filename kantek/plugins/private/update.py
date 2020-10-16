@@ -1,4 +1,5 @@
 import subprocess
+from typing import Dict
 
 from kantex.md import *
 
