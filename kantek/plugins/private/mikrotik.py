@@ -1,21 +1,9 @@
-from datetime import timedelta
-from pprint import pformat
-from socket import create_connection, error as SOCKET_ERROR, timeout as SOCKET_TIMEOUT
-from typing import List, Dict, Tuple
 import routeros
-
 from kantex.md import *
-from routeros import API, TrapError, FatalError, Socket, RouterOS
-from telethon.tl.custom import Message
-from telethon.tl.functions.messages import MigrateChatRequest
 
-from database.database import Database
-from utils import parsers
 from utils.client import Client
 from utils.config import Config
-from utils.parsers import MissingExpression
-from utils.pluginmgr import k, _Command, _Signature
-
+from utils.pluginmgr import k
 
 
 @k.command('mikrotik', document=False)
