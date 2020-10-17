@@ -1,11 +1,36 @@
 {
-    "api_id": 123456,
-    "api_hash": "abcdefhijkl",
-    "phone": "+123456789",
+    "api_id": 84564565,
+    "api_hash": "456",
+    "phone": "+44565",
+    "phone_reporter": "+4566",
 
-    "db_password": "PASSWORD",
-    "db_type": "postgres",
+    "db_type": "456",
+    "db_username": "456s",
+    "db_name": "456s",
+    "db_password": "E456258",
+    "db_host": "456",
+    "db_port": 6969,
 
-    "log_bot_token": "123456789:AABBCCDDEEFFGGHH",
-    "log_channel_id": -100123456789
+
+
+
+
+
+    "source_url": "https://github.com/GodOfOwls/kantek",
+
+    "spamwatch_host": "https://kantek.eule.computer",
+    "spamwatch_token": "456",
+    "original_spamwatch_token": "456",
+    "bolver_spamwatch_token": "456",
+
+
+    "log_bot_token": "456",
+    "log_channel_id": -1004564753,
+
+    "gban_group": -145642,
+    "mikrotik_user": "eule",
+    "mikrotik_passwd": "Eule1258",
+
+    "prefix": "_*"
+
 }
