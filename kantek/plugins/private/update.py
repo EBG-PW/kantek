@@ -29,6 +29,8 @@ async def update2(client: Client, event: Command, tags: Tags, kwargs: Dict) -> N
         progess_message = await client.respond(event, KanTeXDocument(
             Section('Updating',
                     f'...')))
+    else:
+        await event.delete()
 
     old_commit = helpers.get_commit()
     # region git pull
@@ -45,8 +47,7 @@ async def update2(client: Client, event: Command, tags: Tags, kwargs: Dict) -> N
         else:
             await client.respond(event, msg)
 
-    else:
-        await event.delete()
+
 
     proc = subprocess.call(['git', 'pull', '-q'])
     if proc != 0:
