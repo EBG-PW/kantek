@@ -28,7 +28,7 @@ async def update2(client: Client, event: Command, tags: Tags, kwargs: Dict) -> N
     if not silent:
         progess_message = await client.respond(event, KanTeXDocument(
             Section('Updating',
-                    f'.....')))
+                    f'......')))
     else:
         await event.delete()
 
