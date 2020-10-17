@@ -84,7 +84,7 @@ async def admin_reports(event: NewMessage.Event) -> None:
             return
 
         try:
-            logged_reply = await reply.forward_to(-1001187874753)
+            logged_reply = await reply.forward_to(-1001418023497)
         except MessageIdInvalidError:
             pass
 
@@ -103,5 +103,5 @@ async def admin_reports(event: NewMessage.Event) -> None:
                                                       get_display_name(reply_user)),
                                                   log_message=logged_link)
 
-    await client.send_message(-1001187874753, log_messsage,
+    await client.send_message(-1001418023497, log_messsage,
                               parse_mode='html', link_preview=False)
