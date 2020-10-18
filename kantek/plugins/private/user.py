@@ -146,6 +146,7 @@ async def _collect_user_info(client, user, db, **kwargs) -> Union[str, Section, 
         show_spe = True
         show_ebgwatch = True
         show_bolverwatch = True
+        show_spb = True
 
     mention_name = kwargs.get('mention', False)
 
