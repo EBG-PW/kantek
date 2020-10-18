@@ -253,9 +253,13 @@ class Templates(TableWrapper):
 
 
 class WhiteList(TableWrapper):
-    async def add_user(self, uid: int) -> Optional[WhitelistUser]:
+    async def add_user(self, uid: int) -> bool:
         async with self.pool.acquire() as conn:
-            await conn.execute('INSERT INTO whitelist VALUES ($1)', uid)
+            try:
+                await conn.execute('INSERT INTO whitelist VALUES ($1)', uid)
+                return True
+            except asyncpg.UniqueViolationError:
+                return False
 
     async def get_user(self, uid: int) -> Optional[WhitelistUser]:
         """Fetch a users document
