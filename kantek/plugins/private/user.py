@@ -259,26 +259,27 @@ async def _collect_user_info(client, user, db, **kwargs) -> Union[str, Section, 
         else:
             bolverwatch.append(Italic('Disabled'))
         spb_section = SubSection('SpamProtection')
-        if spb_info['success']:
-            spb_section.extend([
-                    KeyValueItem('PTGid', Code(spb_info['results']['private_telegram_id'])),
-                    KeyValueItem('lang', Code(spb_info['results']['language_prediction']['language'])),
-                    KeyValueItem('spam/ham', KeyValueItem(Code(spb_info['results']['spam_prediction']['spam_prediction']), Code(spb_info['results']['spam_prediction']['ham_prediction']))),
-
-
-            ])
-            if spb_info['results']['attributes']['is_blacklisted']:
+        if show_spb:
+            if spb_info['success']:
                 spb_section.extend([
-                    KeyValueItem('reason', Code(spb_info['results']['attributes']['blacklist_reason'])),
-                    KeyValueItem('pot-spam', Code(spb_info['results']['attributes']['is_potential_spammer'])),
-                    KeyValueItem('flag', Code(spb_info['results']['attributes']['blacklist_flag'])),
+                        KeyValueItem('PTGid', Code(spb_info['results']['private_telegram_id'])),
+                        KeyValueItem('lang', Code(spb_info['results']['language_prediction']['language'])),
+                        KeyValueItem('spam/ham', KeyValueItem(Code(spb_info['results']['spam_prediction']['spam_prediction']), Code(spb_info['results']['spam_prediction']['ham_prediction']))),
+
 
                 ])
+                if spb_info['results']['attributes']['is_blacklisted']:
+                    spb_section.extend([
+                        KeyValueItem('reason', Code(spb_info['results']['attributes']['blacklist_reason'])),
+                        KeyValueItem('pot-spam', Code(spb_info['results']['attributes']['is_potential_spammer'])),
+                        KeyValueItem('flag', Code(spb_info['results']['attributes']['blacklist_flag'])),
 
+                    ])
+
+                else:
+                    spb_section.append(KeyValueItem('banned', Code('False')))
             else:
-                spb_section.append(KeyValueItem('banned', Code('False')))
-        else:
-            spb_section.append(KeyValueItem('Error', Code(spb_info['error']['message'])))
+                spb_section.append(KeyValueItem('Error', Code(spb_info['error']['message'])))
 
 
 
