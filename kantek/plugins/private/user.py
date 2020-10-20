@@ -1,8 +1,8 @@
 import logging
 from typing import Union, Dict, List, Optional
 
-from spamwatch.client import Client as SWOClient
 from kantex.md import *
+from spamwatch.client import Client as SWOClient
 from spamwatch.types import Permission
 from telethon.tl.custom import Forward, Message
 from telethon.tl.types import MessageEntityMention, MessageEntityMentionName, User, Channel
@@ -11,7 +11,7 @@ from database.database import Database
 from utils import helpers, constants
 from utils.client import Client
 from utils.config import Config
-from utils.errors import Error
+import utils.errors
 from utils.pluginmgr import k
 from utils.tags import Tags
 
@@ -28,12 +28,18 @@ async def user_info(msg: Message, tags: Tags, client: Client, db: Database,
         `-mention`: Mention the user
         `-id`: Output information in a `name: id` format
         `-full`: Output the full message a user was banned for
-        `-sw`: Output all information from the SpamWatch API
         `-gban`: Output user ids space seperated for `{prefix}gban`
         `-all`: Enable all of the flags below
         `-general`: General info, enabled by default
         `-bot`: Output bot specific information
         `-misc`: Output miscellaneous information
+        `-ng`: Exclude general information
+        `-ebg`: Output all information from the EBG-Watch API
+        `-sw`: Output all information from the SpamWatch API
+        `-bw`: Output all information from the BolverWatch API
+        `-spb`: Show information from SpamProtectionBot
+        `-spe`: Output Analysis vor suspicius Activity and cuteness
+        `c`: Optionaly specify cuteness based on manual review
 
     Tags:
         strafanzeige:
@@ -94,7 +100,7 @@ async def _info_from_reply(client, msg, db, kwargs, tags) -> KanTeXDocument:
     if get_forward and reply_msg.forward is not None:
         forward: Forward = reply_msg.forward
         if forward.sender_id is None:
-            raise Error('User has forward privacy enabled')
+            raise utils.errors.Error('User has forward privacy enabled')
         user: User = await client.get_entity(forward.sender_id)
     else:
         user: User = await client.get_entity(reply_msg.sender_id)
@@ -110,7 +116,6 @@ async def _collect_user_info(client, user, db, **kwargs) -> Union[str, Section, 
     id_only = kwargs.get('id', False)
     gban_format = kwargs.get('gban', False)
     show_general = kwargs.get('general', True)
-    no_general = kwargs.get('ng', False)
     show_bot = kwargs.get('bot', False)
     show_misc = kwargs.get('misc', False)
     show_spe = kwargs.get('spe', False)
@@ -119,9 +124,10 @@ async def _collect_user_info(client, user, db, **kwargs) -> Union[str, Section, 
     show_ebgwatch = kwargs.get('ebg', False)
     show_spamwatch = kwargs.get('sw', False)
     show_bolverwatch = kwargs.get('bw', False)
+    show_spb = kwargs.get('spb', False)
     is_cute = kwargs.get('c', False)
 
-    if no_general:
+    if kwargs.get('ng', False):
         show_general = False
 
     config = Config()
@@ -140,6 +146,7 @@ async def _collect_user_info(client, user, db, **kwargs) -> Union[str, Section, 
         show_spe = True
         show_ebgwatch = True
         show_bolverwatch = True
+        show_spb = True
 
     mention_name = kwargs.get('mention', False)
 
@@ -175,6 +182,13 @@ async def _collect_user_info(client, user, db, **kwargs) -> Union[str, Section, 
                 bw_ban_message = bw_ban.message
                 if bw_ban_message and not full_ban_msg:
                     bw_ban_message = f'{bw_ban_message[:128]}{"[...]" if len(bw_ban_message) > 128 else ""}'
+
+    if show_spb:
+        params = {'query': user.id}
+        async with client.aioclient.get(f'https://api.intellivoid.net/spamprotection/v1/lookup', params=params) as response:
+
+            spb_info = await response.json()
+
 
     if id_only:
         return KeyValueItem(title, Code(user.id))
@@ -244,6 +258,31 @@ async def _collect_user_info(client, user, db, **kwargs) -> Union[str, Section, 
                 bolverwatch.append(KeyValueItem('banned', Code('False')))
         else:
             bolverwatch.append(Italic('Disabled'))
+        spb_section = SubSection('SpamProtection')
+        if show_spb:
+            if spb_info['success']:
+                spb_section.extend([
+                        KeyValueItem('PTGid', Code(spb_info['results']['private_telegram_id'])),
+                        KeyValueItem('lang', Code(spb_info['results']['language_prediction']['language'])),
+                        KeyValueItem('spam/ham', KeyValueItem(Code(spb_info['results']['spam_prediction']['spam_prediction']), Code(spb_info['results']['spam_prediction']['ham_prediction']))),
+
+
+                ])
+                if spb_info['results']['attributes']['is_blacklisted']:
+                    spb_section.extend([
+                        KeyValueItem('reason', Code(spb_info['results']['attributes']['blacklist_reason'])),
+                        KeyValueItem('pot-spam', Code(spb_info['results']['attributes']['is_potential_spammer'])),
+                        KeyValueItem('flag', Code(spb_info['results']['attributes']['blacklist_flag'])),
+
+                    ])
+
+                else:
+                    spb_section.append(KeyValueItem('banned', Code('False')))
+            else:
+                spb_section.append(KeyValueItem('Error', Code(spb_info['error']['message'])))
+
+
+
 
         bot = SubSection(
             Bold('Bot'),
@@ -269,7 +308,7 @@ async def _collect_user_info(client, user, db, **kwargs) -> Union[str, Section, 
 
             cute: str = ('yes' if (user.id == 483808054) else 'no' )
             if is_cute:
-                cute: str = f'{user.first_name} is very cute!!1'
+                cute: str = f'{user.first_name} is {is_cute}'
             sus: str = ('yes' if ((user.id % 2) == 0) and (user.id > 100000000) else 'no')
 
             special_stuff.extend([
@@ -282,6 +321,7 @@ async def _collect_user_info(client, user, db, **kwargs) -> Union[str, Section, 
                        ebgwatch if show_ebgwatch else None,
                        spamwatch if show_spamwatch else None,
                        bolverwatch if show_bolverwatch else None,
+                       spb_section if show_spb else None,
                        misc if show_misc else None,
                        special_stuff if show_spe else None,
                        bot if show_bot else None)

@@ -1,10 +1,10 @@
 import logging
 from typing import Optional
 
+from kantex.md import *
 from telethon.tl.types import Channel, User
 
 from utils.client import Client
-from kantex.md import *
 from utils.pluginmgr import k, Command
 from utils.tags import Tags
 

@@ -2,7 +2,8 @@ import logging
 from typing import Dict
 
 from telethon.tl.custom import Message
-from telethon.tl.types import Channel
+from telethon.tl.functions.users import GetUsersRequest
+from telethon.tl.types import Channel, InputUserSelf
 
 from utils.client import Client
 from utils.pluginmgr import k
@@ -38,8 +39,9 @@ async def purge(client: Client, chat: Channel, msg: Message, args, kwargs: Dict,
             message_ids = await client.get_messages(chat, min_id=reply_msg.id, max_id=msg.id)
         else:
             message_ids = list(range(reply_msg.id, msg.id))
-
-    if sure:
+    me_user = await client(GetUsersRequest([InputUserSelf()]))
+    me = me_user[0].id
+    if sure or msg.sender_id == me:
         await client.delete_messages(chat, message_ids)
     else:
         await client.respond(reply_msg, 'Please use -YesImSure to clarify you understand the extend of your actions!!')

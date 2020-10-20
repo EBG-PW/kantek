@@ -4,8 +4,8 @@ import datetime
 import logging
 import re
 import socket
-from typing import Optional, Union, Tuple
 from random import randint
+from typing import Optional, Union, Tuple
 
 import logzero
 import spamwatch
@@ -94,8 +94,11 @@ class Client(TelegramClient):  # pylint: disable = R0901, W0223
         if uid is None:
             return False, 'Deleted account'
 
-        time_to_sleep: int = randint(1, 20)
-        asyncio.sleep(time_to_sleep)
+        time_to_sleep: int = randint(1, 3)
+        await asyncio.sleep(time_to_sleep)
+        user_wl = await self.db.whitelist.get(uid)
+        if user_wl:
+            return False, 'User is unbannable (┛ಠ_ಠ)┛彡┻━┻'
 
         user = await self.db.banlist.get(uid)
         for ban_reason in AUTOMATED_BAN_REASONS:

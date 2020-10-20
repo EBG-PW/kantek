@@ -3,6 +3,7 @@ import logging
 from datetime import datetime, timedelta, timezone
 from typing import Dict
 
+from kantex.md import *
 from telethon.errors import FloodWaitError
 from telethon.tl.functions.messages import GetScheduledHistoryRequest, DeleteScheduledMessagesRequest
 from telethon.tl.patched import Message
@@ -10,7 +11,6 @@ from telethon.tl.types import Channel, MessageMediaDocument
 
 from utils import parsers
 from utils.client import Client
-from kantex.md import *
 from utils.pluginmgr import k, Command
 
 tlog = logging.getLogger('kantek-channel-log')
@@ -53,7 +53,7 @@ async def schedule(client: Client, chat: Channel, msg: Message, kwargs: Dict, ev
         for cmd in commands:
             if cmd:
                 if dynamic:
-                    offset = (len(cmd.split()) ** 0.7)*60
+                    offset = (len(cmd.split()) ** 0.7) * 60
                 try:
                     await client.send_message(chat, cmd, schedule=next_time)
                 except FloodWaitError as err:
@@ -71,4 +71,3 @@ async def schedule(client: Client, chat: Channel, msg: Message, kwargs: Dict, ev
                                  next_time.astimezone(current.tzinfo).strftime('%Y-%m-%d %H:%M:%S')),
                     KeyValueItem(Bold('Count'), Code(len(commands)))
                     ))
-

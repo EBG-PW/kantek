@@ -1,14 +1,11 @@
+import json
 import logging
 import subprocess
 import time
-import json
 
-from telethon.tl.custom import Dialog
-from telethon.tl.types import Channel, Chat, User
-
-from utils import helpers
-from utils.client import Client
 from kantex.md import *
+
+from utils.client import Client
 from utils.pluginmgr import k, Command
 
 tlog = logging.getLogger('kantek-channel-log')
@@ -29,10 +26,10 @@ async def system(client: Client, event: Command) -> KanTeXDocument:
 
     except FileNotFoundError:
         response = KanTeXDocument(Section(Bold('Neofetch Version 5 or higher Binary couldnt be found. please get it '
-                                              'from https://github.com/dylanaraps/neofetch/releases '
-                                              'and drop it (the binary file named neofetch) in /usr/local/bin and '
-                                              'rename it to owlfetch, '
-                                              'also make sure to set the rights so it can be executed.')))
+                                               'from https://github.com/dylanaraps/neofetch/releases '
+                                               'and drop it (the binary file named neofetch) in /usr/local/bin and '
+                                               'rename it to owlfetch, '
+                                               'also make sure to set the rights so it can be executed.')))
         return response
 
     system_info = json.loads(fetch.stdout)

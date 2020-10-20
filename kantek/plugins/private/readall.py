@@ -4,8 +4,8 @@ import time
 from asyncio import sleep
 
 from utils.client import Client
-from utils.pluginmgr import k, Command
 from utils.config import Config
+from utils.pluginmgr import k, Command
 
 tlog = logging.getLogger('kantek-channel-log')
 

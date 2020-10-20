@@ -1,6 +1,8 @@
 from telethon.errors import MessageTooLongError
+
 from utils.client import Client
 from utils.pluginmgr import k, Command
+
 
 @k.command('json')
 async def json(client: Client, event: Command) -> None:

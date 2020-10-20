@@ -19,7 +19,9 @@ from telethon.events import NewMessage
 from telethon.events.common import EventBuilder
 from telethon.tl.custom import Forward, Message
 from telethon.tl.functions.channels import GetParticipantRequest
-from telethon.tl.types import ChannelParticipantAdmin, DocumentAttributeFilename, ChannelParticipantCreator
+from telethon.tl.functions.users import GetUsersRequest
+from telethon.tl.types import ChannelParticipantAdmin, DocumentAttributeFilename, ChannelParticipantCreator, \
+    InputUserSelf
 from telethon.utils import get_display_name
 
 from utils import helpers
@@ -185,7 +187,8 @@ class PluginManager:
         """
         client = event.client
         msg: Message = event.message
-        me = await client.get_me()
+        me_user = await client(GetUsersRequest([InputUserSelf()]))
+        me = me_user[0]
         if msg.via_bot_id is not None:
             return
         if msg.forward is not None:
@@ -220,7 +223,7 @@ class PluginManager:
 
         chat = await event.get_chat()
         if admins and event.is_channel:
-            uid = event.message.from_id
+            uid = event.message.sender_id
             own_id = (await client.get_me()).id
             if uid != own_id and _kwargs.get('self', False) or (not chat.creator and not chat.admin_rights):
                 return

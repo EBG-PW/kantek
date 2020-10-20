@@ -1,15 +1,13 @@
 """"Plugin to get the fbans of the most important feds of a User."""
-import asyncio
 import logging
-from typing import Union, Dict, List, Optional
+from typing import List
+
 from kantex.md import *
-
 from telethon.errors import MessageIdInvalidError
-from telethon.tl.custom import Forward, Message
+from telethon.tl.custom import Message
 from telethon.tl.functions.users import GetFullUserRequest
-from telethon.tl.types import MessageEntityMention, MessageEntityMentionName, User, Channel, UserFull, InputUser
+from telethon.tl.types import Channel, UserFull, InputUser
 
-from utils import helpers, constants
 from utils.client import Client
 from utils.pluginmgr import k
 from utils.tags import Tags

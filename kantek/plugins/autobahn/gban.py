@@ -77,6 +77,8 @@ async def gban(client: Client, db: Database, tags: Tags, chat: Channel, msg: Mes
         reply_msg: Message = await msg.get_reply_message()
 
         uid = reply_msg.from_id
+        if db.whitelist.get(uid):
+            return
         if args:
             ban_reason = ' '.join(args)
         else:

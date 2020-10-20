@@ -46,7 +46,10 @@ class ConfigWrapper:
 
     kill_command: Optional[str] = None
 
-    source_url: str = 'src.kv2.dev'
+    source_url: str = 'https://github.com/EBG-PW/kantek'
+
+    mikrotik_user: str = 'root'
+    mikrotik_passwd: str = 'toor'
 
 
 class Config:  # pylint: disable = R0902

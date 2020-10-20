@@ -22,6 +22,11 @@ class BannedUser:
     id: int
     reason: str
 
+@dataclass
+class WhitelistUser:
+    id: int
+
+
 
 @dataclass
 class Template:
