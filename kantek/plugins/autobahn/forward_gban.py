@@ -89,14 +89,14 @@ async def fwgban(client: Client, db: Database, tags: Tags, chat: Channel, msg: M
             sections = []
             if not banned:
                 sections.append(KeyValueItem(Bold('Error'), reason))
-                await reply_msg.respond(KanTeXDocument(*sections))
+                await client.respond(KanTeXDocument(*sections), reply=reply_msg)
                 return
 
             if banned_uids:
                 bans = _build_message(banned_uids, message)
                 sections.append(Section(f'GBanned User', *bans))
 
-            await reply_msg.respond(KanTeXDocument(*sections))
+            await client.respond(KanTeXDocument(*sections), reply=reply_msg)
             return
 
 
