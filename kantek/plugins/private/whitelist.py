@@ -14,25 +14,14 @@ SWAPI_SLICE_LENGTH = 50
 
 @k.command('whitelist', 'wl')
 async def whitelist() -> None:
-    """Query, Import or Export the banlist."""
+    """Query,or add to whitelist."""
     pass
 
 
 @whitelist.subcommand()
 async def query(db: Database, args, kwargs) -> KanTeXDocument:
-    """Query the banlist for the total ban count, a specific user or a ban reason.
+    """Query the white-pride-list for users.
 
-    If no arguments are provided the total count will be returned.
-
-    If a list of User IDs is provided their ban reasons will be listed next to their ID.
-
-    If a reason is provided the total amount of banned users for that ban reason will be returned.
-    Use an asterisk (`*`) as wildcard for ban reasons. For a literal asterisk escape it with a backslash: `\\*`
-
-    Arguments:
-        `ids`: User IDs the banlist should be queried for
-        `reason`: Ban reasons to count
-        `-list`: List users that match the ban reason
 
     Examples:
         {cmd} 777000 172811422
