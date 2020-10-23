@@ -220,6 +220,7 @@ class Strafanzeigen(TableWrapper):
             return None
 
     async def cleanup(self):
+        return
         async with self.pool.acquire() as conn:
             await conn.execute("DELETE FROM strafanzeigen WHERE creation_date + '30 minutes' < now();")
 
