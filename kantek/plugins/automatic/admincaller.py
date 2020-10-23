@@ -1,8 +1,7 @@
 """Plugin to log all admin reports."""
 import logging
-from html import escape
-
 import re
+from html import escape
 
 import logzero
 from telethon import events
@@ -12,6 +11,8 @@ from telethon.tl.custom import Message
 from telethon.tl.types import Channel, User
 from telethon.utils import get_display_name
 
+from database.database import Database
+from utils import helpers
 from utils.client import Client
 
 __version__ = '0.1.0'
@@ -26,13 +27,15 @@ logger: logging.Logger = logzero.logger
 log_message_template = '''
 A user is requesting admin assistance in a group.
 Group: <a href="https://t.me/{chat_link}">{chat_title}</a> (#chat{chat_id})
-Reporter: <a href="tg://user?id={reporter_id}">{reporter_name}</a> (#id{reporter_id})
+Reporter: <a href="tg://user?id={reporter_id}">{reporter_name}</a> (#ID{reporter_id})
 Remark: <code>{remark}</code>
+
 '''
 
 log_reply_template = '''
-Reportee: <a href="tg://user?id={reportee_id}">{reportee_name}</a> (#id{reportee_id})
+Reportee: <a href="tg://user?id={reportee_id}">{reportee_name}</a> (#ID{reportee_id})
 <a href="https://t.me/c/{log_message}">View Reported Message</a>
+Anzeige: <code>*gban {reportee_id} sa: {anzeige}</code>
 '''
 
 
@@ -42,6 +45,8 @@ async def admin_reports(event: NewMessage.Event) -> None:
     if not event.is_group:
         return
 
+    client: Client = event.client
+    db: Database = client.db
     msg: Message = event.message
     client: Client = event.client
     chat: Channel = await event.get_chat()
@@ -97,11 +102,14 @@ async def admin_reports(event: NewMessage.Event) -> None:
 
     if logged_reply:
         logged_reply_chat: Channel = await logged_reply.get_chat()
+        data = await helpers.create_strafanzeige(reply_user, logged_reply)
+        key = await db.strafanzeigen.add(data)
         logged_link = f'{logged_reply_chat.id}/{logged_reply.id}'
         log_messsage += log_reply_template.format(reportee_id=reply_user.id,
                                                   reportee_name=escape(
                                                       get_display_name(reply_user)),
-                                                  log_message=logged_link)
+                                                  log_message=logged_link,
+                                                  anzeige=key)
 
     await client.send_message(-1001418023497, log_messsage,
                               parse_mode='html', link_preview=False)
