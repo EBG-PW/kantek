@@ -36,7 +36,7 @@ log_reply_template = '''
 Reportee: <a href="tg://user?id={reportee_id}">{reportee_name}</a> (#ID{reportee_id})
 <a href="https://t.me/c/{log_message}">View Reported Message</a>
 Anzeige: 
-<code>*gban {reportee_id} sa: {anzeige}</code>
+<code>*gban sa: {anzeige}</code>
 '''
 
 
