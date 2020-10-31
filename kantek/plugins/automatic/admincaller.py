@@ -103,7 +103,7 @@ async def admin_reports(event: NewMessage.Event) -> None:
 
     if logged_reply:
         logged_reply_chat: Channel = await logged_reply.get_chat()
-        data = await helpers.create_strafanzeige(reply_user, logged_reply)
+        data = await helpers.create_strafanzeige(reply_user.id, logged_reply)
         key = await db.strafanzeigen.add(data)
         logged_link = f'{logged_reply_chat.id}/{logged_reply.id}'
         log_messsage += log_reply_template.format(reportee_id=reply_user.id,
