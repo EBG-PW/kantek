@@ -48,7 +48,7 @@ async def schedule(client: Client, chat: Channel, msg: Message, kwargs: Dict, ev
             commands = reply_msg.text.split('\n')
         current = datetime.now()
         next_time = current.astimezone(timezone.utc)
-        next_time += timedelta(minutes=5)
+        next_time += timedelta(seconds=15)
         from_time = next_time
         for cmd in commands:
             if cmd:
