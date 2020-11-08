@@ -120,12 +120,13 @@ async def _banuser(event, chat, userid, bancmd, ban_type, ban_reason):
         if old_ban.reason == formatted_reason:
             logger.info('User ID `%s` already banned for the same reason.', userid)
             return
-    if admin:
-        if bancmd == 'manual':
+
+    if bancmd == 'manual':
+        if admin:
             await client.ban(chat, userid)
-        elif bancmd is not None:
-            await client.respond(event, f'{bancmd} {userid} {formatted_reason}')
-            await asyncio.sleep(0.25)
+    elif bancmd is not None:
+        await client.respond(event, f'{bancmd} {userid} {formatted_reason}')
+        await asyncio.sleep(0.25)
     await client.gban(userid, formatted_reason, await helpers.textify_message(event.message))
 
     message_count = len(await client.get_messages(chat, from_user=userid, limit=10))
