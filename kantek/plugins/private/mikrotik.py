@@ -18,37 +18,45 @@ async def mikrotik() -> None:
 @mikrotik.subcommand()
 async def get_addr(client: Client, args, kwargs) -> KanTeXDocument:
     config = Config()
-    router = routeros.login(config.mikrotik_user, config.mikrotik_passwd, args[0])
-    res = router('/ip/address/print')
+    try:
+        router = routeros.login(config.mikrotik_user, config.mikrotik_passwd, args[0])
+        res = router('/ip/address/print')
 
-    sec = Section('Addressen')
-    for i in res:
-        sec.append(KeyValueItem(i['interface'], Code(i['address'])))
+        sec = Section('Addressen')
+        for i in res:
+            sec.append(KeyValueItem(i['interface'], Code(i['address'])))
 
-    return KanTeXDocument(sec)
-
+        return KanTeXDocument(sec)
+    except:
+        pass
 
 @mikrotik.subcommand()
 async def get_route(client: Client, args, kwargs) -> KanTeXDocument:
     config = Config()
-    router = routeros.login(config.mikrotik_user, config.mikrotik_passwd, args[0])
-    res = router('/ip/route/print')
+    try:
+        router = routeros.login(config.mikrotik_user, config.mikrotik_passwd, args[0])
+        res = router('/ip/route/print')
 
-    sec = Section('Routen')
-    for i in res:
-        sec.append(KeyValueItem(i['dst-address'], Code(i['gateway-status'].replace('reachable', ''))))
+        sec = Section('Routen')
+        for i in res:
+            sec.append(KeyValueItem(i['dst-address'], Code(i['gateway-status'].replace('reachable', ''))))
 
-    return KanTeXDocument(sec)
-
+        return KanTeXDocument(sec)
+    except:
+        pass
 
 @mikrotik.subcommand()
 async def firewall(client: Client, args, kwargs) -> KanTeXDocument:
     config = Config()
     # noinspection PyCallByClass
-    router = routeros.login(config.mikrotik_user, config.mikrotik_passwd, args[0])
+    try:
+        router = routeros.login(config.mikrotik_user, config.mikrotik_passwd, args[0])
 
-    res = router('/ip/firewall/filter/add', **{'action': args[1], 'protocol': args[2], 'chain': 'forward', 'src-address': args[3]})
+        res = router('/ip/firewall/filter/add',
+                     **{'action': args[1], 'protocol': args[2], 'chain': 'forward', 'src-address': args[3]})
 
-    sec = Section('OK')
-    sec.append(KeyValueItem('Returncode', Code(res)))
-    return KanTeXDocument(sec)
+        sec = Section('OK')
+        sec.append(KeyValueItem('Returncode', Code(res)))
+        return KanTeXDocument(sec)
+    except:
+        pass
