@@ -96,13 +96,13 @@ class Strafanzeigen(Table):
 
 class Adderlist(Table):
     async def add(self, uid, count) -> str:
-        return await self.db.strafanzeigen.add(content)
+        return await self.db.adderlist.add(uid, count)
 
-    async def get(self, sa_key) -> Optional[str]:
-        return await self.db.strafanzeigen.get(sa_key)
+    async def get(self, uid) -> Optional[str]:
+        return await self.db.adderlist.get(uid)
 
     async def cleanup(self):
-        await self.db.strafanzeigen.cleanup()
+        await self.db.adderlist.cleanup()
 
 
 class Banlist(Table):
@@ -220,6 +220,7 @@ class Database:
         else:
             raise UnknownDatabaseError('Choose from: postgres')
         self.strafanzeigen = Strafanzeigen(self)
+        self.adderlist = Adderlist(self)
         self.banlist = Banlist(self)
         self.whitelist = Whitelist(self)
         self.blacklists = Blacklists(self)

@@ -22,10 +22,16 @@ class BannedUser:
     id: int
     reason: str
 
+
+@dataclass
+class AddingUser:
+    uid: int
+    count: int
+
+
 @dataclass
 class WhitelistUser:
     id: int
-
 
 
 @dataclass
