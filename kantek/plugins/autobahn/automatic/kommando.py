@@ -65,7 +65,8 @@ async def ksk(event: Union[ChatAction.Event, NewMessage.Event]) -> None:  # pyli
                     await db.adderlist.add(uid, 1)
 
                 print(cnt)
-                current_cnt: int = cnt['count']
+                current_cnt: int = cnt.count
                 new_count: int = current_cnt + 1
-                if (new_count % 3) > 1:
+                await db.adderlist.add(uid, new_count)
+                if (new_count // 3) > 1:
                     await client.gban(uid, f'spam adding {new_count}+ members')
