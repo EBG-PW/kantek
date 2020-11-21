@@ -94,6 +94,17 @@ class Strafanzeigen(Table):
         await self.db.strafanzeigen.cleanup()
 
 
+class Adderlist(Table):
+    async def add(self, uid, count) -> str:
+        return await self.db.strafanzeigen.add(content)
+
+    async def get(self, sa_key) -> Optional[str]:
+        return await self.db.strafanzeigen.get(sa_key)
+
+    async def cleanup(self):
+        await self.db.strafanzeigen.cleanup()
+
+
 class Banlist(Table):
     async def get(self, uid) -> BannedUser:
         return await self.db.banlist.get_user(uid)
