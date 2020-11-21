@@ -225,26 +225,6 @@ class Strafanzeigen(TableWrapper):
             await conn.execute("DELETE FROM strafanzeigen WHERE creation_date + '30 minutes' < now();")
 
 
-# TODO implement stuff
-class Adderlist(TableWrapper):
-    async def add(self, uid, count):
-        async with self.pool.acquire() as conn:
-            await conn.execute('INSERT INTO adderlist VALUES ($1, $2)', key, data)
-        return
-
-    async def get(self, uid) -> Optional[str]:
-        async with self.pool.acquire() as conn:
-            row = await conn.fetchrow('SELECT data FROM adderlist WHERE uid = $1', uid)
-        if row:
-            return row['data']
-        else:
-            return None
-
-    async def cleanup(self):
-        async with self.pool.acquire() as conn:
-            await conn.execute("DELETE FROM adderlist WHERE creation_date + '30 minutes' < now();")
-
-
 class Templates(TableWrapper):
     async def add(self, name: str, content: str) -> None:
         async with self.pool.acquire() as conn:
@@ -333,7 +313,6 @@ class Postgres:  # pylint: disable = R0902
         self.blacklists = Blacklists(self.pool)
         self.banlist: BanList = BanList(self.pool)
         self.strafanzeigen: Strafanzeigen = Strafanzeigen(self.pool)
-        self.adderlist: Adderlist = Adderlist(self.pool)
         self.templates: Templates = Templates(self.pool)
         self.whitelist: WhiteList = WhiteList(self.pool)
 
