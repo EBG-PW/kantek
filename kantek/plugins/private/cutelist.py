@@ -57,6 +57,6 @@ async def cuteness(event: NewMessage.Event) -> None:
     lover_user: User = await client.get_entity(lover)
     loved_user: User = await client.get_entity(loved_one)
     await client.send_message(event.chat,
-                              str(KanTeXDocument(f'ok. From now on {lover_user.first_name} will always be considered '
-                                                 f'cute by {loved_user.first_name}')),
+                              str(KanTeXDocument(f'ok. From now on {loved_user.first_name} will always be considered '
+                                                 f'cute by {lover_user.first_name}')),
                               reply_to=msg)
