@@ -261,6 +261,14 @@ class Cutelist(TableWrapper):
         else:
             return None
 
+    async def get_all(self) -> List[CuteUser]:
+        async with self.pool.acquire() as conn:
+            row = await conn.fetch('SELECT * FROM cute_chain')
+        all: List = []
+        for each_row in row:
+            all.append(CuteUser(each_row['uid'], each_row['loved_by']))
+        return all
+
 
 class Templates(TableWrapper):
     async def add(self, name: str, content: str) -> None:

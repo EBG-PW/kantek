@@ -112,6 +112,9 @@ class Cutelist(Table):
     async def get(self, uid) -> Optional[str]:
         return await self.db.cutelist.get(uid)
 
+    async def get_all(self) -> List:
+        return await self.db.cutelist.get_all()
+
 
 class Banlist(Table):
     async def get(self, uid) -> BannedUser:

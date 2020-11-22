@@ -60,3 +60,26 @@ async def cuteness(event: NewMessage.Event) -> None:
                               str(KanTeXDocument(f'ok. From now on {loved_user.first_name} will always be considered '
                                                  f'cute by {lover_user.first_name}')),
                               reply_to=msg)
+
+
+@k.event(events.NewMessage(outgoing=True, incoming=True), name='cuteness lister')
+async def cutenesslist(event: NewMessage.Event) -> None:
+    msg: Message = event.message
+    client: Client = event.client
+    db: Database = client.db
+    message_text: str = msg.text
+    tags = await Tags.from_event(event)
+    loud_cute = tags.get('cute', False)
+    if not message_text.startswith('!listcute'):
+        return
+
+    if not loud_cute:
+        return
+
+    users: Section = Section('Cuteness List:')
+    for i in await db.cutelist.get_all():
+        user: User = await client.get_entity(i.uid)
+        users.append(Mention(user.first_name, user.id))
+
+    first = await client.respond(event, '.')
+    await first.edit(str(KanTeXDocument(users)))
