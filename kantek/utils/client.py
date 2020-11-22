@@ -108,14 +108,15 @@ class Client(TelegramClient):  # pylint: disable = R0901, W0223
                 else:
                     return False, 'Already banned by autobahn'
         # Remove need to check the reason for previous count of added members since this is now done by Kommando
-        '''if user:
+        if user:
             if '[SW]' not in reason:
                 count = SPAMADD_PATTERN.search(reason)
                 previous_count = SPAMADD_PATTERN.search(str(user.reason))
                 if count is not None and previous_count is not None:
-                    count = int(count.group('count')) + int(previous_count.group('count'))
-                    reason = f"spam adding {count}+ members"'''
-
+                    if previous_count + 30 < count:
+                        reason = f"spam adding {count}+ members"
+                    else:
+                        return False, 'Not added enough'
         data = {
             'id': str(uid),
             'reason': reason
