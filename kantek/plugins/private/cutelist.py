@@ -4,6 +4,7 @@ from kantex.md import *
 from telethon import events
 from telethon.events import NewMessage
 from telethon.tl.custom import Message
+from telethon.tl.types import User
 
 from database.database import Database
 from utils.client import Client
@@ -36,7 +37,9 @@ async def cuteness(event: NewMessage.Event) -> None:
 
     adder = await db.cutelist.get(lover)
     if not adder:
-        await client.respond(event, str(KanTeXDocument('You need to be cute yourself for first.')))
+        await client.send_message(event.chat,
+                                  str(KanTeXDocument('You should be cute yourself for first')),
+                                  reply_to=msg)
         return
 
     loved_already = await db.cutelist.get(loved_one)
@@ -51,3 +54,9 @@ async def cuteness(event: NewMessage.Event) -> None:
         return
 
     await db.cutelist.add(loved_one, lover)
+    lover_user: User = await client.get_entity(lover)
+    loved_user: User = await client.get_entity(loved_one)
+    await client.send_message(event.chat,
+                              str(KanTeXDocument(f'ok. From now on {lover_user.first_name} will always be considered '
+                                                 f'cute by {loved_user.first_name}')),
+                              reply_to=msg)
