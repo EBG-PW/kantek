@@ -221,28 +221,30 @@ class Strafanzeigen(TableWrapper):
 
     async def cleanup(self):
         return
-        async with self.pool.acquire() as conn:
-            await conn.execute("DELETE FROM strafanzeigen WHERE creation_date + '30 minutes' < now();")
+
+        # async with self.pool.acquire() as conn:
+        #    await conn.execute("DELETE FROM strafanzeigen WHERE creation_date + '30 minutes' < now();")
 
 
-# TODO implement stuff
+
 class Adderlist(TableWrapper):
     async def add(self, uid, count):
         async with self.pool.acquire() as conn:
-            await conn.execute('INSERT INTO adderlist VALUES ($1, $2)', key, data)
+            await conn.execute('INSERT INTO adderlist VALUES ($1, $2) ON CONFLICT (uid) DO UPDATE SET count = $2', uid,
+                               count)
         return
 
-    async def get(self, uid) -> Optional[str]:
+    async def get(self, uid) -> Optional[AddingUser]:
         async with self.pool.acquire() as conn:
-            row = await conn.fetchrow('SELECT data FROM adderlist WHERE uid = $1', uid)
+            row = await conn.fetchrow('SELECT * FROM adderlist WHERE uid = $1', uid)
         if row:
-            return row['data']
+            return AddingUser(row['uid'], row['count'])
         else:
             return None
 
     async def cleanup(self):
         async with self.pool.acquire() as conn:
-            await conn.execute("DELETE FROM adderlist WHERE creation_date + '30 minutes' < now();")
+            await conn.execute("DELETE FROM adderlist WHERE COUNT < '5' AND creation_date + '30 minutes' < now();")
 
 
 class Templates(TableWrapper):

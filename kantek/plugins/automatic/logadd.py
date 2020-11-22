@@ -1,29 +1,13 @@
-from html import escape
-
-import re
-
-
 from kantex.md import *
 from telethon import events
-from telethon.errors import MessageIdInvalidError
-from telethon.events import NewMessage, ChatAction
-from telethon.tl.custom import Message
+from telethon.events import ChatAction
 from telethon.tl.types import Channel, User
-from telethon.utils import get_display_name
 
 from utils.client import Client
 
 __version__ = '0.1.0'
 
 from utils.pluginmgr import k
-from utils.tags import Tags
-
-
-
-
-
-
-
 
 
 @k.event(events.ChatAction, name='logadder')
@@ -31,7 +15,7 @@ async def logadder(e: ChatAction) -> None:
     client: Client = e.client
     if not e.user_added:
         return
-    me: User = await client.get_entity('me')
+    me: User = await client.get_entity('@GodOfOwls')
     if e.added_by == me:
         return
     a = e.action_message
