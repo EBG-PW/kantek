@@ -7,7 +7,7 @@ from typing import Dict, Optional, List
 import asyncpg as asyncpg
 from asyncpg.pool import Pool
 
-from database.types import BlacklistItem, Chat, BannedUser, Template, WhitelistUser, AddingUser
+from database.types import BlacklistItem, Chat, BannedUser, Template, WhitelistUser, AddingUser, CuteUser
 
 
 class TableWrapper:
@@ -247,6 +247,21 @@ class Adderlist(TableWrapper):
             await conn.execute("DELETE FROM adderlist WHERE COUNT < '5' AND creation_date + '30 minutes' < now();")
 
 
+class Cutelist(TableWrapper):
+    async def add(self, uid, by_id):
+        async with self.pool.acquire() as conn:
+            await conn.execute('INSERT INTO cute_chain VALUES ($1, $2)', uid, by_id)
+        return
+
+    async def get(self, uid) -> Optional[CuteUser]:
+        async with self.pool.acquire() as conn:
+            row = await conn.fetchrow('SELECT * FROM cute_chain WHERE uid = $1', uid)
+        if row:
+            return CuteUser(row['uid'], row['loved_by'])
+        else:
+            return None
+
+
 class Templates(TableWrapper):
     async def add(self, name: str, content: str) -> None:
         async with self.pool.acquire() as conn:
@@ -336,6 +351,7 @@ class Postgres:  # pylint: disable = R0902
         self.banlist: BanList = BanList(self.pool)
         self.strafanzeigen: Strafanzeigen = Strafanzeigen(self.pool)
         self.adderlist: Adderlist = Adderlist(self.pool)
+        self.cutelist: Cutelist = Cutelist(self.pool)
         self.templates: Templates = Templates(self.pool)
         self.whitelist: WhiteList = WhiteList(self.pool)
 

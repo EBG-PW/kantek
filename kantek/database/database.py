@@ -105,6 +105,14 @@ class Adderlist(Table):
         await self.db.adderlist.cleanup()
 
 
+class Cutelist(Table):
+    async def add(self, uid, by_id) -> str:
+        return await self.db.cutelist.add(uid, by_id)
+
+    async def get(self, uid) -> Optional[str]:
+        return await self.db.cutelist.get(uid)
+
+
 class Banlist(Table):
     async def get(self, uid) -> BannedUser:
         return await self.db.banlist.get_user(uid)
@@ -175,7 +183,7 @@ class Whitelist(Table):
     async def get(self, uid) -> WhitelistUser:
         return await self.db.whitelist.get_user(uid)
 
-    async def add(self, uid: int) -> WhitelistUser:
+    async def add(self, uid: int) -> bool:
         return await self.db.whitelist.add_user(uid)
 
     async def remove(self, uid: int) -> None:
@@ -221,6 +229,7 @@ class Database:
             raise UnknownDatabaseError('Choose from: postgres')
         self.strafanzeigen = Strafanzeigen(self)
         self.adderlist = Adderlist(self)
+        self.cutelist = Cutelist(self)
         self.banlist = Banlist(self)
         self.whitelist = Whitelist(self)
         self.blacklists = Blacklists(self)

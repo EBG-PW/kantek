@@ -30,6 +30,12 @@ class AddingUser:
 
 
 @dataclass
+class CuteUser:
+    uid: int
+    loved_by: int
+
+
+@dataclass
 class WhitelistUser:
     id: int
 
