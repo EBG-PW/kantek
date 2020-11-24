@@ -15,6 +15,7 @@ async def logadder(e: ChatAction) -> None:
     client: Client = e.client
     if not e.user_added:
         return
+    return
     me: User = await client.get_entity('@GodOfOwls')
     if e.added_by == me:
         return
