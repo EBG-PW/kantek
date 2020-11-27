@@ -5,7 +5,7 @@ from kantex.md import *
 from spamwatch.client import Client as SWOClient
 from spamwatch.types import Permission
 from telethon.tl.custom import Forward, Message
-from telethon.tl.types import MessageEntityMention, MessageEntityMentionName, User, Channel
+from telethon.tl.types import MessageEntityMention, MessageEntityMentionName, User, Channel, UserFull
 
 import utils.errors
 from database.database import Database
@@ -103,7 +103,8 @@ async def _info_from_reply(client, msg, db, kwargs, tags) -> KanTeXDocument:
             raise utils.errors.Error('User has forward privacy enabled')
         user: User = await client.get_entity(forward.sender_id)
     else:
-        user: User = await client.get_entity(reply_msg.sender_id)
+        user: UserFull = await client.get_entity(reply_msg.sender_id)
+
     user_section = await _collect_user_info(client, user, db, **kwargs)
     if anzeige and isinstance(user_section, Section):
         data = await helpers.create_strafanzeige(user.id, reply_msg)
@@ -293,6 +294,7 @@ async def _collect_user_info(client, user, db, **kwargs) -> Union[str, Section, 
             Bold('Bot'),
             KeyValueItem('bot', Code(user.bot)),
             KeyValueItem('bot_chat_history', Code(user.bot_chat_history)),
+            KeyValueItem('bot_info', Code(user.bot_info if user.bot_info else None)),
             KeyValueItem('bot_info_version', Code(user.bot_info_version)),
             KeyValueItem('bot_inline_geo', Code(user.bot_inline_geo)),
             KeyValueItem('bot_inline_placeholder',
