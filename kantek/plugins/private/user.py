@@ -7,11 +7,11 @@ from spamwatch.types import Permission
 from telethon.tl.custom import Forward, Message
 from telethon.tl.types import MessageEntityMention, MessageEntityMentionName, User, Channel
 
+import utils.errors
 from database.database import Database
 from utils import helpers, constants
 from utils.client import Client
 from utils.config import Config
-import utils.errors
 from utils.pluginmgr import k
 from utils.tags import Tags
 
@@ -134,7 +134,12 @@ async def _collect_user_info(client, user, db, **kwargs) -> Union[str, Section, 
     if config.original_spamwatch_token:
         swoclient = SWOClient(config.original_spamwatch_token)
     if config.bolver_spamwatch_token:
-        swbclient = SWOClient(config.bolver_spamwatch_token, host='https://spamapi.bolverblitz.net/')
+        try:
+
+            swbclient = SWOClient(config.bolver_spamwatch_token, host='https://spamapi.bolverblitz.net/')
+        except:
+            swbclient = None
+
     else:
         swbclient = None
 
