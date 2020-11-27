@@ -1,4 +1,5 @@
 import logging
+import re
 from typing import Union, Dict, List, Optional
 
 from kantex.md import *
@@ -135,9 +136,90 @@ async def _collect_user_info(client, user, db, **kwargs) -> Union[str, Section, 
     show_spb = kwargs.get('spb', False)
     is_cute = kwargs.get('c', False)
     full = kwargs.get('full')
+    deai = kwargs.get('deai')
 
     if kwargs.get('ng', False):
         show_general = False
+
+    deai_section: Section()
+    if deai:
+        conversation_hack = dict()
+        DEAI_BAN_CODES = {
+            "00": "Gban",
+            "01": "Joinspam",
+            "02": "Spambot",
+            "03": "Generic spam",
+            "04": "Scam",
+            "05": "Illegal",
+            "06": "Pornography",
+            "07": "Nonsense",
+            "08": "Chain bans",
+            "09": "Special",
+            "10": "Preemptive",
+            "11": "Copyright",
+            "12": "Admin rights abuse",
+            "13": "Toxicity",
+            "14": "Flood",
+            "15": "Detected but not classified",
+            "16": "Advanced detection",
+            "17": "Reported",
+            "18": "AI association",
+            "19": "Impersonation",
+            "20": "Malware",
+            "21": "Ban evasion",
+            "22": "PM spam",
+            "23": "Spam adding members"
+        }
+        DEAI_MODULE_CODES = {
+            "0": "Gban",
+            "1": "Database parser",
+            "2": "Realtime",
+            "3": "Profiler",
+            "4": "Scraper",
+            "5": "Association analytics",
+            "6": "Codename Autobahn",
+            "7": "Codename Polizei",
+            "8": "Codename Gestapo"
+        }
+
+        deai_section = SubSection(Bold('DEAI'))
+
+        async with client.conversation(885745757) as conv:
+
+            await conv.send_message(f'/fcheck {user.id} 845d33d3-0961-4e44-b4b5-4c57775fbdac')
+            response = await conv.get_response()
+            response = response.raw_text
+
+        ntext = response.split('\n')
+        ntext.pop(0)
+        if ntext:
+            ntext.pop(0)
+        if ntext:
+            deai_reason = SubSection(Bold('Reason'))
+            text = ''
+            ntext.pop(0)
+            reason = '\n'.join(ntext).strip()
+
+            match = re.match(r'(?:AIdetection:)?((?:0x\d{2} )+)risk:(\S+) mod:X([0-8])(?: cmt:(.+))?', reason)
+            if match:
+
+                for i in match.group(1).split(' '):
+                    if i:
+                        i = DEAI_BAN_CODES.get(i.strip()[2:], i.strip())
+                        deai_reason.append(f'--- {i}')
+
+                deai_section.append(SubSubSection('Risk Factor', match.group(2).capitalize()))
+                deai_section.append(SubSection('Module', DEAI_MODULE_CODES.get(match.group(3), match.group(3))))
+                comment = (match.group(4) or '').strip()
+                if comment:
+                    deai_section.append(SubSubSection('Comment:', comment))
+                    match = re.match(r'^banstack trigger:0x(\d{2})$', comment)
+                    if match:
+                        deai_section.append(SubSubSection('Ban-Stack Trigger Code:',
+                                                          DEAI_BAN_CODES.get(match.group(1), "0x" + match.group(1))))
+                deai_section.append(deai_reason)
+        else:
+            deai_section.append('Not banned')
 
     config = Config()
     if config.original_spamwatch_token:
@@ -339,4 +421,5 @@ async def _collect_user_info(client, user, db, **kwargs) -> Union[str, Section, 
                        spb_section if show_spb else None,
                        misc if show_misc else None,
                        special_stuff if show_spe else None,
+                       deai_section if deai else None,
                        bot if show_bot else None)
