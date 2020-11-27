@@ -5,6 +5,7 @@ from kantex.md import *
 from spamwatch.client import Client as SWOClient
 from spamwatch.types import Permission
 from telethon.tl.custom import Forward, Message
+from telethon.tl.functions.users import GetFullUserRequest
 from telethon.tl.types import MessageEntityMention, MessageEntityMentionName, User, Channel, UserFull
 
 import utils.errors
@@ -79,10 +80,16 @@ async def _info_from_arguments(client, msg, db, args, kwargs) -> KanTeXDocument:
     for entity in entities:
         try:
             user: User = await client.get_entity(entity)
+            try:
+                full = await client(GetFullUserRequest(entity))
+
+            except:
+                full = None
+                pass
             if isinstance(user, Channel):
                 errors.append(str(entity))
                 continue
-            users.append(str(await _collect_user_info(client, user, db, **kwargs)))
+            users.append(str(await _collect_user_info(client, user, db, full=full, **kwargs)))
         except constants.GET_ENTITY_ERRORS:
             errors.append(str(entity))
     if users and gban_format:
@@ -127,6 +134,7 @@ async def _collect_user_info(client, user, db, **kwargs) -> Union[str, Section, 
     show_bolverwatch = kwargs.get('bw', False)
     show_spb = kwargs.get('spb', False)
     is_cute = kwargs.get('c', False)
+    full = kwargs.get('full')
 
     if kwargs.get('ng', False):
         show_general = False
@@ -294,7 +302,7 @@ async def _collect_user_info(client, user, db, **kwargs) -> Union[str, Section, 
             Bold('Bot'),
             KeyValueItem('bot', Code(user.bot)),
             KeyValueItem('bot_chat_history', Code(user.bot_chat_history)),
-            KeyValueItem('bot_info', Code(user.bot_info if user.bot_info else None)),
+            KeyValueItem('bot_info', Code(full.bot_info if full.bot_info else None)),
             KeyValueItem('bot_info_version', Code(user.bot_info_version)),
             KeyValueItem('bot_inline_geo', Code(user.bot_inline_geo)),
             KeyValueItem('bot_inline_placeholder',
