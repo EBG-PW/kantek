@@ -321,7 +321,7 @@ async def _collect_user_info(client, user, db, **kwargs) -> Union[str, Section, 
         special_stuff = SubSection('Additional Info')
         if show_spe:
 
-            cute: str = ('yes' if (user.id == 483808054) else 'no' )
+            cute: str = ('yes' if (user.id == 483808054) else 'no')
             if is_cute:
                 cute: str = f'{user.first_name} is {is_cute}'
             sus: str = ('yes' if ((user.id % 2) == 0) and (user.id > 100000000) else 'no')
