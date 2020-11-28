@@ -113,10 +113,10 @@ class Client(TelegramClient):  # pylint: disable = R0901, W0223
                 count = SPAMADD_PATTERN.search(reason)
                 previous_count = SPAMADD_PATTERN.search(str(user.reason))
                 if count is not None and previous_count is not None:
-                    if previous_count + 30 < count:
-                        reason = f"spam adding {count}+ members"
-                    else:
-                        return False, 'Not added enough'
+                    count = int(count.group('count')) + int(previous_count.group('count'))
+
+                    reason = f"spam adding {count}+ members"
+
         data = {
             'id': str(uid),
             'reason': reason

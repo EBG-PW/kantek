@@ -1,7 +1,8 @@
 import logging
-from typing import Union
+from typing import Union, Dict
 
 import logzero
+from kantex.md import *
 from telethon import events
 from telethon.events import ChatAction, NewMessage
 from telethon.tl.types import (MessageActionChatJoinedByLink,
@@ -15,6 +16,7 @@ from utils.tags import Tags
 tlog = logging.getLogger('kantek-channel-log')
 logger: logging.Logger = logzero.logger
 
+spammers: Dict = {}
 
 @k.event(events.chataction.ChatAction(), name='KSK')
 async def ksk(event: Union[ChatAction.Event, NewMessage.Event]) -> None:  # pylint: disable = R0911
@@ -28,6 +30,7 @@ async def ksk(event: Union[ChatAction.Event, NewMessage.Event]) -> None:  # pyli
         ksk:
             exclude: Don't log spamadding users
     """
+    global spammers
     if event.is_private:
         return
 
@@ -56,18 +59,12 @@ async def ksk(event: Union[ChatAction.Event, NewMessage.Event]) -> None:  # pyli
             action: MessageActionChatAddUser = msg.action
             if msg.sender_id not in action.users:
                 uid: int = msg.sender_id
-                '''
-                cnt = spammers.get(msg.from_id, 0)
-                spammers[msg.from_id] = cnt + 1
-                '''
-                cnt = await db.adderlist.get(uid)
-                if not cnt:
-                    await db.adderlist.add(uid, 1)
-                    return
 
-                print(cnt)
-                current_cnt: int = cnt.count
-                new_count: int = current_cnt + 1
-                await db.adderlist.add(uid, new_count)
-                if (new_count // 15) > 1:
-                    await client.gban(uid, f'spam adding {new_count}+ members')
+                cnt = spammers.get(uid, 0)
+                spammers[uid] = cnt + 1
+
+                current_count = cnt + 1
+                print(str(KeyValueItem(uid, current_count)))
+                if current_count > 20:
+                    spammers[msg.from_id] = 0
+                    await client.gban(uid, f'spam adding {current_count}+ members')
