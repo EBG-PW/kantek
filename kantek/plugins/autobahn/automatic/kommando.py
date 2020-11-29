@@ -2,7 +2,6 @@ import logging
 from typing import Union, Dict
 
 import logzero
-from kantex.md import *
 from telethon import events
 from telethon.events import ChatAction, NewMessage
 from telethon.tl.types import (MessageActionChatJoinedByLink,
@@ -65,9 +64,8 @@ async def ksk(event: Union[ChatAction.Event, NewMessage.Event]) -> None:  # pyli
                 spammers[uid] = cnt + 1
 
                 current_count = cnt + 1
-                print(str(KeyValueItem(uid, current_count)))
                 if current_count > 20:
-                    if len(spammers) > 200:
+                    if len(spammers) > 20000:
                         spammers = {}
                     spammers[msg.from_id] = 0
                     await client.gban(uid, f'spam adding {current_count}+ members')

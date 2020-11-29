@@ -122,6 +122,7 @@ class Client(TelegramClient):  # pylint: disable = R0901, W0223
             'reason': reason
         }
 
+        logger.info(f'Banned {uid} for {reason}')
         await self.db.banlist.upsert_multiple([data])
 
         await self.send_message(
