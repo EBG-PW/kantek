@@ -18,6 +18,7 @@ logger: logging.Logger = logzero.logger
 
 spammers: Dict = {}
 
+
 @k.event(events.chataction.ChatAction(), name='KSK')
 async def ksk(event: Union[ChatAction.Event, NewMessage.Event]) -> None:  # pylint: disable = R0911
     """Automatically ban spamadding users.
@@ -66,5 +67,7 @@ async def ksk(event: Union[ChatAction.Event, NewMessage.Event]) -> None:  # pyli
                 current_count = cnt + 1
                 print(str(KeyValueItem(uid, current_count)))
                 if current_count > 20:
+                    if len(spammers) > 200:
+                        spammers = {}
                     spammers[msg.from_id] = 0
                     await client.gban(uid, f'spam adding {current_count}+ members')
