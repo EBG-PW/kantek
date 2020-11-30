@@ -336,7 +336,7 @@ class HashList(TableWrapper):
 
     async def add_column(self, uid: int):
         new_table_name = f'f{uid}_hash'
-        query_string: str = f'ALTER TABLE users ADD COLUMN IF NOT EXISTS {new_table_name} TEXT DEFAULT nein'
+        query_string: str = f'ALTER TABLE users ADD COLUMN IF NOT EXISTS {new_table_name} TEXT'
         print(query_string)
         async with self.pool.acquire() as conn:
             await conn.execute(query_string)
