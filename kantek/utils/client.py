@@ -43,6 +43,7 @@ class Client(TelegramClient):  # pylint: disable = R0901, W0223
     aioclient: ClientSession = None
     config: Config
     _me: Optional[User] = None
+    self_id: int = 0
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -233,11 +234,12 @@ class Client(TelegramClient):  # pylint: disable = R0901, W0223
 
         return str(url)
 
-    async def get_me(self, input_peer: bool = False) -> User:
-        if self._me is None:
-            self._me = await super().get_me()
-        else:
-            return self._me
+    '''    async def get_me(self, input_peer: bool = False) -> User:
+            if self._me is None:
+                self._me = await super().get_me()
+            else:
+                return self._me
+    '''
 
     def disconnect(self):
         loop = asyncio.get_event_loop()

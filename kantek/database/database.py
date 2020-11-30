@@ -193,6 +193,14 @@ class Whitelist(Table):
         return await self.db.whitelist.remove(uid)
 
 
+class Hashlist(Table):
+    async def add_user(self, uid, self_id, name, hash):
+        return await self.db.hashlist.add_user(uid, self_id, name, hash)
+
+    async def add_column(self, self_id):
+        return await self.db.hashlist.add_column(self_id)
+
+
 class Blacklists:
     def __init__(self, parent: 'Database'):
         self.db = parent.db
@@ -235,6 +243,7 @@ class Database:
         self.cutelist = Cutelist(self)
         self.banlist = Banlist(self)
         self.whitelist = Whitelist(self)
+        self.hashlist = Hashlist(self)
         self.blacklists = Blacklists(self)
         self.chats = Chats(self)
         self.templates = Templates(self)

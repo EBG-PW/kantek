@@ -226,7 +226,6 @@ class Strafanzeigen(TableWrapper):
         #    await conn.execute("DELETE FROM strafanzeigen WHERE creation_date + '30 minutes' < now();")
 
 
-
 class Adderlist(TableWrapper):
     async def add(self, uid, count):
         async with self.pool.acquire() as conn:
@@ -323,6 +322,26 @@ class WhiteList(TableWrapper):
             await conn.execute("DELETE FROM whitelist WHERE id = $1", uid)
 
 
+class HashList(TableWrapper):
+    async def add_user(self, uid: int, self_id: int, name: str, hash: str) -> bool:
+        async with self.pool.acquire() as conn:
+            try:
+
+                await conn.execute(
+                    f'INSERT INTO users(tg_id, first_name, f{self_id}_hash) VALUES ($1, $2, $3) ON CONFLICT (tg_id) DO UPDATE set f{self_id}_hash = $3, first_name = $2 ',
+                    uid, name, str(hash))
+                return True
+            except asyncpg.UniqueViolationError:
+                return False
+
+    async def add_column(self, uid: int):
+        new_table_name = f'f{uid}_hash'
+        query_string: str = f'ALTER TABLE users ADD COLUMN IF NOT EXISTS {new_table_name} TEXT DEFAULT nein'
+        print(query_string)
+        async with self.pool.acquire() as conn:
+            await conn.execute(query_string)
+
+
 class Blacklists:
     def __init__(self, pool):
         self.pool = pool
@@ -362,6 +381,7 @@ class Postgres:  # pylint: disable = R0902
         self.cutelist: Cutelist = Cutelist(self.pool)
         self.templates: Templates = Templates(self.pool)
         self.whitelist: WhiteList = WhiteList(self.pool)
+        self.hashlist: HashList = HashList(self.pool)
 
     async def disconnect(self):
         await self.pool.close()

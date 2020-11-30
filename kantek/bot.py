@@ -55,7 +55,13 @@ async def main() -> None:
         client.sw = SWClient(config.spamwatch_token, host=config.spamwatch_host)
         client.swo = SWClient(config.original_spamwatch_token)
         client.sw_url = config.spamwatch_host
+    ich = await client.get_me()
+    if not ich:
+        client.self_id = 12345678
+    else:
+        client.self_id = ich.id
 
+    await client.db.hashlist.add_column(self_id=client.self_id)
     await client.catch_up()
     await client.run_until_disconnected()
 
