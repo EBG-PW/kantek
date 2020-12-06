@@ -58,3 +58,15 @@ async def add(client: Client, db: Database, msg: Message, args) -> KanTeXDocumen
         query_results = [KeyValueItem('Success', Bold('FALSE'))]
 
     return KanTeXDocument(Section('Added to whitelist:', *query_results))
+
+
+@whitelist.subcommand()
+async def ag(client: Client, db: Database, msg: Message, args) -> KanTeXDocument:
+    chat = await msg.get_chat()
+    query_results = []
+
+    async for user in client.iter_participants(chat):
+        wl = await db.whitelist.add(user.id)
+        query_results.append(KeyValueItem(user.first_name, ('True' if wl else 'False')))
+
+    return KanTeXDocument(Section('Added to whitelist:', *query_results))
