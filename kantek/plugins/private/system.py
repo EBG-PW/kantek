@@ -2,6 +2,7 @@ import json
 import logging
 import subprocess
 import time
+from typing import Dict
 
 from kantex.md import *
 
@@ -32,13 +33,9 @@ async def system(client: Client, event: Command) -> KanTeXDocument:
                                                'also make sure to set the rights so it can be executed.')))
         return response
 
-    system_info = json.loads(fetch.stdout)
+    system_info: Dict = json.loads(fetch.stdout)
     stop_time = time.time() - start_time
 
-    try:
-        gpu = system_info['GPU']
-    except KeyError:
-        gpu = 'None'
 
     response = KanTeXDocument(
 
@@ -47,13 +44,13 @@ async def system(client: Client, event: Command) -> KanTeXDocument:
                 SubSection('Hardware',
                            KeyValueItem('Host', system_info['Host']),
                            KeyValueItem('CPU', system_info['CPU']),
-                           KeyValueItem('GPU', gpu),
+                           KeyValueItem('GPU', system_info.get('GPU', 'None')),
                            KeyValueItem('Memory', system_info['Memory']),
                            KeyValueItem('Uptime', system_info['Uptime'])),
                 SubSection('Software',
                            KeyValueItem('OS', system_info['OS']),
                            KeyValueItem('Kernel', system_info['Kernel']),
-                           KeyValueItem('Terminal', system_info['Terminal']),
+                           KeyValueItem('Terminal', system_info.get('Terminal', 'None')),
                            KeyValueItem('Shell', system_info['Shell']),
                            KeyValueItem('Packages', system_info['Packages'])),
 
