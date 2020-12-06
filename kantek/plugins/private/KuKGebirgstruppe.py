@@ -49,4 +49,4 @@ async def KuK(event: NewMessage.Event) -> None:
                         await db.hashlist.add_user(mention_id, self_id, mention_name, mention_hash)
 
                 except (*constants.GET_ENTITY_ERRORS, ChannelPrivateError):
-                    pass
+                    logging.error('Cannot add entity from Mention')

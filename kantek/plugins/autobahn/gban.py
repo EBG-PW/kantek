@@ -3,6 +3,7 @@ import datetime
 import logging
 from typing import Dict, Optional, List
 
+from kantex.md import *
 from telethon.errors import UserNotParticipantError
 from telethon.tl.custom import Message
 from telethon.tl.functions.channels import GetParticipantRequest
@@ -13,7 +14,6 @@ from telethon.tl.types import (Channel, InputReportReasonSpam, InputPeerChannel,
 from database.database import Database
 from utils import helpers, parsers
 from utils.client import Client
-from kantex.md import *
 from utils.pluginmgr import k, Command
 from utils.tags import Tags
 
@@ -77,7 +77,7 @@ async def gban(client: Client, db: Database, tags: Tags, chat: Channel, msg: Mes
         reply_msg: Message = await msg.get_reply_message()
 
         uid = reply_msg.from_id
-        if db.whitelist.get(uid):
+        if await db.whitelist.get(uid):
             return
         if args:
             ban_reason = ' '.join(args)
