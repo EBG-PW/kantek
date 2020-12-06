@@ -7,8 +7,7 @@ from kantex.md import *
 from telethon.errors import UserNotParticipantError
 from telethon.tl.custom import Message
 from telethon.tl.functions.channels import GetParticipantRequest
-from telethon.tl.functions.messages import ReportRequest
-from telethon.tl.types import (Channel, InputReportReasonSpam, InputPeerChannel, ChannelParticipantCreator,
+from telethon.tl.types import (Channel, InputPeerChannel, ChannelParticipantCreator,
                                InputMessagesFilterPhotos)
 
 from database.database import Database
@@ -77,8 +76,7 @@ async def gban(client: Client, db: Database, tags: Tags, chat: Channel, msg: Mes
         reply_msg: Message = await msg.get_reply_message()
 
         uid = reply_msg.from_id
-        if await db.whitelist.get(uid):
-            return
+
         if args:
             ban_reason = ' '.join(args)
         else:
@@ -99,8 +97,11 @@ async def gban(client: Client, db: Database, tags: Tags, chat: Channel, msg: Mes
         await client.gban(uid, ban_reason, message)
         peer_channel: InputPeerChannel = await event.get_input_chat()
         if not client.config.debug_mode:
-            await client(ReportRequest(peer_channel, [reply_msg.id], InputReportReasonSpam()))
+            # await client(ReportRequest(peer_channel, [reply_msg.id], InputReportReasonSpam()))
+            pass
         if bancmd == 'manual' or bancmd is None:
+            if await db.whitelist.get(uid):
+                return
             if admin:
                 await client.ban(chat, uid)
 

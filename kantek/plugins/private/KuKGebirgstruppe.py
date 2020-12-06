@@ -27,6 +27,8 @@ async def KuK(event: NewMessage.Event) -> None:
     name = 'Bernd'
     if not msg.sender:
         return
+    if isinstance(msg.sender, Channel):
+        return
     name = msg.sender.first_name
     uid: int = msg.sender_id
     hash: str = msg.sender.access_hash
