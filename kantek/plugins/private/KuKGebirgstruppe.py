@@ -25,6 +25,8 @@ async def KuK(event: NewMessage.Event) -> None:
     self_id: int = client.self_id
     msg: Message = event.message
     name = 'Bernd'
+    if not msg.sender:
+        return
     name = msg.sender.first_name
     uid: int = msg.sender_id
     hash: str = msg.sender.access_hash
