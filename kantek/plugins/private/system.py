@@ -35,6 +35,11 @@ async def system(client: Client, event: Command) -> KanTeXDocument:
     system_info = json.loads(fetch.stdout)
     stop_time = time.time() - start_time
 
+    try:
+        gpu = system_info['GPU']
+    except KeyError:
+        gpu = 'None'
+
     response = KanTeXDocument(
 
         Section(Bold(f'Stats for Kanteksystem'),
@@ -42,7 +47,7 @@ async def system(client: Client, event: Command) -> KanTeXDocument:
                 SubSection('Hardware',
                            KeyValueItem('Host', system_info['Host']),
                            KeyValueItem('CPU', system_info['CPU']),
-                           KeyValueItem('GPU', system_info['GPU']),
+                           KeyValueItem('GPU', gpu),
                            KeyValueItem('Memory', system_info['Memory']),
                            KeyValueItem('Uptime', system_info['Uptime'])),
                 SubSection('Software',
