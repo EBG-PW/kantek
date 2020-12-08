@@ -103,12 +103,13 @@ class Client(TelegramClient):  # pylint: disable = R0901, W0223
 
         user = await self.db.banlist.get(uid)
         for ban_reason in AUTOMATED_BAN_REASONS:
-            if user and (ban_reason in user.reason.lower()):
-                if ban_reason == 'kriminalamt':
-                    return False, 'Already banned by kriminalamt'
-                else:
-                    return False, 'Already banned by autobahn'
-        # Remove need to check the reason for previous count of added members since this is now done by Kommando
+            if '[sw]' not in user.reason.lower():
+                if user and (ban_reason in user.reason.lower()):
+                    if ban_reason == 'kriminalamt':
+                        return False, 'Already banned by kriminalamt'
+                    else:
+                        return False, 'Already banned by autobahn'
+
         if user:
             if '[SW]' not in reason:
                 count = SPAMADD_PATTERN.search(reason)

@@ -36,11 +36,11 @@ async def kriminalamt(event: ChatAction.Event) -> None:
     tags = await Tags.from_event(event)
     enabled = tags.get('kriminalamt', True)
     bancmd = tags.get('gbancmd', 'manual')
-    delay = 1
+    delay = 2
     if not event.user_joined or not (chat.creator or chat.admin_rights):
         return
 
-    if user == None:
+    if user is None:
         logger.warning(f'Found None User on {chat}')
 
     if not enabled or user.bot:
