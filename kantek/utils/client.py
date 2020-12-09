@@ -103,7 +103,7 @@ class Client(TelegramClient):  # pylint: disable = R0901, W0223
 
         user = await self.db.banlist.get(uid)
         for ban_reason in AUTOMATED_BAN_REASONS:
-            if '[sw]' not in user.reason.lower():
+            if user and '[sw]' not in user.reason.lower():
                 if user and (ban_reason in user.reason.lower()):
                     if ban_reason == 'kriminalamt':
                         return False, 'Already banned by kriminalamt'
