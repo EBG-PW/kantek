@@ -219,7 +219,7 @@ async def _collect_user_info(client, user, db, **kwargs) -> Union[str, Section, 
                                                           DEAI_BAN_CODES.get(match.group(1), "0x" + match.group(1))))
                 deai_section.append(deai_reason)
         else:
-            deai_section.append('Not banned')
+            deai_section.append(KeyValueItem('Banned', 'False'))
 
     config = Config()
     if config.original_spamwatch_token:
@@ -281,10 +281,9 @@ async def _collect_user_info(client, user, db, **kwargs) -> Union[str, Section, 
 
     if show_spb:
         params = {'query': user.id}
-        async with client.aioclient.get(f'https://api.intellivoid.net/spamprotection/v1/lookup', params=params) as response:
-
+        async with client.aioclient.get(f'https://api.intellivoid.net/spamprotection/v1/lookup',
+                                        params=params) as response:
             spb_info = await response.json()
-
 
     if id_only:
         return KeyValueItem(title, Code(user.id))
@@ -292,7 +291,7 @@ async def _collect_user_info(client, user, db, **kwargs) -> Union[str, Section, 
         return str(user.id)
     else:
         general = SubSection(
-            Bold('General'),
+            'General',
             KeyValueItem('id', Code(user.id)),
             KeyValueItem('first_name', Code(user.first_name)))
         if user.last_name is not None or show_all:
@@ -358,10 +357,11 @@ async def _collect_user_info(client, user, db, **kwargs) -> Union[str, Section, 
         if show_spb:
             if spb_info['success']:
                 spb_section.extend([
-                        KeyValueItem('PTGid', Code(spb_info['results']['private_telegram_id'])),
-                        KeyValueItem('lang', Code(spb_info['results']['language_prediction']['language'])),
-                        KeyValueItem('spam/ham', KeyValueItem(Code(spb_info['results']['spam_prediction']['spam_prediction']), Code(spb_info['results']['spam_prediction']['ham_prediction']))),
-
+                    KeyValueItem('PTGid', Code(spb_info['results']['private_telegram_id'])),
+                    KeyValueItem('lang', Code(spb_info['results']['language_prediction']['language'])),
+                    KeyValueItem('spam/ham',
+                                 KeyValueItem(Code(spb_info['results']['spam_prediction']['spam_prediction']),
+                                              Code(spb_info['results']['spam_prediction']['ham_prediction']))),
 
                 ])
                 if spb_info['results']['attributes']['is_blacklisted']:
@@ -376,9 +376,6 @@ async def _collect_user_info(client, user, db, **kwargs) -> Union[str, Section, 
                     spb_section.append(KeyValueItem('banned', Code('False')))
             else:
                 spb_section.append(KeyValueItem('Error', Code(spb_info['error']['message'])))
-
-
-
 
         bot = SubSection(
             Bold('Bot'),
@@ -411,7 +408,7 @@ async def _collect_user_info(client, user, db, **kwargs) -> Union[str, Section, 
             special_stuff.extend([
                 KeyValueItem('Cute', cute),
                 KeyValueItem('Sus', sus)
-             ])
+            ])
 
         return Section(title,
                        general if show_general else None,
