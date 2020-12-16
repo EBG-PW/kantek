@@ -84,6 +84,8 @@ async def spamschutz(event: Union[ChatAction.Event, NewMessage.Event]) -> None: 
                 return
 
     reason = '[SW] ' + ban.reason
+    if 'Kriminalamt' in reason:
+        return
 
     await client.gban(uid, reason)
 

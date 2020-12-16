@@ -37,5 +37,7 @@ async def spamgrenze(event: NewMessage.Event) -> None:
 
     userid: int = int(data[1])
     reason: str = data[2]
+    if 'Kriminalamt' in reason:
+        return
 
     await client.gban(userid, f'[SW] {reason}')
