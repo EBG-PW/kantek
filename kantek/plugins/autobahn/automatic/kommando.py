@@ -49,8 +49,8 @@ async def ksk(event: Union[ChatAction.Event, NewMessage.Event]) -> None:  # pyli
     tags = await Tags.from_event(event)
     polizei_tag = tags.get('polizei')
     ksk_tag = tags.get('ksk')
-    # if ksk_tag == 'exclude' or polizei_tag == 'exclude':
-    # return
+    if ksk_tag == 'exclude' or polizei_tag == 'exclude':
+        return
 
     msg = event.action_message
     if isinstance(msg, MessageService):
@@ -65,7 +65,7 @@ async def ksk(event: Union[ChatAction.Event, NewMessage.Event]) -> None:  # pyli
 
                 current_count = cnt + 1
                 if current_count > 20:
-                    if len(spammers) > 20000:
+                    if len(spammers) > 2000:
                         spammers = {}
                     spammers[msg.from_id] = 0
                     await client.gban(uid, f'spam adding {current_count}+ members')

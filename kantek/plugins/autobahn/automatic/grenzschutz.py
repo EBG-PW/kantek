@@ -100,5 +100,5 @@ async def grenzschutz(event: Union[ChatAction.Event, NewMessage.Event]) -> None:
                 KeyValueItem(Bold("Reason"),
                              ban_reason)
             ))
-            delete_time = '2m30s' if 'kriminalamt' not in ban_reason.lower() else '10s'
+            delete_time = '1m30s' if 'kriminalamt' not in ban_reason.lower() else '10s'
             await client.respond(event, str(message), reply=False, delete=delete_time)
