@@ -3,7 +3,7 @@ import itertools
 import logging
 
 import logzero
-from pil import UnidentifiedImageError
+from PIL import UnidentifiedImageError
 from photohash import hashes_are_similar
 from telethon import events
 from telethon.errors import UserNotParticipantError, ChannelPrivateError, FloodWaitError, ChatAdminRequiredError
