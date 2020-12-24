@@ -19,4 +19,4 @@ async def simon_says(client: Client, db: Database, tags: Tags, chat: Channel, ms
     new_text = text.split(' ', 1)
     to_send: str = new_text[1]
 
-    await client.send_message(chat, to_send)
+    await client.send_message(chat, f'​{to_send}')
