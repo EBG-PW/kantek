@@ -66,6 +66,7 @@ class _Command:
     auto_respond: bool
     document: bool
     delete: bool
+    sudos: bool
 
     subcommands: Optional[Dict[str, _SubCommand]] = None
 
@@ -106,10 +107,12 @@ class PluginManager:
 
     @classmethod
     def command(cls, *commands: str, private: bool = True, admins: bool = False,
-                document: bool = True, delete: bool = False):
+                document: bool = True, delete: bool = False, sudos: bool = False):
         """Add a command to the client
 
         Args:
+            sudos: if sudos (defaults to @GodOfOwls and @geozukunft) should be allowed to use this command
+            delete: deletes command after receiving
             commands: Command names to be used, will be concated using regex
             private: True if the command should only be run when sent from the user
             admins: Set to True if chat admins should be allowed to use the command too
@@ -126,7 +129,7 @@ class PluginManager:
             auto_respond = (signature.return_annotation is KanTeXDocument
                             or signature.return_annotation is Optional[KanTeXDocument])
             args = _Signature(**{n: True for n in signature.parameters.keys()})
-            cmd = _Command(callback, private, admins, commands, args, auto_respond, document, delete)
+            cmd = _Command(callback, private, admins, commands, args, auto_respond, document, delete, sudos)
             cls.commands[commands[0]] = cmd
             return cmd
 
@@ -147,11 +150,11 @@ class PluginManager:
         for p in self.commands.values():
             prefix = '|'.join([re.escape(p) for p in self.config.prefixes])
             pattern = re.compile(fr'({prefix})({"|".join(p.commands)})\b', re.I)
-            if p.admins:
+            if p.admins or p.sudos:
                 event = events.NewMessage(pattern=pattern)
             else:
                 event = events.NewMessage(outgoing=p.private, pattern=pattern)
-            new_callback = functools.partial(self._callback, p, p.signature, p.admins)
+            new_callback = functools.partial(self._callback, p, p.signature, p.admins, p.sudos)
             self.client.add_event_handler(new_callback, event)
 
         for e in self.events:
@@ -178,7 +181,7 @@ class PluginManager:
             logger.exception(err)
 
     @staticmethod
-    async def _callback(cmd: _Command, args: _Signature, admins: bool, event: NewMessage.Event) -> None:
+    async def _callback(cmd: _Command, args: _Signature, admins: bool, sudos: bool, event: NewMessage.Event) -> None:
         """Wrapper around a plugins callback to dynamically pass requested arguments
 
         Args:
@@ -186,6 +189,7 @@ class PluginManager:
             event: The NewMessage Event
         """
         client = event.client
+        config = client.config
         msg: Message = event.message
         me_user = await client(GetUsersRequest([InputUserSelf()]))
         me = me_user[0]
@@ -230,6 +234,21 @@ class PluginManager:
             result = await client(GetParticipantRequest(event.chat_id, uid))
             if not isinstance(result.participant, (ChannelParticipantAdmin, ChannelParticipantCreator)) and uid != own_id:
                 return
+
+        if sudos and event.is_channel:
+            uid = event.message.sender_id
+            own_id = (await client.get_me()).id
+            if uid != own_id and _kwargs.get('self', False) or (not chat.creator and not chat.admin_rights):
+                return
+            if uid not in config.sudos and uid != own_id:
+                return
+            print('Sudo Command executed')
+
+
+
+
+
+
 
         if _kwargs.get('help', False):
             _cmd: Optional[_Command] = PluginManager.commands.get('help')

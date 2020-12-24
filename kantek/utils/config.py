@@ -51,6 +51,8 @@ class ConfigWrapper:
     mikrotik_user: str = 'root'
     mikrotik_passwd: str = 'toor'
 
+    sudos: List[int] = field(default_factory=lambda: [357693014, 181585055, 483808054, 860831767])
+
 
 class Config:  # pylint: disable = R0902
     """Handle loading config options"""
@@ -81,6 +83,9 @@ class Config:  # pylint: disable = R0902
                 if prefixes:
                     config['prefixes'] = prefixes
                     config['prefix'] = prefixes[0]
+                sudos = config.get('sudos', [357693014, 181585055, 483808054, 860831767])
+                if sudos:
+                    config['sudos'] = sudos
                 cfg = ConfigWrapper(**config)
                 cfg.session_name = (sessions_dir / cfg.session_name).absolute()
                 cls.instance = cfg

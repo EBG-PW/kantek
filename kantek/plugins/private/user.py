@@ -20,7 +20,7 @@ from utils.tags import Tags
 tlog = logging.getLogger('kantek-channel-log')
 
 
-@k.command('user', 'u')
+@k.command('user', 'u', sudos=True)
 async def user_info(msg: Message, tags: Tags, client: Client, db: Database,
                     args: List, kwargs: Dict) -> Optional[KanTeXDocument]:
     """Show information about a user. Can be used in reply to a message.

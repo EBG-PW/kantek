@@ -62,6 +62,7 @@ async def main() -> None:
         client.self_id = ich.id
 
     await client.db.hashlist.add_column(self_id=client.self_id)
+    print(config.sudos)
     await client.catch_up()
     await client.run_until_disconnected()
 
