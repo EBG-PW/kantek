@@ -51,7 +51,7 @@ class ConfigWrapper:
     mikrotik_user: str = 'root'
     mikrotik_passwd: str = 'toor'
 
-    sudos: List[int] = field(default_factory=lambda: [357693014, 181585055, 483808054, 860831767])
+    sudos: List[int] = field(default_factory=lambda: [357693014, 181585055, 483808054, 860831767, 206921999])
 
 
 class Config:  # pylint: disable = R0902
@@ -83,7 +83,7 @@ class Config:  # pylint: disable = R0902
                 if prefixes:
                     config['prefixes'] = prefixes
                     config['prefix'] = prefixes[0]
-                sudos = config.get('sudos', [357693014, 181585055, 483808054, 860831767])
+                sudos = config.get('sudos', [357693014, 181585055, 483808054, 860831767, 206921999])
                 if sudos:
                     config['sudos'] = sudos
                 cfg = ConfigWrapper(**config)
