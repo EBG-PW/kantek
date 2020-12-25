@@ -238,7 +238,7 @@ class PluginManager:
         if sudos and event.is_channel:
             uid = event.message.sender_id
             own_id = (await client.get_me()).id
-            if uid != own_id and _kwargs.get('sudo', False) or (not chat.creator and not chat.admin_rights):
+            if uid != own_id and not _kwargs.get('sudo', False):
                 return
             if uid not in config.sudos and uid != own_id:
                 return
