@@ -238,7 +238,7 @@ class PluginManager:
         if sudos and event.is_channel:
             uid = event.message.sender_id
             own_id = (await client.get_me()).id
-            if uid != own_id and _kwargs.get('self', False) or (not chat.creator and not chat.admin_rights):
+            if uid != own_id and _kwargs.get('sudo', False) or (not chat.creator and not chat.admin_rights):
                 return
             if uid not in config.sudos and uid != own_id:
                 return
@@ -285,7 +285,7 @@ class PluginManager:
         if args.tags:
             callback_args['tags'] = await Tags.from_event(event)
 
-        if admins and event.from_id != me.id:
+        if (admins or sudos) and event.from_id != me.id:
             try:
                 entity = await client.get_cached_entity(event.from_id)
                 name = get_display_name(entity)

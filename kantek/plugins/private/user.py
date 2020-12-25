@@ -42,6 +42,7 @@ async def user_info(msg: Message, tags: Tags, client: Client, db: Database,
         `-spb`: Show information from SpamProtectionBot
         `-spe`: Output Analysis vor suspicius Activity and cuteness
         `c`: Optionaly specify cuteness based on manual review
+        `self`: Defaults on true and prevents sudoers from triggering unwantedly
 
     Tags:
         strafanzeige:
@@ -56,6 +57,7 @@ async def user_info(msg: Message, tags: Tags, client: Client, db: Database,
         {cmd} 777000 -sw
         {cmd} -sa
     """
+
     if not args and msg.is_reply:
         return await _info_from_reply(client, msg, db, kwargs, tags)
     elif args:
