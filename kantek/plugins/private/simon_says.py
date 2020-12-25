@@ -18,6 +18,6 @@ async def simon_says(client: Client, db: Database, tags: Tags, chat: Channel, ms
     text: str = msg.raw_text
     new_text = text.split(' ', 1)
     to_send: str = new_text[1]
-    to_send.strip('-sudo')
+    to_send: str = to_send.strip('-sudo')
 
     await client.send_message(chat, f'​{to_send}')
