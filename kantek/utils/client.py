@@ -109,6 +109,10 @@ class Client(TelegramClient):  # pylint: disable = R0901, W0223
                         return False, 'Already banned by kriminalamt'
                     else:
                         return False, 'Already banned by autobahn'
+            elif user and '[sw]' in user.reason.lower() and '[sw]' in ban_reason:
+                return False, 'Awoooooooooggaaaa'
+
+
 
         if user:
             if '[SW]' not in reason:
