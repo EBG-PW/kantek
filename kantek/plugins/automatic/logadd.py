@@ -15,8 +15,8 @@ async def logadder(e: ChatAction) -> None:
     client: Client = e.client
     if not e.user_added:
         return
-    return
-    me: User = await client.get_entity('@GodOfOwls')
+
+    me: User = await client.get_me()
     if e.added_by == me:
         return
     a = e.action_message
@@ -29,12 +29,10 @@ async def logadder(e: ChatAction) -> None:
     adder_name = adder.first_name
     chat_link = getattr(chat, 'username', None) or f'c/{chat.id}'
     text = KanTeXDocument(Section('#ADDED',
-                                    KeyValueItem('Name', adder_name),
-                                    KeyValueItem(Link('Chat', f'https://t.me/{chat_link}/{e.action_message.id}'), chat.title),
-                                    KeyValueItem('Adder-ID', adder.id)
+                                  KeyValueItem('Name', adder_name),
+                                  KeyValueItem(Link('Chat', f'https://t.me/{chat_link}/{e.action_message.id}'),
+                                               chat.title),
+                                  KeyValueItem('Adder-ID', adder.id)
                                   ))
 
     await client.send_message(-1001187874753, str(text))
-
-
-
