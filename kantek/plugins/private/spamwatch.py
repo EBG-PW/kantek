@@ -14,7 +14,7 @@ tlog = logging.getLogger('kantek-channel-log')
 
 # TODO: Make this nice, this is just a skeleton so I have an easy way of creating tokens,
 #  preferably clean this up at some point
-@k.command('spamwatch', 'sw', document=False)
+@k.command('ebgwatch', 'ebg', document=False)
 async def sw(client: Client, args: List, kwargs: Dict, event: Command) -> None:
     """Create SpamWatch Tokens"""
     if not client.sw:
@@ -50,7 +50,7 @@ async def _token(event, client, args, keyword_args):
         permission = keyword_args.get('permission', 'User')
         permission = _permission_map.get(permission)
         token = client.sw.create_token(id, permission)
-        return KanTeXDocument(Section('SpamWatch Token',
+        return KanTeXDocument(Section('EBG-Watch Token',
                                       KeyValueItem('ID', Code(token.id)),
                                       KeyValueItem('User', Code(token.userid)),
                                       KeyValueItem('Permission', token.permission.name),
