@@ -397,6 +397,7 @@ async def _collect_user_info(client, user, db, **kwargs) -> Union[str, Section, 
             KeyValueItem('deleted', Code(user.deleted)),
             KeyValueItem('verified', Code(user.verified)),
             KeyValueItem('min', Code(user.min)),
+            KeyValueItem('acces', Code(user.access_hash)),
             KeyValueItem('lang_code', Code(user.lang_code)))
 
         special_stuff = SubSection('Additional Info')
