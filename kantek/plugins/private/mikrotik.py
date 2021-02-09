@@ -27,8 +27,8 @@ async def get_addr(client: Client, args, kwargs) -> KanTeXDocument:
             sec.append(KeyValueItem(i['interface'], Code(i['address'])))
 
         return KanTeXDocument(sec)
-    except:
-        pass
+    except Exception as e:
+        print(e)
 
 @mikrotik.subcommand()
 async def get_route(client: Client, args, kwargs) -> KanTeXDocument:
