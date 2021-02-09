@@ -62,7 +62,7 @@ async def spamschutz(event: Union[ChatAction.Event, NewMessage.Event]) -> None: 
     if isinstance(event, ChatAction.Event):
         uid = event.user_id
     elif isinstance(event, NewMessage.Event):
-        uid = event.message.from_id
+        uid = event.message.sender_id
     else:
         return
     if uid is None:

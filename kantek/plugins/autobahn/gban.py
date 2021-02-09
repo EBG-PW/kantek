@@ -75,14 +75,14 @@ async def gban(client: Client, db: Database, tags: Tags, chat: Channel, msg: Mes
         bancmd = tags.get('gbancmd')
         reply_msg: Message = await msg.get_reply_message()
 
-        uid = reply_msg.from_id
+        uid = reply_msg.sender_id
 
         if args:
             ban_reason = ' '.join(args)
         else:
             ban_reason = DEFAULT_REASON
             try:
-                participant = await client(GetParticipantRequest(event.chat_id, reply_msg.from_id))
+                participant = await client(GetParticipantRequest(event.chat_id, reply_msg.sender_id))
                 if not isinstance(participant.participant, ChannelParticipantCreator):
                     join_date = participant.participant.date
 

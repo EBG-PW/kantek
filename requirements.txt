@@ -1,5 +1,5 @@
 logzero~=1.5.0
-telethon~=1.16.0
+telethon~=1.19.1
 beautifulsoup4~=4.9.1
 aiohttp[speedups]~=3.6.2
 asyncpg~=0.21.0
