@@ -84,14 +84,15 @@ async def join_polizei(event: ChatAction.Event) -> None:
     try:
         user: UserFull = await client(GetFullUserRequest(await event.get_input_user()))
     except TypeError as e:
-        logger.error(e)
-        return
+        user = event.user
 
     for item in bio_blacklist:
-        if user.about and item.value in user.about and not item.retired:
-            ban_type, ban_reason = db.blacklists.bio.hex_type, item.index
 
-    if user.profile_photo:
+        if hasattr(user, 'about') and user.about:
+            if item.value in user.about and not item.retired:
+                ban_type, ban_reason = db.blacklists.bio.hex_type, item.index
+
+    if hasattr(user, 'profile_photo') and user.profile_photo:
         try:
             dl_photo = await client.download_file(user.profile_photo)
         except constants.DOWNLOAD_ERRORS:
