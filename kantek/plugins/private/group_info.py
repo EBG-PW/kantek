@@ -2,7 +2,7 @@ import logging
 from typing import List, Dict, Optional
 
 from kantex.md import *
-from telethon.tl.patched import Message
+from telethon.tl.custom import Message
 from telethon.tl.types import Channel
 from telethon.utils import get_peer_id
 

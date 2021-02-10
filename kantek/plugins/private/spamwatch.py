@@ -3,7 +3,7 @@ from typing import List, Dict
 
 from kantex.md import *
 from spamwatch.types import Permission
-from telethon.tl.patched import Message
+from telethon.tl.custom import Message
 from telethon.tl.types import User
 
 from utils.client import Client

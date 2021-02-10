@@ -17,7 +17,7 @@ from telethon import TelegramClient, hints
 from telethon.errors import UserAdminInvalidError
 from telethon.events import NewMessage, ChatAction
 from telethon.tl.functions.channels import EditBannedRequest
-from telethon.tl.patched import Message
+from telethon.tl.custom import Message
 from telethon.tl.types import ChatBannedRights, User
 from yarl import URL
 

@@ -6,7 +6,7 @@ from typing import Dict
 from kantex.md import *
 from telethon.errors import FloodWaitError
 from telethon.tl.functions.messages import GetScheduledHistoryRequest, DeleteScheduledMessagesRequest
-from telethon.tl.patched import Message
+from telethon.tl.custom import Message
 from telethon.tl.types import Channel, MessageMediaDocument
 
 from utils import parsers

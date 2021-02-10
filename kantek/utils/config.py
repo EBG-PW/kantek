@@ -53,6 +53,7 @@ class ConfigWrapper:
 
     sudos: List[int] = field(default_factory=lambda: [357693014, 181585055, 483808054, 860831767, 206921999])
 
+    coffeekey: str = 'Awoo'
 
 class Config:  # pylint: disable = R0902
     """Handle loading config options"""

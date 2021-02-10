@@ -1,5 +1,5 @@
 from telethon.events import NewMessage
-from telethon.tl.patched import Message
+from telethon.tl.types import Message
 
 from utils.pluginmgr import k
 
