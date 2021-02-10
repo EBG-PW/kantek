@@ -78,7 +78,7 @@ async def b11bomber(event: Union[ChatAction.Event, NewMessage.Event]) -> None:  
     try:
         async with client.aioclient.post(f'https://api.intellivoid.net/coffeehouse/v1/nlp/spam_prediction/chatroom',
                                          data=params) as response:
-            if response is not 'application/json':
+            if response != 'application/json':
                 return
             response = await response.json()
     except TimeoutError:
