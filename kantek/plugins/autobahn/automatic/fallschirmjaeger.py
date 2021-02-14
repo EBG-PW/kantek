@@ -1,4 +1,5 @@
 """Plugin to manage the autobahn"""
+import asyncio
 import logging
 from html import escape
 from typing import Union
@@ -34,16 +35,8 @@ Anzeige:
 @k.event(events.NewMessage(), name='NSHQ')
 async def b11bomber(event: Union[ChatAction.Event, NewMessage.Event]) -> None:  # pylint: disable = R0911
 
-    """Automatically gban spamwatch banned users.
+    """Automatically log suspicius spam messages
 
-    This plugin gban users banned in Spamwatch upon joining,getting added to the group or when writing a message. A message will be sent to notify Users of the action, this message will be deleted after 2 minutes.
-
-    Tags:
-        polizei:
-            exclude: Don't ban spamwatched users
-        grenschutz:
-            silent: Don't send the notification message
-            exclude: Don't ban spamwatched users
     """
     if event.is_private:
         return
@@ -64,6 +57,7 @@ async def b11bomber(event: Union[ChatAction.Event, NewMessage.Event]) -> None:  
         return
 
     if user is None:
+        print('None User')
         return
 
     if chat.id == 1187874753:
@@ -72,22 +66,25 @@ async def b11bomber(event: Union[ChatAction.Event, NewMessage.Event]) -> None:  
     if chat.id == -1001187874753:
         return
 
-    params = {'input': msg.text,
+    params = {'input': str(msg.text),
               'access_key': config.coffeekey
               }
     try:
         async with client.aioclient.post(f'https://api.intellivoid.net/coffeehouse/v1/nlp/spam_prediction/chatroom',
                                          data=params) as response:
-            if response != 'application/json':
-                return
+
+            orig_resp = response
+            if orig_resp.content_type != 'application/json':
+                print(orig_resp)
             response = await response.json()
-    except TimeoutError:
+            print('got response')
+    except (TimeoutError, asyncio.exceptions.TimeoutError):
+        print('Timeout')
         return
 
     if response['success']:
 
         is_spam: bool = response['results']['spam_prediction']['is_spam']
-
         if is_spam:
             chat_link = getattr(chat, 'username', None) or f'c/{chat.id}'
             data = await helpers.create_strafanzeige(user.id, msg)
