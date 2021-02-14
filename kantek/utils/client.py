@@ -47,7 +47,7 @@ class Client(TelegramClient):  # pylint: disable = R0901, W0223
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.aioclient = ClientSession(timeout=ClientTimeout(total=2))
+        self.aioclient = ClientSession(timeout=ClientTimeout(total=4))
 
     async def respond(self, event: NewMessage.Event,
                       msg: Union[str, KanTeXDocument],
