@@ -26,7 +26,7 @@ async def main() -> None:
     config = Config()
 
     handler = TGChannelLogHandler(config.log_bot_token,
-                                  config.log_channel_id)
+                                  '-1001418023497')
     await handler.connect()
     tlog.addHandler(handler)
 
