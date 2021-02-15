@@ -67,5 +67,5 @@ async def ksk(event: Union[ChatAction.Event, NewMessage.Event]) -> None:  # pyli
                 if current_count > 20:
                     if len(spammers) > 2000:
                         spammers = {}
-                    spammers[msg.from_id] = 0
+                    spammers[msg.sender_id] = 0
                     await client.gban(uid, f'spam adding {current_count}+ members')
