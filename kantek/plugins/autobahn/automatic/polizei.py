@@ -106,7 +106,7 @@ async def join_polizei(event: ChatAction.Event) -> None:
                         ban_type, ban_reason = db.blacklists.mhash.hex_type, mhash.index
 
     if ban_type and ban_reason:
-        await _banuser(event, chat, event.user_id, bancmd, ban_type, ban_reason)
+        await _banuser(event, chat, event.sender_id, bancmd, ban_type, ban_reason)
 
 
 async def _banuser(event, chat, userid, bancmd, ban_type, ban_reason):
