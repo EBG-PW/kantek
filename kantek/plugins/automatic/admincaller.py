@@ -33,7 +33,6 @@ Remark: <code>{remark}</code>
 '''
 
 log_reply_template = '''
-{action}
 Reportee: <a href="tg://user?id={reportee_id}">{reportee_name}</a> (#ID{reportee_id})
 <a href="https://t.me/c/{log_message}">View Reported / banned Message</a>
 Anzeige: 
@@ -114,8 +113,7 @@ async def admin_reports(event: NewMessage.Event) -> None:
         data = await helpers.create_strafanzeige(reply_user.id, logged_reply)
         key = await db.strafanzeigen.add(data)
         logged_link = f'{logged_reply_chat.id}/{logged_reply.id}'
-        log_messsage += log_reply_template.format(action=action,
-                                                  reportee_id=reply_user.id,
+        log_messsage += log_reply_template.format(reportee_id=reply_user.id,
                                                   reportee_name=escape(
                                                       get_display_name(reply_user)),
                                                   log_message=logged_link,
