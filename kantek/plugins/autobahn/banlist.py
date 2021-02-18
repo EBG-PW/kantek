@@ -137,8 +137,8 @@ async def importjustasic_(client: Client, db: Database, msg: Message, chat: Chan
                         for uid in uid_batch:
                             banned, reason = await client.gban(uid, reasontoban, 'imported')
 
-                        uids = _banlist[CHUNK_SIZE:]
-                        if uids:
+                        _banlist = _banlist[CHUNK_SIZE:]
+                        if _banlist:
                             if progress_message:
                                 await progress_message.edit(
                                     f"Sleeping for 10 seconds after banning {len(uid_batch)} Users. {len(_banlist)} Users left.")

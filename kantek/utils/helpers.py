@@ -89,6 +89,8 @@ async def id_csv_to_dict(data: bytes) -> List[str]:
     for y in x:
 
         bans.append(y)
+
+    bans = list(dict.fromkeys(bans))
     return bans
 
 
