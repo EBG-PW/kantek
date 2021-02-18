@@ -53,6 +53,10 @@ async def admin_reports(event: NewMessage.Event) -> None:
     client: Client = event.client
     chat: Channel = await event.get_chat()
     reply = None
+    tags = await Tags.from_event(event)
+    polizei_tag = tags.get('polizei')
+    if polizei_tag == 'exclude':
+        return
     try:
         user: User = await event.get_sender()
         if user is None:
