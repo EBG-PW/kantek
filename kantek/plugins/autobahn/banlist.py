@@ -1,3 +1,4 @@
+import asyncio
 import codecs
 import csv
 import logging
@@ -8,7 +9,7 @@ from io import BytesIO
 from kantex.md import *
 from spamwatch.types import Ban, Permission
 from telethon.tl.custom import Message
-from telethon.tl.types import DocumentAttributeFilename
+from telethon.tl.types import DocumentAttributeFilename, Channel
 
 from database.database import Database
 from utils import helpers
@@ -19,7 +20,7 @@ from utils.pluginmgr import k
 tlog = logging.getLogger('kantek-channel-log')
 
 SWAPI_SLICE_LENGTH = 50
-
+CHUNK_SIZE = 10
 
 @k.command('banlist', 'bl')
 async def banlist() -> None:
@@ -102,10 +103,53 @@ async def import_(client: Client, db: Database, msg: Message) -> KanTeXDocument:
 
                 stop_time = time.time() - start_time
                 return KanTeXDocument(Section('Import Result',
-                                             f'Added {len(_banlist)} entries.'),
-                                     Italic(f'Took {stop_time:.02f}s'))
+                                              f'Added {len(_banlist)} entries.'),
+                                      Italic(f'Took {stop_time:.02f}s'))
             else:
                 raise Error('File is not a CSV')
+        else:
+            raise Error('Need to reply to a document')
+
+
+@banlist.subcommand()
+async def importjustasic_(client: Client, db: Database, msg: Message, chat: Channel, args, kwargs) -> KanTeXDocument:
+    """Import a CSV to the banlist.
+
+    The CSV file should end in .csv and have a `id` and `reason` column
+
+    Examples:
+        {cmd}
+    """
+    reasontoban = kwargs.get('reason')
+    if msg.is_reply:  # pylint: disable = R1702
+        reply_msg: Message = await msg.get_reply_message()
+        if reply_msg.document:
+            _, ext = os.path.splitext(reply_msg.document.attributes[0].file_name)
+            if ext == '.txt':
+                data = await reply_msg.download_media(bytes)
+                start_time = time.time()
+                _banlist = await helpers.id_csv_to_dict(data)
+                if _banlist:
+
+                    progress_message: Message = await client.send_message(chat, f"Processing {len(_banlist)} User IDs")
+                    while _banlist:
+                        uid_batch = _banlist[:CHUNK_SIZE]
+                        for uid in uid_batch:
+                            banned, reason = await client.gban(uid, reasontoban, 'imported')
+
+                        uids = _banlist[CHUNK_SIZE:]
+                        if uids:
+                            if progress_message:
+                                await progress_message.edit(
+                                    f"Sleeping for 10 seconds after banning {len(uid_batch)} Users. {len(_banlist)} Users left.")
+                            await asyncio.sleep(10)
+
+                stop_time = time.time() - start_time
+                return KanTeXDocument(Section('Import Result',
+                                              f'Added {len(_banlist)} entries.'),
+                                      Italic(f'Took {stop_time:.02f}s'))
+            else:
+                raise Error('File is not a txxxt')
         else:
             raise Error('Need to reply to a document')
 

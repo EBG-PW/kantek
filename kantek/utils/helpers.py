@@ -73,6 +73,25 @@ async def rose_csv_to_dict(data: bytes) -> List[Dict[str, str]]:
     return bans
 
 
+async def id_csv_to_dict(data: bytes) -> List[str]:
+    """Convert a fedban list in form of a printed python list to a json that can be imported into the database
+
+    Args:
+        reason: The reason the ids should be banned for
+
+    Returns:
+
+    """
+    bans = []
+    f = StringIO(data.decode())
+    x = f.read().strip('][').split(', ')
+
+    for y in x:
+
+        bans.append(y)
+    return bans
+
+
 async def resolve_invite_link(link):
     """Method to work around a bug in telethon 1.6 and 1.7 that makes the resolve_invite_link method
     unable to parse tg://invite style links
