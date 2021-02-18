@@ -75,11 +75,12 @@ async def b11bomber(event: Union[ChatAction.Event, NewMessage.Event]) -> None:  
 
             orig_resp = response
             if orig_resp.content_type != 'application/json':
-                print(orig_resp)
+
+                return
             response = await response.json()
-            print('got response')
+
     except (TimeoutError, asyncio.exceptions.TimeoutError):
-        print('Timeout')
+
         return
 
     if response['success']:
