@@ -23,8 +23,8 @@ from utils.tags import Tags
 tlog = logging.getLogger('kantek-channel-log')
 logger: logging.Logger = logzero.logger
 
-
 log_message_template = '''
+{action}
 A user is requesting admin assistance in a group.
 Group: <a href="https://t.me/{chat_link}">{chat_title}</a> (#chat{chat_id})
 Reporter: <a href="tg://user?id={reporter_id}">{reporter_name}</a> (#ID{reporter_id})
@@ -33,8 +33,9 @@ Remark: <code>{remark}</code>
 '''
 
 log_reply_template = '''
+{action}
 Reportee: <a href="tg://user?id={reportee_id}">{reportee_name}</a> (#ID{reportee_id})
-<a href="https://t.me/c/{log_message}">View Reported Message</a>
+<a href="https://t.me/c/{log_message}">View Reported / banned Message</a>
 Anzeige: 
 <code>*gban sa: {anzeige}</code>
 '''
@@ -51,6 +52,7 @@ async def admin_reports(event: NewMessage.Event) -> None:
     msg: Message = event.message
     client: Client = event.client
     chat: Channel = await event.get_chat()
+    reply = None
     try:
         user: User = await event.get_sender()
         if user is None:
@@ -73,13 +75,14 @@ async def admin_reports(event: NewMessage.Event) -> None:
     except Exception as e:
         tlog.critical(e)
 
+    finder_ban = re.compile(r'^[/!](?:[dgsf]*ban?)(?:$|\W+)')
+    finder_report = re.compile(r'(?:^|\s+)@admins?(?:$|\W+)|^[/!](?:report|admins?)(?:$|\W+)')
 
-
-    # pattern = r'[/!]report|[\s\S]*@admins?'
-
-    finder = re.compile(r'[/!]report|[\s\S]*@admins?')
-
-    if not finder.search(msg.text):
+    if finder_report.search(msg.text):
+        action = '#REPORT'
+    elif finder_ban.search(msg.text):
+        action = '#BAN'
+    else:
         return
 
     logged_reply = None
@@ -95,7 +98,8 @@ async def admin_reports(event: NewMessage.Event) -> None:
             pass
 
     chat_link = getattr(chat, 'username', None) or f'c/{chat.id}'
-    log_messsage = log_message_template.format(chat_link=f'{chat_link}/{event.id}',
+    log_messsage = log_message_template.format(action=action,
+                                               chat_link=f'{chat_link}/{event.id}',
                                                chat_title=escape(get_display_name(chat)),
                                                chat_id=chat.id, reporter_id=user.id,
                                                reporter_name=escape(get_display_name(user)),
@@ -106,7 +110,8 @@ async def admin_reports(event: NewMessage.Event) -> None:
         data = await helpers.create_strafanzeige(reply_user.id, logged_reply)
         key = await db.strafanzeigen.add(data)
         logged_link = f'{logged_reply_chat.id}/{logged_reply.id}'
-        log_messsage += log_reply_template.format(reportee_id=reply_user.id,
+        log_messsage += log_reply_template.format(action=action,
+                                                  reportee_id=reply_user.id,
                                                   reportee_name=escape(
                                                       get_display_name(reply_user)),
                                                   log_message=logged_link,
