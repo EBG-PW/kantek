@@ -138,7 +138,7 @@ async def importjustasic_(client: Client, db: Database, msg: Message, chat: Chan
                     while _banlist:
                         uid_batch = _banlist[:CHUNK_SIZE]
                         for uid in uid_batch:
-                            banned, reason = await client.ungban(uid)
+                            await client.ungban(uid)
 
                         _banlist = _banlist[CHUNK_SIZE:]
                         if _banlist:
