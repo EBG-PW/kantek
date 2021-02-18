@@ -115,7 +115,10 @@ async def import_(client: Client, db: Database, msg: Message) -> KanTeXDocument:
 async def importjustasic_(client: Client, db: Database, msg: Message, chat: Channel, args, kwargs) -> KanTeXDocument:
     """Import a CSV to the banlist.
 
-    The CSV file should end in .csv and have a `id` and `reason` column
+    Made to import a fuckming printed python list
+
+
+    who even does this
 
     Examples:
         {cmd}
@@ -135,7 +138,7 @@ async def importjustasic_(client: Client, db: Database, msg: Message, chat: Chan
                     while _banlist:
                         uid_batch = _banlist[:CHUNK_SIZE]
                         for uid in uid_batch:
-                            banned, reason = await client.gban(uid, reasontoban, 'imported')
+                            banned, reason = await client.ungban(uid)
 
                         _banlist = _banlist[CHUNK_SIZE:]
                         if _banlist:
