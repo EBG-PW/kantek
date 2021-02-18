@@ -163,6 +163,7 @@ class Client(TelegramClient):  # pylint: disable = R0901, W0223
         Returns: None
 
         """
+
         await self.send_message(
             self.config.gban_group,
             f'<a href="tg://user?id={uid}">{uid}</a>', parse_mode='html')
@@ -180,7 +181,7 @@ class Client(TelegramClient):  # pylint: disable = R0901, W0223
                                          max_id=1000000,
                                          clear_mentions=True)
 
-        await self.db.banlist.remove(uid)
+        await self.db.banlist.remove(int(uid))
         if self.sw and self.sw.permission in [Permission.Admin,
                                               Permission.Root]:
             self.sw.delete_ban(int(uid))
