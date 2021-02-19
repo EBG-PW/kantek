@@ -65,6 +65,8 @@ async def b11bomber(event: Union[ChatAction.Event, NewMessage.Event]) -> None:  
 
     if chat.id == -1001187874753:
         return
+    if not chat.megagroup:
+        return
 
     params = {'input': str(msg.text),
               'access_key': config.coffeekey
