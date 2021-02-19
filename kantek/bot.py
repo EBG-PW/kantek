@@ -16,7 +16,8 @@ import resource
 resource.setrlimit(resource.RLIMIT_AS, (2147483648, 2147483648))
 
 logger = logzero.setup_logger('kantek-logger', level=logging.DEBUG)
-telethon_logger = logzero.setup_logger('telethon', level=logging.WARNING)
+telethon_logger = logzero.setup_logger('telethon', level=logging.DEBUG, logfile='log.log')
+
 tlog = logging.getLogger('kantek-channel-log')
 
 tlog.setLevel(logging.INFO)
