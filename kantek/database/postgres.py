@@ -229,7 +229,7 @@ class Strafanzeigen(TableWrapper):
 class Adderlist(TableWrapper):
     async def add(self, uid, count):
         async with self.pool.acquire() as conn:
-            await conn.execute('INSERT INTO adderlist VALUES ($1, $2) ON CONFLICT (uid) DO UPDATE SET count = $2', uid,
+            await conn.execute('INSERT INTO adderlist VALUES ($1, $2) ON CONFLICT (uid) DO UPDATE SET count = count + 1', uid,
                                count)
         return
 
