@@ -86,7 +86,8 @@ async def b11bomber(event: Union[ChatAction.Event, NewMessage.Event]) -> None:  
         return
 
     if response['success']:
-        
+        if isinstance(user, Channel):
+            return
         if user.bot:
             return
 
