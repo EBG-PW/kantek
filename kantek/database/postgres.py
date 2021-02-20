@@ -229,7 +229,9 @@ class Strafanzeigen(TableWrapper):
 class Adderlist(TableWrapper):
     async def add(self, uid, count):
         async with self.pool.acquire() as conn:
-            await conn.execute('UPDATE adderlist SET count = count + 1 WHERE uid = $1 if NOT FOUND insert into adderlist VALUES ($1, $2)', uid, count)
+            await conn.execute("insert into adderlist VALUES ($1, $2) "
+                               "ON CONFLICT (uid) DO UPDATE adderlist "
+                               "SET count = count + 1 WHERE 'uid' = $1", uid, count)
         return
 
     async def get(self, uid) -> Optional[AddingUser]:
