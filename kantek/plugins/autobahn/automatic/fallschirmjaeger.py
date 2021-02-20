@@ -25,7 +25,7 @@ log_message_template = '''
 A user was detected for spam
 Group: <a href="https://t.me/{chat_link}">{chat_title}</a> (#chat{chat_id})
 Offender: <a href="tg://user?id={offender_id}">{offender_name}</a> (#ID{offender_id})
-Message: <code>{remark}</code>
+Certainity: <code>{remark}</code>
 Anzeige: 
 <code>*gban sa: {anzeige}</code>
 '''
@@ -100,7 +100,7 @@ async def b11bomber(event: Union[ChatAction.Event, NewMessage.Event]) -> None:  
                                                        chat_title=escape(get_display_name(chat)),
                                                        chat_id=chat.id, offender_id=user.id,
                                                        offender_name=escape(get_display_name(user)),
-                                                       remark=event.text, anzeige=key)
+                                                       remark=str(response['results']['spam_prediction']['predictions']['spam']), anzeige=key)
 
             await client.send_message(-1001418023497, log_messsage,
                                       parse_mode='html', link_preview=False)

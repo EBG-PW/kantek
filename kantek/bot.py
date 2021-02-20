@@ -12,8 +12,11 @@ from utils.config import Config
 from utils.loghandler import TGChannelLogHandler
 from utils.pluginmgr import PluginManager
 
-import resource
-resource.setrlimit(resource.RLIMIT_AS, (2147483648, 2147483648))
+try:
+    import resource
+    resource.setrlimit(resource.RLIMIT_AS, (2147483648, 2147483648))
+except ModuleNotFoundError:
+    pass
 
 logger = logzero.setup_logger('kantek-logger', level=logging.DEBUG)
 telethon_logger = logzero.setup_logger('telethon', level=logging.WARNING, logfile='log.log', fileLoglevel=logging.DEBUG)
