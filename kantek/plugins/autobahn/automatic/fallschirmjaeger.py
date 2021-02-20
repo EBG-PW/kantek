@@ -83,6 +83,9 @@ async def b11bomber(event: Union[ChatAction.Event, NewMessage.Event]) -> None:  
         return
 
     if response['success']:
+        
+        if user.bot:
+            return
 
         is_spam: bool = response['results']['spam_prediction']['is_spam']
         if is_spam:
