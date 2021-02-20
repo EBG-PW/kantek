@@ -65,6 +65,8 @@ async def b11bomber(event: Union[ChatAction.Event, NewMessage.Event]) -> None:  
 
     if chat.id == -1001187874753:
         return
+    if not chat.megagroup:
+        return
 
     params = {'input': str(msg.text),
               'access_key': config.coffeekey
@@ -75,11 +77,12 @@ async def b11bomber(event: Union[ChatAction.Event, NewMessage.Event]) -> None:  
 
             orig_resp = response
             if orig_resp.content_type != 'application/json':
-                print(orig_resp)
+
+                return
             response = await response.json()
 
     except (TimeoutError, asyncio.exceptions.TimeoutError):
-        print('Timeout')
+
         return
 
     if response['success']:

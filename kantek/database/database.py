@@ -184,6 +184,7 @@ class Templates(Table):
 
 class Whitelist(Table):
     async def get(self, uid) -> WhitelistUser:
+        uid = int(uid)
         return await self.db.whitelist.get_user(uid)
 
     async def add(self, uid: int) -> bool:

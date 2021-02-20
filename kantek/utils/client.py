@@ -94,11 +94,10 @@ class Client(TelegramClient):  # pylint: disable = R0901, W0223
         # if the user account is deleted this can be None
         if uid is None:
             return False, 'Deleted account'
-
         uid = int(uid)
 
-        time_to_sleep: int = randint(1, 3)
-        await asyncio.sleep(time_to_sleep)
+
+
         user_wl = await self.db.whitelist.get(uid)
         if user_wl:
             return False, 'User is unbannable (┛ಠ_ಠ)┛彡┻━┻'
@@ -164,6 +163,7 @@ class Client(TelegramClient):  # pylint: disable = R0901, W0223
         Returns: None
 
         """
+
         await self.send_message(
             self.config.gban_group,
             f'<a href="tg://user?id={uid}">{uid}</a>', parse_mode='html')
@@ -180,11 +180,13 @@ class Client(TelegramClient):  # pylint: disable = R0901, W0223
         await self.send_read_acknowledge(self.config.gban_group,
                                          max_id=1000000,
                                          clear_mentions=True)
-
-        await self.db.banlist.remove(uid)
-        if self.sw and self.sw.permission in [Permission.Admin,
-                                              Permission.Root]:
-            self.sw.delete_ban(int(uid))
+        try:
+            await self.db.banlist.remove(int(uid))
+            if self.sw and self.sw.permission in [Permission.Admin,
+                                                  Permission.Root]:
+                self.sw.delete_ban(int(uid))
+        except:
+            pass
 
     async def ban(self, chat, uid):
         """Bans a user from a chat."""
