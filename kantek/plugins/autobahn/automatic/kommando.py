@@ -1,4 +1,5 @@
 import logging
+import time
 from typing import Union, Dict
 
 from kantex.md import *
@@ -18,6 +19,7 @@ tlog = logging.getLogger('kantek-channel-log')
 logger: logging.Logger = logzero.logger
 
 spammers: Dict = {}
+spammers_time: Dict = {}
 
 
 @k.event(events.chataction.ChatAction(), name='KSK')
@@ -33,6 +35,7 @@ async def ksk(event: Union[ChatAction.Event, NewMessage.Event]) -> None:  # pyli
             exclude: Don't log spamadding users
     """
     global spammers
+    global spammers_time
     if event.is_private:
         return
 
@@ -63,7 +66,6 @@ async def ksk(event: Union[ChatAction.Event, NewMessage.Event]) -> None:  # pyli
             if msg.sender_id not in action.users:
                 try:
                     if (await client.get_cached_entity(action.users[0])).bot:
-
                         return
                 except:
                     pass
@@ -74,8 +76,8 @@ async def ksk(event: Union[ChatAction.Event, NewMessage.Event]) -> None:  # pyli
                 await db.adderlist.add(uid, 1)
 
                 current_count = cnt + 1
-                if current_count > 20:
-                    if len(spammers) > 200:
+                if current_count > 30:
+                    if len(spammers) > 2000:
                         spammers = {}
                     spammers[msg.sender_id] = 0
                     await client.gban(uid, f'spam adding {current_count}+ members')
@@ -86,12 +88,17 @@ async def ksk(event: Union[ChatAction.Event, NewMessage.Event]) -> None:  # pyli
                     text = KanTeXDocument(Section('#ADDED',
                                                   KeyValueItem('Name', adder_name),
                                                   KeyValueItem(
-                                                      Link('Chat', f'https://t.me/{chat_link}/{event.action_message.id}'),
+                                                      Link('Chat',
+                                                           f'https://t.me/{chat_link}/{event.action_message.id}'),
                                                       chat.title),
                                                   KeyValueItem('Adder-ID', adder.id),
                                                   KeyValueItem('combined amount', total_count.count)
                                                   ))
 
+                    now = time.time()
+                    last = spammers_time.get(uid, now - 40)
+                    delta = now - last
+                    if now - last < 30:
+                        return
+                    spammers_time[uid] = now
                     await client.send_message(-1001418023497, str(text))
-
-
