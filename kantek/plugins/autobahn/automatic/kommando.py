@@ -9,6 +9,7 @@ from telethon.tl.types import (MessageActionChatJoinedByLink,
                                MessageActionChatAddUser, MessageService, User, Channel)
 
 from database.database import Database
+from database.types import AddingUser
 from utils.client import Client
 from utils.pluginmgr import k
 from utils.tags import Tags
@@ -81,12 +82,14 @@ async def ksk(event: Union[ChatAction.Event, NewMessage.Event]) -> None:  # pyli
                     adder: User = await client.get_entity(msg.sender_id)
                     adder_name = adder.first_name
                     chat_link = getattr(chat, 'username', None) or f'c/{chat.id}'
+                    total_count: AddingUser = await db.adderlist.get(uid)
                     text = KanTeXDocument(Section('#ADDED',
                                                   KeyValueItem('Name', adder_name),
                                                   KeyValueItem(
                                                       Link('Chat', f'https://t.me/{chat_link}/{event.action_message.id}'),
                                                       chat.title),
-                                                  KeyValueItem('Adder-ID', adder.id)
+                                                  KeyValueItem('Adder-ID', adder.id),
+                                                  KeyValueItem('combined amount', total_count.count)
                                                   ))
 
                     await client.send_message(-1001418023497, str(text))
