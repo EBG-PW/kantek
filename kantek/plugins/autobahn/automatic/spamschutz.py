@@ -59,6 +59,9 @@ async def spamschutz(event: Union[ChatAction.Event, NewMessage.Event]) -> None: 
     grenzschutz_tag = tags.get('grenzschutz')
     silent = grenzschutz_tag == 'silent'
 
+    if swoclient is None:
+        return
+
     if isinstance(event, ChatAction.Event):
         uid = event.user_id
     elif isinstance(event, NewMessage.Event):

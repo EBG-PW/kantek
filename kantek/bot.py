@@ -60,7 +60,10 @@ async def main() -> None:
 
     if config.spamwatch_host and config.spamwatch_token:
         client.sw = SWClient(config.spamwatch_token, host=config.spamwatch_host)
-        client.swo = SWClient(config.original_spamwatch_token)
+        try:
+            client.swo = SWClient(config.original_spamwatch_token)
+        except:
+            pass
         client.sw_url = config.spamwatch_host
     ich = await client.get_me()
     if not ich:
