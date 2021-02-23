@@ -94,7 +94,7 @@ async def grenzschutz(event: Union[ChatAction.Event, NewMessage.Event]) -> None:
         await event.delete()
         if not silent:
             message = KanTeXDocument(Section(
-                Bold('SpamWatch Grenzschutz Ban'),
+                Bold('EBGWatch Grenzschutz Ban'),
                 KeyValueItem(Bold("User"),
                              f'{Mention(name, uid)} [{Code(uid)}]'),
                 KeyValueItem(Bold("Reason"),
