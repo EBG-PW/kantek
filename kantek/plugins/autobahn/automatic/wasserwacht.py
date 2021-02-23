@@ -69,18 +69,18 @@ async def uboot(event: Union[ChatAction.Event, NewMessage.Event]) -> None:  # py
         return
 
     try:
-        input_pic = await client.download_file(msg)
+        input_pic = await client.download_file(msg.photo)
     except TypeError:
         return
 
     pil_photo: PIL.Image = Image.open(BytesIO(input_pic))
-    stream = BytesIO()
-    pil_photo.save(stream, format="JPEG")
-    pic = base64.b64encode(stream.getvalue())
+    im_file = BytesIO()
+    pil_photo.save(im_file, format="JPEG")
+    im_bytes = im_file.getvalue()  # im_bytes: image in binary format.
+    pic = base64.b64encode(im_bytes)
 
 
-
-    params = {'image': pic,
+    params = {'image': pic.decode(),
               'access_key': config.coffeekey
               }
     try:
@@ -97,5 +97,6 @@ async def uboot(event: Union[ChatAction.Event, NewMessage.Event]) -> None:  # py
 
         return
 
-    if response['success']:
-        await event.forward_to(-1001418023497)
+    if response['results']['nsfw_classification']['is_nsfw']:
+        x = await event.forward_to(config.log_channel_id)
+        await client.send_message(config.log_channel_id, '#NSFW', reply_to=x)
