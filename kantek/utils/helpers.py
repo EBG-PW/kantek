@@ -36,8 +36,11 @@ async def get_full_name(user: User) -> str:
     Returns:
         The combined names
     """
-    if user is None:
+    if user.deleted:
         return 'DELETED'
+    elif user.first_name is None:
+        return 'NonetypeUser'
+
     return str(user.first_name + ' ' + (user.last_name or ''))
 
 

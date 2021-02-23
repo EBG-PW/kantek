@@ -157,3 +157,11 @@ async def upgrade(client, chat):
     """Upgrade a normal chat to a supergroup
     """
     await client(MigrateChatRequest(chat.id))
+
+
+@dev.subcommand()
+async def get_chat_list_so_i_can_fucking_find_a_deleted_user_because_fucking_sessions_only_save_what_they_see(client, chat):
+    """get chat list
+    """
+    await client.get_dialogs()
+    await client.respond('done')
