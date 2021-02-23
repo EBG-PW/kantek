@@ -12,6 +12,7 @@ from telethon.tl.types import (MessageActionChatJoinedByLink,
 from database.database import Database
 from database.types import AddingUser
 from utils.client import Client
+from utils.config import Config
 from utils.pluginmgr import k
 from utils.tags import Tags
 
@@ -50,6 +51,7 @@ async def ksk(event: Union[ChatAction.Event, NewMessage.Event]) -> None:  # pyli
                             (MessageActionChatJoinedByLink, MessageActionChatAddUser)):
             return
     client: Client = event.client
+    config = Config()
     db: Database = client.db
     chat: Channel = await event.get_chat()
     tags = await Tags.from_event(event)
@@ -101,4 +103,4 @@ async def ksk(event: Union[ChatAction.Event, NewMessage.Event]) -> None:  # pyli
                     if now - last < 30:
                         return
                     spammers_time[uid] = now
-                    await client.send_message(-1001418023497, str(text))
+                    await client.send_message(config.log_channel_id, str(text))
