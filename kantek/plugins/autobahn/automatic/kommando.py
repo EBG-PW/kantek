@@ -78,7 +78,7 @@ async def ksk(event: Union[ChatAction.Event, NewMessage.Event]) -> None:  # pyli
                 await db.adderlist.add(uid, 1)
 
                 current_count = cnt + 1
-                if current_count > 30:
+                if current_count > 39:
                     if len(spammers) > 2000:
                         spammers = {}
                     spammers[msg.sender_id] = 0
