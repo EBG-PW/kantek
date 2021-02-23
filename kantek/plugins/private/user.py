@@ -301,6 +301,9 @@ async def _collect_user_info(client, user, db, **kwargs) -> Union[str, Section, 
         if user.username is not None or show_all:
             general.append(KeyValueItem('username', Code(user.username)))
 
+        if await db.adderlist.get(user.id) is not None:
+            general.append(KeyValueItem('Added:', Code((await db.adderlist.get(user.id)).count)))
+
         if user.scam or show_all:
             general.append(KeyValueItem('scam', Code(user.scam)))
 
