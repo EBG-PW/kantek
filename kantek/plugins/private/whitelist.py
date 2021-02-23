@@ -45,6 +45,12 @@ async def query(db: Database, args, kwargs) -> KanTeXDocument:
 
 @whitelist.subcommand()
 async def add(client: Client, db: Database, msg: Message, args) -> KanTeXDocument:
+    """Add uid's to the white-pride-list
+
+
+    Examples:
+        {cmd} 777000 172811422
+    """
     args = [arg for arg in args if isinstance(arg, int)]
 
     if args:
@@ -62,6 +68,8 @@ async def add(client: Client, db: Database, msg: Message, args) -> KanTeXDocumen
 
 @whitelist.subcommand()
 async def ag(client: Client, db: Database, msg: Message, args) -> KanTeXDocument:
+    """Add all Group members to the whitelist at once"""
+
     chat = await msg.get_chat()
     query_results = []
 
