@@ -102,5 +102,5 @@ async def b11bomber(event: Union[ChatAction.Event, NewMessage.Event]) -> None:  
                                                        offender_name=escape(get_display_name(user)),
                                                        remark=str(response['results']['spam_prediction']['predictions']['spam']), anzeige=key)
 
-            await client.send_message(-1001418023497, log_messsage,
+            await client.send_message(config.log_channel_id, log_messsage,
                                       parse_mode='html', link_preview=False)
