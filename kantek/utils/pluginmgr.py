@@ -177,7 +177,7 @@ class PluginManager:
             await event.callback(tg_event)
         except Exception as err:
             name = event.callback.__name__
-            tlog.error(f'An error occured in the event `{name}`', exc_info=err)
+            tlog.error(f'An error occured in the event `{name}` on #ID', exc_info=err)
             logger.exception(err)
 
     @staticmethod

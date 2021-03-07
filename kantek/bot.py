@@ -32,8 +32,7 @@ async def main() -> None:
     """Register logger and components."""
     config = Config()
 
-    handler = TGChannelLogHandler(config.log_bot_token,
-                                  '-1001418023497')
+    handler = TGChannelLogHandler(config.log_bot_token, config.log_channel_id)
     await handler.connect()
     tlog.addHandler(handler)
 
