@@ -54,7 +54,7 @@ async def polizei(event: NewMessage.Event) -> None:
         return
     ban_type, ban_reason = await _check_message(event)
     if ban_type and ban_reason:
-        uid = event.message.from_id
+        uid = event.message.sender_id
         admins = [p.id for p in await client.get_participants(event.chat_id, filter=ChannelParticipantsAdmins())]
         if uid not in admins:
             await _banuser(event, chat, uid, bancmd, ban_type, ban_reason)
