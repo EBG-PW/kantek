@@ -1,3 +1,5 @@
+#Plugin by Dank-Del
+
 from utils.client import Client
 from telethon import events
 import asyncio
