@@ -44,12 +44,16 @@ async def uboot(event: Union[ChatAction.Event, NewMessage.Event]) -> None:  # py
     db = client.db
     tags = await Tags.from_event(event)
     polizei_tag = tags.get('polizei')
+    enl_tag = tags.get('enl-only')
     grenzschutz_tag = tags.get('grenzschutz')
     silent = grenzschutz_tag == 'silent'
     msg = event.message
 
     user: User = await event.get_sender()
     if polizei_tag == 'exclude':
+        return
+
+    if enl_tag:
         return
 
     if user is None:
