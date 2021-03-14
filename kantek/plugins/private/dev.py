@@ -1,4 +1,4 @@
-#Plugin by Dank-Del
+# Plugin by Dank-Del
 
 from utils.client import Client
 from telethon import events
@@ -9,8 +9,9 @@ from io import StringIO
 import traceback
 import sys
 
+
 @k.command('shell')
-async def term(event):
+async def term(event, client: Client):
     """Run terminal cmds from Kantek itself
 
     Examples:
@@ -30,13 +31,13 @@ async def term(event):
     stdout, stderr = await async_process.communicate()
     msg = f"**Command:**\n`{cmd}`\n"
     if stderr.decode():
-        msg += f"**Stderr:**\n`{stderr.decode()}`"
-    if stdout.decode():
-        msg += f"**Stdout:**\n`{stdout.decode()}`"
+        msg += f"**Stderr:**\n`{stderr.decode(errors='replace')}`"
+    if stdout.decode(errors='replace'):
+        msg += f"**Stdout:**\n`{stdout.decode(errors='replace')}`"
     if len(msg) > 4096:
-        with io.BytesIO(msg) as file:
+        with io.BytesIO(bytes(msg, 'utf8')) as file:
             file.name = "shell.txt"
-            await Client.send_file(
+            await client.send_file(
                 event.chat_id,
                 file,
                 force_document=True,
@@ -45,6 +46,7 @@ async def term(event):
             )
             return
     await event.edit(msg)
+
 
 # Thanks to stackoverflow for existing https://stackoverflow.com/questions/3906232/python-get-the-print-output-in-an-exec-statement
 
