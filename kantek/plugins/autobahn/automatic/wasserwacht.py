@@ -75,7 +75,7 @@ async def uboot(event: Union[ChatAction.Event, NewMessage.Event]) -> None:  # py
 
     try:
         input_pic = await client.download_file(msg.photo)
-    except TypeError:
+    except (TypeError, FileIdInvalidError):
         return
 
     pil_photo: PIL.Image = Image.open(BytesIO(input_pic))
