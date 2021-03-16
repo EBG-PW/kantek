@@ -28,6 +28,11 @@ class AddingUser:
     uid: int
     count: int
 
+@dataclass
+class CountWord:
+    word: str
+    count: int
+
 
 @dataclass
 class CuteUser:

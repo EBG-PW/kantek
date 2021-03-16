@@ -7,7 +7,7 @@ from typing import Dict, Optional, List
 import asyncpg as asyncpg
 from asyncpg.pool import Pool
 
-from database.types import BlacklistItem, Chat, BannedUser, Template, WhitelistUser, AddingUser, CuteUser
+from database.types import BlacklistItem, Chat, BannedUser, Template, WhitelistUser, AddingUser, CuteUser, CountWord
 
 
 class TableWrapper:
@@ -298,6 +298,23 @@ class Templates(TableWrapper):
         async with self.pool.acquire() as conn:
             await conn.execute("DELETE FROM templates WHERE name = $1", name)
 
+class Wordlist(TableWrapper):
+    async def add(self, word: str, count):
+        async with self.pool.acquire() as conn:
+            await conn.execute("insert into public.wordlist VALUES ($1, 1) ON CONFLICT (word) DO NOTHING", word)
+            await conn.execute("UPDATE wordlist SET count = count + 1 WHERE word = $1", word)
+
+
+        return
+
+    async def get(self, word) -> Optional[CountWord]:
+        async with self.pool.acquire() as conn:
+            row = await conn.fetchrow('SELECT * FROM wordlist WHERE word = $1', word)
+        if row:
+            return CountWord(row['word'], row['count'])
+        else:
+            return None
+
 
 class WhiteList(TableWrapper):
     async def add_user(self, uid: int) -> bool:
@@ -380,6 +397,7 @@ class Postgres:  # pylint: disable = R0902
         self.banlist: BanList = BanList(self.pool)
         self.strafanzeigen: Strafanzeigen = Strafanzeigen(self.pool)
         self.adderlist: Adderlist = Adderlist(self.pool)
+        self.wordlist: Wordlist = Wordlist(self.pool)
         self.cutelist: Cutelist = Cutelist(self.pool)
         self.templates: Templates = Templates(self.pool)
         self.whitelist: WhiteList = WhiteList(self.pool)

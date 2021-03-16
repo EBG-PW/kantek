@@ -10,6 +10,7 @@ import PIL.Image
 import logzero
 from PIL import Image
 from telethon import events
+from telethon.errors import MessageIdInvalidError, FileIdInvalidError
 from telethon.events import ChatAction
 from telethon.events import NewMessage
 from telethon.tl.custom import Message
@@ -102,5 +103,8 @@ async def uboot(event: Union[ChatAction.Event, NewMessage.Event]) -> None:  # py
         return
 
     if response['results']['nsfw_classification']['is_nsfw']:
-        x = await event.forward_to(config.log_channel_id)
-        await client.send_message(config.log_channel_id, '#NSFW', reply_to=x)
+        try:
+            x = await event.forward_to(config.log_channel_id)
+            await client.send_message(config.log_channel_id, '#NSFW', reply_to=x)
+        except (MessageIdInvalidError, FileIdInvalidError):
+            pass

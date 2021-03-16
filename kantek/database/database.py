@@ -105,6 +105,16 @@ class Adderlist(Table):
         await self.db.adderlist.cleanup()
 
 
+class Wordlist(Table):
+    async def add(self, word, count) -> str:
+        return await self.db.wordlist.add(word, count)
+
+    async def get(self, word) -> Optional[str]:
+        return await self.db.wordlist.get(word)
+
+
+
+
 class Cutelist(Table):
     async def add(self, uid, by_id) -> str:
         return await self.db.cutelist.add(uid, by_id)
@@ -244,6 +254,7 @@ class Database:
         self.cutelist = Cutelist(self)
         self.banlist = Banlist(self)
         self.whitelist = Whitelist(self)
+        self.wordlist = Wordlist(self)
         self.hashlist = Hashlist(self)
         self.blacklists = Blacklists(self)
         self.chats = Chats(self)
