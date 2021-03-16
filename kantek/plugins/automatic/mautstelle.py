@@ -67,6 +67,11 @@ async def wordl_lister(client: Client, db: Database, tags: Tags, chat: Channel, 
         {cmd} eule
 
     """
+    polizei_tag = tags.get('polizei')
+    if polizei_tag == 'exclude':
+        return
+
+
     words_count: dict = {}
 
     for i in args:
